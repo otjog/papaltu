@@ -19,7 +19,7 @@ Route::resource('products',     'Shop\ProductController',       [ 'only' => [ 's
 Route::resource('orders',       'Shop\OrderController',         [ 'only' => [ 'store', 'create', 'show' ]]);
 Route::resource('pages',        'Info\PageController',          [ 'only' => [ 'show' ]]);
 
-Route::group(['prefix' => 'adminio'], function () {
+Route::group(['prefix' => 'adminio', 'middleware' => ['auth']], function () {
     Route::resource('categories',   'Shop\CategoryController',      [ 'except' => [ 'show' ]]);
     Route::resource('products',     'Shop\ProductController',       [ 'except' => [ 'show' ]]);
     Route::resource('pages',        'Info\PageController',          [ 'except' => [ 'show' ]]);
@@ -37,6 +37,7 @@ Route::group(['prefix' => 'basket'], function () {
     Route::get('/change', 'Shop\BasketController@getChange')->name('changeBasket');
     Route::delete('/destroy', 'Shop\BasketController@deleteDestory');
 });
+
 //addToBasket
 Route::post('/products/{id}',   'Shop\ProductController@toBasket');
 Route::post('/categories/{id}', 'Shop\CategoryController@productToBasket');
