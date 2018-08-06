@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateProductHasPriceTable extends Migration
+class CreateProductHasImageTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,10 @@ class CreateProductHasPriceTable extends Migration
      */
     public function up()
     {
-        Schema::create('product_has_price', function (Blueprint $table) {
+        Schema::create('product_has_image', function (Blueprint $table) {
             $table->increments('id');
-            $table->tinyInteger('active')->unsigned()->default(0);
             $table->integer('product_id');
-            $table->integer('price_id');
-            $table->integer('currency_id');
-            $table->float('value', 10, 2)->default(0);
+            $table->integer('image_id');
             $table->timestamps();
         });
     }
@@ -31,6 +28,6 @@ class CreateProductHasPriceTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('product_has_price');
+        Schema::dropIfExists('product_has_image');
     }
 }

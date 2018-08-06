@@ -22,9 +22,8 @@ class CreateProductsTable extends Migration
             $table->string('original_name', 255)->nullable();
             $table->string('scu', 255)->nullable();
             $table->text('description')->nullable();
-            $table->string('image', 255)->nullable();
             $table->string('thumbnail', 255)->nullable();
-            $table->string('url', 255)->nullable();
+            $table->string('unique', 255)->nullable();
             $table->timestamps();
         });
     }

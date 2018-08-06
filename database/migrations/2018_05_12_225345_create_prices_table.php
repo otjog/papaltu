@@ -17,7 +17,7 @@ class CreatePricesTable extends Migration
             $table->increments('id');
             $table->tinyInteger('active')->unsigned()->default(0);
             $table->string('name', 45);
-            $table->string('currency', 3);
+            $table->string('comment', 255)->nullable();
             $table->timestamps();
         });
     }

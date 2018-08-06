@@ -31,9 +31,8 @@ class Product extends Model{
             'products.original_name',
             'products.scu',
             'products.description',
-            'products.image',
             'products.thumbnail',
-            'products.url'
+            'products.unique'
         )
             ->orderBy('name')
             ->get();
@@ -49,9 +48,8 @@ class Product extends Model{
             'products.original_name',
             'products.scu',
             'products.description',
-            'products.image',
             'products.thumbnail',
-            'products.url'
+            'products.unique'
         )
             ->where('products.active', 1)
             ->orderBy('products.name')
@@ -66,10 +64,10 @@ class Product extends Model{
             'products.original_name',
             'products.scu',
             'products.description',
-            'products.image',
+            'products.thumbnail',
             'brands.name                as brand_name',
             'manufacturers.name         as manufacturer_name',
-            'prices.currency            as currency_char_code',
+            'currency.char_code         as currency_char_code',
             'product_has_price.value    as price'
         )
 
@@ -90,7 +88,7 @@ class Product extends Model{
             ->leftJoin('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
 
             /************CURRENCY******************/
-            ->leftJoin('currency', 'prices.currency', '=', 'currency.char_code')
+            ->leftJoin('currency', 'product_has_price.currency_id', '=', 'currency.id')
 
             ->where('prices.name', 'retail')
             ->where('products.active', 1)
@@ -117,29 +115,32 @@ class Product extends Model{
             'products.original_name',
             'products.scu',
             'products.description',
-            'products.image',
             'products.thumbnail',
-            'products.url',
+            'products.unique',
             'manufacturers.name         as manufacturer_name',
             'brands.name                as brand_name',
             'prices.name                as price_name',
-            'prices.currency            as currency_char_code',
+            'currency.char_code         as currency_char_code',
             'product_has_price.value    as price'
         )
+
             ->leftJoin('product_has_price', function ($join) {
                 $join->on('product_has_price.product_id', '=', 'products.id')
                     ->where('product_has_price.active', 1);
             })
+
             ->leftJoin('prices', 'product_has_price.price_id', '=', 'prices.id')
 
             ->leftJoin('product_has_brand', function ($join) {
                 $join->on('product_has_brand.product_id', '=', 'products.id');
             })
+
             ->leftJoin('brands', 'product_has_brand.brand_id', '=', 'brands.id')
 
             ->leftJoin('manufacturers', 'products.manufacturer_id', '=', 'manufacturers.id')
 
-            ->leftJoin('currency', 'prices.currency', '=', 'currency.char_code')
+            ->leftJoin('currency', 'product_has_price.currency_id', '=', 'currency.id')
+
             ->where('prices.name', 'retail')
             ->where('products.category_id', $category_id)
             ->where('products.active', 1)
@@ -164,13 +165,12 @@ class Product extends Model{
             'products.original_name',
             'products.scu',
             'products.description',
-            'products.image',
             'products.thumbnail',
-            'products.url',
+            'products.unique',
             'manufacturers.name         as manufacturer_name',
             'brands.name                as brand_name',
             'prices.name                as price_name',
-            'prices.currency            as currency_char_code',
+            'currency.char_code         as currency_char_code',
             'product_has_price.value    as price'
         )
             /***********price************/
@@ -198,7 +198,8 @@ class Product extends Model{
                 return $query->whereIn('products.manufacturer_id', explode('|', $parameters['manufacturer']));
             })
 
-            ->leftJoin('currency', 'prices.currency', '=', 'currency.char_code')
+            ->leftJoin('currency', 'product_has_price.currency_id', '=', 'currency.id')
+
             ->where('prices.name', 'retail')
             ->where('products.category_id', $category_id)
             ->where('products.active', 1)
@@ -222,24 +223,25 @@ class Product extends Model{
             'products.original_name',
             'products.scu',
             'products.description',
-            'products.image',
             'products.thumbnail',
-            'products.url',
+            'products.unique',
             'manufacturers.name         as manufacturer_name',
             'prices.name                as price_name',
-            'prices.currency            as currency_char_code',
-            'currency.value             as currency_quotation',
+            'currency.char_code         as currency_char_code',
             'product_has_price.value    as currency_price'
         )
+
             ->leftJoin('product_has_price', function ($join) {
                 $join->on('product_has_price.product_id', '=', 'products.id')
                     ->where('product_has_price.active', 1);
             })
+
             ->leftJoin('prices', 'product_has_price.price_id', '=', 'prices.id')
 
             ->leftJoin('manufacturers', 'products.manufacturer_id', '=', 'manufacturers.id')
 
-            ->leftJoin('currency', 'prices.currency', '=', 'currency.char_code')
+            ->leftJoin('currency', 'product_has_price.currency_id', '=', 'currency.id')
+
             ->where('prices.name', 'retail')
             ->where('products.category_id', $category_id)
             ->orderBy('products.name')
@@ -256,29 +258,32 @@ class Product extends Model{
             'products.original_name',
             'products.scu',
             'products.description',
-            'products.image',
             'products.thumbnail',
-            'products.url',
+            'products.unique',
             'manufacturers.name         as manufacturer_name',
             'brands.name                as brand_name',
             'prices.name                as price_name',
-            'prices.currency            as currency_char_code',
+            'currency.char_code         as currency_char_code',
             'product_has_price.value    as price'
         )
+
             ->leftJoin('product_has_price', function ($join) {
                 $join->on('product_has_price.product_id', '=', 'products.id')
                     ->where('product_has_price.active', 1);
             })
+
             ->leftJoin('prices', 'product_has_price.price_id', '=', 'prices.id')
 
             ->leftJoin('product_has_brand', function ($join) {
                 $join->on('product_has_brand.product_id', '=', 'products.id');
             })
+
             ->leftJoin('brands', 'product_has_brand.brand_id', '=', 'brands.id')
 
             ->leftJoin('manufacturers', 'products.manufacturer_id', '=', 'manufacturers.id')
 
-            ->leftJoin('currency', 'prices.currency', '=', 'currency.char_code')
+            ->leftJoin('currency', 'product_has_price.currency_id', '=', 'currency.id')
+
             ->where('prices.name', 'retail')
             ->where('brands.id', $brand_id)
             ->where('products.active', 1)
@@ -299,28 +304,32 @@ class Product extends Model{
             'products.manufacturer_id',
             'products.original_name',
             'products.name',
-            'products.scu',
             'products.thumbnail',
+            'products.scu',
             'manufacturers.name         as manufacturer_name',
             'brands.name                as brand_name',
             'prices.name                as price_name',
-            'prices.currency            as currency_char_code',
+            'currency.char_code         as currency_char_code',
             'product_has_price.value    as price'
         )
+
             ->leftJoin('product_has_price', function ($join) {
                 $join->on('product_has_price.product_id', '=', 'products.id')
                     ->where('product_has_price.active', 1);
             })
+
             ->leftJoin('prices', 'product_has_price.price_id', '=', 'prices.id')
 
             ->leftJoin('product_has_brand', function ($join) {
                 $join->on('product_has_brand.product_id', '=', 'products.id');
             })
+
             ->leftJoin('brands', 'product_has_brand.brand_id', '=', 'brands.id')
 
             ->leftJoin('manufacturers', 'products.manufacturer_id', '=', 'manufacturers.id')
 
-            ->leftJoin('currency', 'prices.currency', '=', 'currency.char_code')
+            ->leftJoin('currency', 'product_has_price.currency_id', '=', 'currency.id')
+
             ->where('prices.name', 'retail')
             ->whereIn('products.id', $idProducts)
             ->get();

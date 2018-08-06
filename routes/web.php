@@ -44,7 +44,9 @@ Route::post('/categories/{id}', 'Shop\CategoryController@productToBasket');
 Route::post('/brands/{id}',     'Shop\BrandController@productToBasket');
 Route::post('/search/',         'Search\SearchController@productToBasket');
 
-
 Auth::routes();
 
 Route::get('/adminio', 'Admin\AdminController@index')->name('admin');
+
+Route::get('/parseXl', 'Parse\FromXlsxController@parse');
+Route::get('/parseSite', 'Parse\FromSiteController@parse');

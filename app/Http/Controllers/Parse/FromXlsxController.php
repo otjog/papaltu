@@ -2,164 +2,227 @@
 
 namespace App\Http\Controllers\Parse;
 
+use App\Category;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use App\Product;
-use App\Price;
 use Illuminate\Support\Facades\DB;
 
 class FromXlsxController extends Controller{
 
-    private $pathToFolder = '../public/storage/parse/';
-    private $fileName;
+    private $pathToFile;
     private $startRow;
-    private $nameColumns;
+
+    private $tables;
+    private $pivotTable;
+    private $compareColumn;
 
     private $product;
+    private $category;
+    private $reader;
 
-    public function __construct(Request $request, Product $product){
-        $this->fileName     = 'pumps.xlsx';
+    public function __construct(Request $request, Product $product, Category $category){
+        $this->pathToFile = '../public/storage/parse/pumps.xlsx';
         $this->startRow     = '2';
-        $this->nameColumns  = [
-            'A' => 'products.category_id',
-            'B' => 'products.name',
-            'C' => 'products.scu',
 
-            'D' => 'prices.wholesale',
-            'E' => 'prices.retail'
+        $this->tables = [
+            'categories'        => [
+                'default'   =>  [ 'active'  => '1' ],
+                'columns'   =>  [ 'name'   => 'A' ],
+            ],
+            'products'          => [
+                'default'   =>  [ 'active' => '1', 'manufacturer_id' => '1' ],
+                'columns'   =>  [ 'name'   => 'B' ],
+            ],
+            'product_has_price.wholesale' => [
+                'default'   =>  [ 'active' => '1', 'price_id' => '3' ],
+                'columns'   =>  [ 'value'  => 'C' ],
+            ],
+            'product_has_price.retail' => [
+                'default'   =>  [ 'active' => '1', 'price_id' => '2' ],
+                'columns'   =>  [ 'value'  => 'D' ],
+            ],
+            'images'            => [
+                'default'   =>  [],
+                'columns'   =>  [],
+            ],
         ];
 
+        $this->pivotTable       = 'products';
+        $this->compareColumn    = 'name';
+
         $this->product = $product;
+        $this->category = $category;
+
+        $this->reader = $this->getReader();
     }
 
     public function parse(){
-        $tables = $this->read();
+        $newDataInTables = $this->read();
 
-        $this->store($tables);
+        $this->store($newDataInTables);
     }
 
-    private function read() {
+    private function read(){
 
-        $tables = [
-            'categories'    =>  [],
-            'products'      =>  [],
-            'prices'        =>  [],
-        ];
+        $newDataInTables = [];
 
-        $iterator = $this->getIterator();
+        $groupIteraror = $this->getGroupIterator();
 
-        foreach ($iterator as $item) {
+        foreach($groupIteraror as $group){
 
-            if($item->getRowIndex() >= $this->startRow){
+            $itemIterator = $this->getItemIterator( $group );
 
-                $parsedParameters = $this->getCurrentParameters($item);
+            foreach ($itemIterator as $item) {
 
-                foreach($parsedParameters as $table_name => $currentParameters){
+                $parsedParameters = $this->getCurrentParameters( $item );
 
-                    switch($table_name){
-                        case 'categories' : /**/;break;
+                if(isset ($parsedParameters[ $this->pivotTable ][ $this->compareColumn ] ) ){
+                    $sc_value = $parsedParameters[ $this->pivotTable ][ $this->compareColumn ];
+                }else{
+                    break;
+                }
 
-                        case 'products' :
-                            $tables['products'][] = $currentParameters;
-                            break;
+                foreach($parsedParameters as $tableName => $currentParameters){
 
-                        case 'prices'  :
-                            foreach($currentParameters as $price_name => $price_value) {
-                                $tables['prices'][ $price_name ][ key( $price_value ) ] = ceil($price_value[ key( $price_value ) ]);
-                            }
-                            break;
+                    if( count( $currentParameters ) > 0 ){
+                        $newDataInTables[$tableName][ $sc_value ] = $currentParameters;
                     }
 
                 }
-
             }
-
         }
 
-        return $tables;
-
+        return $newDataInTables;
     }
 
-    private function store($tables){
+    private function store($newDataInTables){
 
-        foreach ($tables as $table_name => $parameters){
-            switch($table_name){
+        foreach ($newDataInTables as $tableName => $parameters){
 
-                case 'categories' : /**/; break;
+            list($clearTableName) = explode('.', $tableName);
+
+            switch($clearTableName){
+
+                case 'categories' :
+                    $newDataInTables[ $this->pivotTable ] = $this->storeCategoriesAndGetIds($parameters, $newDataInTables[ $this->pivotTable ]);
+                    break;
 
                 case 'products' :
-                    $data = $this->getProductData($parameters);
-                    //$this->deActivate....
-                    $this->updateCurrentTable($data, $table_name);
+                    $this->storeProducts($newDataInTables[ $this->pivotTable ]);
                     break;
 
-                case 'prices' :
-                    $data = $this->getPriceData($parameters);
-                    $this->deActiveOldPrice($data['columns']);
-                    $this->updateCurrentTable($data['data'], 'product_has_price');
+                case 'images' :
+                    $this->storeImages($parameters);
+                    break;
+
+                case 'product_has_price' :
+                    $this->storePrices($parameters);
                     break;
             }
         }
+    }
+
+    private function getGroupIterator(){
+
+        return $this->reader->getSheetNames();
 
     }
 
-    private function getIterator(){
-        $reader = IOFactory::createReader('Xlsx');
-        $reader->setReadDataOnly(TRUE);
-        $spreadsheet = $reader->load(
-            $this->pathToFolder.$this->fileName
-        );
+    private function getItemIterator( $group ){
 
-        $worksheet = $spreadsheet->getActiveSheet();
+        $sheetName = $group;
 
-        return $worksheet->getRowIterator();
+        $worksheet = $this->reader->getSheetByName($sheetName);
+
+        return $worksheet->getRowIterator($this->startRow);
     }
 
-    private function getCurrentParameters($row){
+    private function getCurrentParameters( $item ){
 
-        $cellIterator = $row->getCellIterator();
-        $cellIterator->setIterateOnlyExistingCells(true);
+        $currentParameters = [];
 
-        $currentParameters = [
-            'categories'    =>  [],
+        foreach($this->tables as $tableName => $tableData) {
 
-            'products'      => [
-                'active'            => '1',
-                'manufacturer_id'   => '1',
-            ],
+            $currentParameters[$tableName] = $tableData['default'];
 
-            'prices'        => []
-        ];
+            foreach($tableData['columns'] as $columnName => $key){
 
-        foreach ($cellIterator as $cell) {
-            if( isset( $this->nameColumns[$cell->getColumn()] ) ){
+                $value = $this->getValue($item, $key);
 
-                list($name_table, $name_column) = explode('.',  $this->nameColumns[$cell->getColumn()] );
+                if( $value !== null ){
 
-                switch($name_table){
-                    case 'categories' :
-                        break;
+                    $currentParameters[$tableName][$columnName] = trim($value);
 
-                    case 'products' :
-                        $currentParameters[$name_table][$name_column] = (string) $cell->getValue();
-                        break;
-
-                    case 'prices'   :
-                        $currentParameters[$name_table][$name_column]['scu'] = (string) $cell->getValue();
-                        break;
                 }
+
             }
 
         }
-
-        $currentParameters = $this->addScuToPriceParameters($currentParameters);
 
         return $currentParameters;
 
     }
 
-    private function getProductData($parameters){
+    private function getValue($row, $key){
+
+        return $this->getRawValue($row, $key);
+
+    }
+
+    private function getRawValue($row, $key){
+
+        $rawValue = $row->getWorksheet()->getCell($key.$row->getRowIndex());
+
+        return $rawValue->getValue();
+    }
+
+    private function getCategoriesData($parameters){
+
+        $data = [
+            'new'       => [],
+            'update'    => []
+        ];
+
+        $products = [];
+
+        $collection = $this->category->getAllCategories();
+
+        foreach ($parameters as $sc_value => $currentParameters) {
+
+            $tableRow = $this->getCurrentTableRow($collection, 'name', $currentParameters['name']);
+
+            if($tableRow !== null){
+
+                $data['update'] = $this->getArrayForUpdate($currentParameters, $tableRow, $data['update']);
+
+                $products[$sc_value]['category_id'] = $tableRow->id;
+
+            }else{
+
+                if($this->getArrayForInsert($currentParameters, $data['new']) !== false){
+                    $data['new'][] = $this->getArrayForInsert($currentParameters, $data['new']);
+                }
+
+            }
+        }
+
+        return ['data' => $data, 'products' => $products];
+    }
+
+    private function storeCategoriesAndGetIds($categoryParameters, $productParameters){
+        $data = $this->getCategoriesData($categoryParameters);
+        //$this->deActivate....
+        $this->updateCurrentTable($data['data'], 'categories');
+
+        if( count( $data['data']['new'] ) > 0 ){
+            $data = $this->getCategoriesData($categoryParameters);
+        }
+        return array_merge_recursive($productParameters, $data[ $this->pivotTable ]);
+    }
+
+    private function getProductsData($parameters){
 
         $data = [
             'new'       => [],
@@ -170,7 +233,7 @@ class FromXlsxController extends Controller{
 
         foreach ($parameters as $currentParameters) {
 
-            $product = $this->getCurrentProduct($productsCollection, $currentParameters['scu']);
+            $product = $this->getCurrentTableRow($productsCollection, $this->compareColumn, $currentParameters[$this->compareColumn]);
 
             if($product !== null){
 
@@ -178,7 +241,9 @@ class FromXlsxController extends Controller{
 
             }else{
 
-                $data['new'][] = $this->getArrayForInsert($currentParameters);
+                if($this->getArrayForInsert($currentParameters, $data['new']) !== false){
+                    $data['new'][] = $this->getArrayForInsert($currentParameters, $data['new']);
+                }
 
             }
         }
@@ -186,79 +251,178 @@ class FromXlsxController extends Controller{
         return $data;
     }
 
-    private function getPriceData($parameters, $productPrices = []){
+    private function storeProducts($productsParameters){
+        $data = $this->getProductsData($productsParameters);
+        //$this->deActivate....
+        $this->updateCurrentTable($data, 'products');
+    }
+
+    private function getImagesData($parameters){
+
+        $productsCollection = $this->product->getAllProducts();
+
+        $thumbHeight    = 150;
+        $thumbWidth     = 150;
+
+        $imageHeight    = 500;
+        $imageWidth     = 500;
+
+        $data = [
+            'new'       => [],
+            'update'    => []
+        ];
+
+        foreach($parameters['main'] as $searchColumnValue => $src){
+
+            $src = '../public/storage/img/shop/product/'.$src;
+
+            $product = $this->getCurrentTableRow($productsCollection, $this->compareColumn, $searchColumnValue);
+
+            if($product !== null){
+
+                $newImageParameters = [
+                    'thumb' => [
+                        'height'    => $thumbHeight,
+                        'width'     => $thumbWidth,
+                        'name'      => $searchColumnValue .'-thumbnail-' . $thumbWidth . 'x'. $thumbHeight
+                    ],
+                    'image' => [
+                        'height'    => $imageHeight,
+                        'width'     => $imageWidth,
+                        'name'      => $searchColumnValue
+                    ]
+                ];
+
+                if($this->notExistImages($newImageParameters)){
+
+                    $currentParameters = [
+                        'image'     => null,
+                        'thumbnail' => null
+                    ];
+
+                    $parsedUrl = parse_url($src);
+                    $path = explode('/', $parsedUrl['path']);
+
+                    $url = $parsedUrl['scheme'].'://'.$parsedUrl['host'];
+                    foreach ($path as $key => $folder) {
+
+                        if( count($path)-1 === $key ){
+                            $url .= rawurlencode( $folder );
+                        }else{
+                            $url .= $folder.'/';
+                        }
+
+                    }
+
+                    $thumb = imagecreatetruecolor($newImageParameters['thumb']['width'], $newImageParameters['thumb']['height']);
+                    $image = @imagecreatefromjpeg($url);
+
+                    $sourceImageData =  getimagesize($url);
+
+                    $sourceImageParameters = [
+                        'width'     => $sourceImageData[0],
+                        'height'    => $sourceImageData[1],
+                        'type'      => explode('/', $sourceImageData['mime'])
+                    ];
+
+                    $newThumb = imagecopyresized(
+                        $thumb,
+                        $image,
+                        0,
+                        0,
+                        0,
+                        0,
+                        $newImageParameters['thumb']['width'],
+                        $newImageParameters['thumb']['height'],
+                        $sourceImageParameters['width'],
+                        $sourceImageParameters['height']);
+
+                    $newThumbName = $newImageParameters['thumb']['name'] . '.' . $sourceImageParameters['type'][1];
+                    $newImageName = $newImageParameters['image']['name'] . '.' . $sourceImageParameters['type'][1];
+
+                    if($newThumb){
+                        $res = imagejpeg($thumb, '../public/storage/img/shop/product/thumbnail/'.$newThumbName, 100);
+
+                        if($res){
+                            $currentParameters['thumbnail'] = $newThumbName;
+                        }
+
+                    }
+
+                    if($image){
+                        $res = imagejpeg($image, '../public/storage/img/shop/product/'.$newImageName, 100);
+
+                        if($res){
+                            $currentParameters['image'] = $newImageName;
+                        }
+                    }
+
+                    foreach($currentParameters as $name_param => $value ){
+                        switch($name_param){
+                            case 'image'            :
+                            case 'thumbnail'        :
+                                if($value !== $product[$name_param]){
+                                    $data['update'][$name_param][$product['id']] = $value;
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    private function storeImages($imagesParameters){
+        $data = $this->getImagesData($imagesParameters);
+        $this->updateCurrentTable($data, 'products');
+    }
+
+    private function getPricesData($parameters){
 
         $data = [
             'new'   => []
         ];
 
-        $columns = [
-            'prices'    => [],
-            'products'  => [],
+        $oldPrice = [
+            'prices_id'    => [ $parameters[ key($parameters) ]['price_id'] ],
+            'products_id'  => [],
         ];
 
-        foreach($parameters as $price_name => $priceData){
+        $productsCollection = $this->product->getAllProducts();
 
-            //todo переписать функцию, а то там '*'
-            $price = Price::firstOrCreate([
-                'name' =>  $price_name
-            ]);
+        foreach($parameters as $sc_value => $currentParameters) {
 
-            $columns['prices'][] = $price->id;
+            $product = $this->getCurrentTableRow($productsCollection, $this->compareColumn, $sc_value);
 
-            if( count( $priceData ) > 0){
+            if($product !== null){
 
-                $productsCollection = $this->product->getAllProducts();
+                $oldPrice['products_id'][] = $product->id;
 
-                foreach($priceData as $scu => $value) {
+                $currentParameters['product_id'] = $product->id;
 
-                    $product = $this->getCurrentProduct($productsCollection, (string)$scu);
+                $currentParameters = $this->addTimeStamp($currentParameters);
 
-                    if($product !== null){
+                $data['new'][] = $currentParameters;
 
-                        $columns['products'][] = $product->id;
-
-                        $currentParameters = [
-                            'active'        => '1',
-                            'product_id'    => $product->id,
-                            'price_id'      => $price->id,
-                            'value'         => $value
-                        ];
-
-                        $currentParameters = $this->addTimeStamp($currentParameters);
-
-                        $data['new'][] = $currentParameters;
-
-                    }
-                }
-
-            }elseif( count( $productPrices ) > 0 ){
-
-                foreach($productPrices as $productPrice){
-
-                    $productPrice->price_id    = $price->id;
-                    $productPrice->value       = ceil($productPrice->value * $productPrice->quotation);
-                    unset( $productPrice->quotation );
-
-                    $productPrice = $this->addTimeStamp($productPrice->toArray());
-
-                    $data['new'][] = $productPrice;
-
-                }
             }
-
-
         }
 
-        return ['data' => $data, 'columns' => $columns];
+        return ['new_price' => $data, 'old_price' => $oldPrice];
     }
 
+    private function storePrices($priceParameters){
+        $data = $this->getPricesData($priceParameters);
+        $this->deActiveOldPrice($data['old_price']);
+        $this->updateCurrentTable($data['new_price'], 'product_has_price');
+    }
 
     /******** Helpers *********/
 
-    private function getCurrentProduct($products, $scu){
-        return $products->first(function($value, $key) use ($scu){
-            return $value->scu === $scu;
+    private function getCurrentTableRow($collection, $columnName, $columnValue){
+        return $collection->first(function($value, $key) use ($columnName, $columnValue){
+            return $value->$columnName === $columnValue;
         });
     }
 
@@ -270,26 +434,24 @@ class FromXlsxController extends Controller{
         return $currentParameters;
     }
 
-    private function getArrayForUpdate($currentParameters, $product, $data){
+    private function getArrayForUpdate($currentParameters, $tableRow, $data){
 
         foreach($currentParameters as $name_param => $value ){
-            switch($name_param){
-                case 'active'           :
-                case 'original_name'    :
-                case 'name'             :
-                case 'thumbnail'        :
-                case 'image'            :
-
-                    if($value !== $product[$name_param]){
-                        $data[$name_param][$product['id']] = $value;
-                    }
-                    break;
+            if($value !== $tableRow[$name_param]){
+                $data[$name_param][$tableRow['id']] = $value;
             }
         }
         return $data;
     }
 
-    private function getArrayForInsert($currentParameters){
+    private function getArrayForInsert($currentParameters, $data){
+
+        foreach($data as $tableRow){
+            if( $tableRow['name'] === $currentParameters['name'] ){
+                return false;
+            }
+        }
+
         $currentParameters = $this->addTimeStamp($currentParameters);
 
         return $currentParameters;
@@ -356,25 +518,33 @@ class FromXlsxController extends Controller{
 
         DB::table('product_has_price')
             ->where('active', 1)
-            ->whereIn('product_id',    $columns['products'])
-            ->whereIn('price_id',      $columns['prices'])
+            ->whereIn('product_id',    $columns['products_id'])
+            ->whereIn('price_id',      $columns['prices_id'])
             ->update(['active' => 0]
             );
     }
 
+    private function preparePriceValue($value, $priceType){
+        $value = str_replace(' ', '', $value);
 
-
-    private function addScuToPriceParameters($currentParameters){
-        foreach ($currentParameters['prices'] as $key => $price) {
-
-            $scu = $currentParameters['products']['scu'];
-
-            $currentParameters['prices'][$key][$scu] = $price['scu'];
-
-            unset($currentParameters['prices'][$key]['scu']);
-        }
-        return $currentParameters;
+        return $value;
     }
 
+    private function prepareImageValue($path){
+        $path = str_replace('/resize.php?file=', '', $path);
+        $path = str_replace('&size=300', '', $path);
+
+        return $path;
+
+    }
+
+    /**************************************/
+    private function getReader(){
+        $reader = IOFactory::createReader('Xlsx');
+        $reader->setReadDataOnly(TRUE);
+        return $reader->load(
+            $this->pathToFile
+        );
+    }
 
 }
