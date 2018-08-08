@@ -100,7 +100,7 @@ class OrderController extends Controller{
     public function show($id){
 
         $this->data['template']['view'] = 'show';
-        $this->data['data']['order']    = $this->orders->getOrderWithId($id);
+        $this->data['data']['order']    = $this->orders->getOrderById($id);
 
         return view( 'templates.default', $this->data);
     }

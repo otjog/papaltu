@@ -40,7 +40,7 @@ class Filter extends Model{
                         $filter['old_values']   = $this->addOldValues($old_values, $filter['alias']);
                         break;
                     case 'price'        :
-                        $filter['values']       = array_column(self::getPriceFilter($category_id, $price_id = 2), 'value');
+                        $filter['values']       = array_column(self::getPriceFilter($category_id), 'value');
                         $filter['old_values']   = $this->addOldValues($old_values, $filter['alias']);
                         break;
                     case 'phrase'       :
@@ -93,7 +93,7 @@ class Filter extends Model{
             ->get()->toArray();
     }
 
-    private static function getPriceFilter($category_id, $price_id){
+    private static function getPriceFilter($category_id){
         return Price::select(
             'product_has_price.value'
         )
@@ -101,7 +101,7 @@ class Filter extends Model{
                 $join->on('product_has_price.price_id', '=', 'prices.id');
             })
             ->where('product_has_price.active', 1)
-            ->where('prices.id', $price_id)
+            ->where('prices.name', 'retail')
             ->whereIn('product_id', Product::select('id')
                 ->where('products.active', 1)
                 ->where('category_id', $category_id)

@@ -42,7 +42,7 @@ class ShopOrder extends Model{
             ->first();
     }
 
-    public function getOrderWithId($id){
+    public function getOrderById($id){
         return self::select(
             'id',
             'ordered',
