@@ -50,3 +50,6 @@ Route::get('/adminio', 'Admin\AdminController@index')->name('admin');
 
 Route::get('/parseXl', 'Parse\FromXlsxController@parse');
 Route::get('/parseSite', 'Parse\FromSiteController@parse');
+
+
+Route::get('/dpd', 'Delivery\DpdController@getIp');
