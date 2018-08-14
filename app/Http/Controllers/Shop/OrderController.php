@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shop;
 
+use App\Models\DeliveryServices;
 use App\Payment;
 use App\Shipment;
 use Illuminate\Http\Request;
@@ -78,15 +79,24 @@ class OrderController extends Controller{
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(Request $request, Product $products, Payment $payments, Shipment $shipments){
+    public function create(Request $request, Product $products, Payment $payments, Shipment $shipments, DeliveryServices $ds){
         $token = $request->session()->get('_token');
 
         $basket = $this->baskets->getActiveBasket( $token );
 
+        $productsFromBasket = $products->getProductsFromBasket($basket);
+
+        $parcel = $products->getParcelParameters($productsFromBasket);
+
         $this->data['template']['view']         = 'create';
-        $this->data['data']['basketProducts']   = $products->getProductsFromBasket($basket);
+
+        $this->data['data']['basketProducts']   = $productsFromBasket;
+
         $this->data['data']['payments']         = $payments->getActiveMethods();
+
         $this->data['data']['shipments']        = $shipments->getActiveMethods();
+
+        $this->data['data']['delivery']  = $ds->getDeliveryDataForProduct($request->session(), $parcel);
 
         return view( 'templates.default', $this->data);
     }
@@ -100,7 +110,7 @@ class OrderController extends Controller{
     public function show($id){
 
         $this->data['template']['view'] = 'show';
-        $this->data['data']['order']    = $this->orders->getOrderById($id);
+        $this->data['data']['order']    = $this->orders->getOrderByBasketIdAndOrderId($id);
 
         return view( 'templates.default', $this->data);
     }

@@ -63,4 +63,33 @@ class ShopOrder extends Model{
             ->first();
     }
 
+    public function getOrderByBasketIdAndOrderId($id){
+
+        list($basketId, $orderId) = explode('-', $id);
+
+        return self::select(
+            'id',
+            'ordered',
+            'shop_basket_id',
+            'payment_id',
+            'shipment_id',
+            'products',
+            'first_name',
+            'middle_name',
+            'last_name',
+            'phone',
+            'email',
+            'address',
+            'comment',
+            'created_at'
+        )
+            ->where('id', $orderId)
+
+            ->where('shop_basket_id', $basketId)
+
+            ->where('ordered', 1)
+
+            ->first();
+    }
+
 }

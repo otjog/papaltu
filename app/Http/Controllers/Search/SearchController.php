@@ -56,13 +56,4 @@ class SearchController extends Controller{
         return view( 'templates.default', $this->data);
     }
 
-    public function productToBasket(Request $request){
-        $basket = new BasketController($this->baskets);
-        $basket->postAdd($request);
-        //todo исправить баг с post Запросом и обновлением страницы
-        return $this->show();
-
-
-    }
-
 }

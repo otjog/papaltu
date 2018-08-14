@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\Shop;
 
+use App\Models\DeliveryServices;
 use App\Product;
 use App\ShopBasket;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-class BasketController extends Controller
-{
+class BasketController extends Controller{
 
     protected $baskets;
+
     protected $data;
 
     public function __construct(ShopBasket $baskets){
@@ -23,38 +24,106 @@ class BasketController extends Controller
         ];
     }
 
-    public function getIndex(){
-
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        //
     }
 
-    public function getShow(Request $request, Product $products){
-
-        $token = $request->session()->get('_token');
-
-        $basket = $this->baskets->getActiveBasket( $token );
-
-        $this->data['template']['view']         = 'show';
-        $this->data['data']['basketProducts']   = $products->getProductsFromBasket($basket);
-
-        return view( 'templates.default', $this->data);
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
     }
 
-    public function postAdd(Request $request){
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request){
 
         $token = $request->session()->get('_token');
 
         $basket = $this->baskets->getActiveBasket( $token );
 
         if($basket === null){
-            $this->store( $token, $request->all() );
+            $this->baskets->token     = $token;
+
+            $this->baskets->products  = json_encode(array($request->all()));
+
+            $this->baskets->save();
         }else{
             $products = $this->addProductToArray( $basket, $request->all() );
-            $this->update( $basket, $products );
+
+            $basket->products = json_encode($products);
+
+            $basket->save();
+        }
+
+        return back();
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function show($token){
+
+
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(Request $request, Product $products, DeliveryServices $ds, $token){
+
+        $basket = $this->baskets->getActiveBasket( $token );
+
+        if($basket->order_id === null){
+
+            $productsFromBasket = $products->getProductsFromBasket($basket);
+
+            $parcel = $products->getParcelParameters($productsFromBasket);
+
+            $this->data['template']['view']         = 'show';
+
+            $this->data['data']['basketProducts']   = $productsFromBasket;
+
+            $this->data['data']['delivery']  = $ds->getDeliveryDataForProduct($request->session(), $parcel);
+
+            return view( 'templates.default', $this->data);
+
+        } else {
+
+            return redirect('orders.show', $basket->id . '-' . $basket->order_id);
+
         }
 
     }
 
-    public function getChange(Request $request){
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $token){
 
         $token = $request->session()->get('_token');
 
@@ -62,33 +131,46 @@ class BasketController extends Controller
 
         $products = $this->changeQuantityInArray( $request->all() );
 
-        $this->update( $basket, $products );
-
-        return redirect($request->server('HTTP_REFERER'));
-
-    }
-
-    public function deleteDestroy($id){
-
-        //DELETE
-    }
-
-
-    private function store($token, $newProduct){
-
-        $this->baskets->token     = $token;
-        $this->baskets->products  = json_encode(array($newProduct));
-        $this->baskets->save();
-
-    }
-
-    private function update($basket, $products){
-
         $basket->products = json_encode($products);
+
         $basket->save();
 
+        return back();
     }
 
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //
+    }
+
+    private function changeQuantityInArray($products){
+
+        $newProducts = [];
+
+        foreach ($products as $key => $product){
+
+            if( substr( $key, 0, 1 ) !== '_'){
+
+                $product['quantity'] = (int)$product['quantity'];
+
+                if($product['quantity'] > 0){
+
+                    $newProducts[] = $product;
+
+                }
+
+            }
+
+        }
+
+        return $newProducts;
+    }
 
     private function addProductToArray($basket, $newProduct){
         $products = json_decode($basket->products, true);
@@ -109,19 +191,4 @@ class BasketController extends Controller
 
         return $products;
     }
-
-    private function changeQuantityInArray($products){
-
-        $newProducts = [];
-
-        foreach ($products as $product){
-            $product['quantity'] = (int)$product['quantity'];
-            if($product['quantity'] > 0){
-                $newProducts[] = $product;
-            }
-        }
-
-        return $newProducts;
-    }
-
 }

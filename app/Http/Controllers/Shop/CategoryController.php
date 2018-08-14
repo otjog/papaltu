@@ -141,12 +141,4 @@ class CategoryController extends Controller{
         //
     }
 
-    public function productToBasket(Request $request, Product $products, $id){
-        $basket = new BasketController($this->baskets);
-        $basket->postAdd($request);
-
-        //return $this->show($request, $products, $id);
-        return redirect()->route('categories.show', ['id' => $id]);
-
-    }
 }

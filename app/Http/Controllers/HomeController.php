@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\MainPage;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Category;
 use App\Brand;
 
-class MainPageController extends Controller{
+class HomeController extends Controller{
 
     protected $categories;
     protected $data;

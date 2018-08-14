@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Shop;
 
 use App\Http\Controllers\Controller;
+use App\Models\DeliveryServices;
 use App\ShopBasket;
 use Illuminate\Http\Request;
 use App\Product;
-use App\Http\Controllers\Shop\BasketController;
 
 class ProductController extends Controller{
 
@@ -65,12 +65,19 @@ class ProductController extends Controller{
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id){
+    public function show(Request $request, DeliveryServices $ds, $id){
+
+        $product    = $this->products->getActiveProduct($id);
+
+        $parcel     = $this->products->getParcelParameters( collect( [$product] ));
 
         $this->data['template']['view'] = 'show';
-        $this->data['data']['product']  = $this->products->getActiveProduct($id);
 
         $this->data['template']['custom'][] = 'shop-icons';
+
+        $this->data['data']['product']  = $product;
+
+        $this->data['data']['delivery']  = $ds->getDeliveryDataForProduct($request->session(), $parcel);
 
         return view( 'templates.default', $this->data);
     }
@@ -107,11 +114,4 @@ class ProductController extends Controller{
         //
     }
 
-    public function toBasket(Request $request, $id){
-        $basket = new BasketController($this->baskets);
-        $basket->postAdd($request);
-
-        //return $this->show($id);
-        return redirect()->route('products.show', ['id' => $id]);
-    }
 }

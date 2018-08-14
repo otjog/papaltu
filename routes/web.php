@@ -10,46 +10,60 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
+    //Home
+    Route::get('/',         'HomeController@index'          )->name('home');
 
-Route::get('/', 'MainPage\MainPageController@index');
+    //Search
+    Route::get('/search',    'Search\SearchController@show' )->name('search');
 
-Route::resource('index',        'MainPage\MainPageController',  [ 'only' => [ 'index' ]]);
-Route::resource('categories',   'Shop\CategoryController',      [ 'only' => [ 'index', 'show' ]]);
-Route::resource('products',     'Shop\ProductController',       [ 'only' => [ 'show' ]]);
-Route::resource('orders',       'Shop\OrderController',         [ 'only' => [ 'store', 'create', 'show' ]]);
-Route::resource('pages',        'Info\PageController',          [ 'only' => [ 'show' ]]);
+    //Products
+    Route::resource('/products',    'Shop\ProductController',   [ 'only' => [ 'show' ]]);
 
-Route::group(['prefix' => 'adminio', 'middleware' => ['auth']], function () {
-    Route::resource('categories',   'Shop\CategoryController',      [ 'except' => [ 'show' ]]);
-    Route::resource('products',     'Shop\ProductController',       [ 'except' => [ 'show' ]]);
-    Route::resource('pages',        'Info\PageController',          [ 'except' => [ 'show' ]]);
+    //Categories
+    Route::resource('/categories',  'Shop\CategoryController',  [ 'only' => [ 'index', 'show' ]]);
 
-});
+    //Orders
+    Route::resource('/orders',      'Shop\OrderController',     [ 'only' => [ 'store', 'create', 'show' ]]);
 
-Route::get('search', 'Search\SearchController@show')->name('search');
+    //Pages
+    Route::resource('/pages',       'Info\PageController',      [ 'only' => [ 'show' ]]);
 
-Route::get('/parse', 'Price\ParseController@parse');
+    //Basket
+    Route::resource('/baskets',     'Shop\BasketController',    [ 'only' => [ 'store', 'edit', 'update' ]]);
 
-Route::group(['prefix' => 'basket'], function () {
-    Route::get('/', 'Shop\BasketController@getIndex')->name('showBaskets');
-    Route::get('/show', 'Shop\BasketController@getShow')->name('showBasket');
-    //Route::post('/add', 'Shop\BasketController@getAdd')->name('addToBasket');
-    Route::get('/change', 'Shop\BasketController@getChange')->name('changeBasket');
-    Route::delete('/destroy', 'Shop\BasketController@deleteDestory');
-});
+    //Forms
+    Route::group(['prefix' => 'form'], function () {
 
-//addToBasket
-Route::post('/products/{id}',   'Shop\ProductController@toBasket');
-Route::post('/categories/{id}', 'Shop\CategoryController@productToBasket');
-Route::post('/brands/{id}',     'Shop\BrandController@productToBasket');
-Route::post('/search/',         'Search\SearchController@productToBasket');
+        //GeoData
+        Route::post('geodata', function (\Illuminate\Http\Request $request, \App\Models\GeoData $geoData){
+            $geoData->setGeoInput( $request->address_json );
+            return back();
+        })->name('GetGeo');
 
-Auth::routes();
-
-Route::get('/adminio', 'Admin\AdminController@index')->name('admin');
-
-Route::get('/parseXl', 'Parse\FromXlsxController@parse');
-Route::get('/parseSite', 'Parse\FromSiteController@parse');
+    });
 
 
-Route::get('/dpd', 'Delivery\DpdController@getIp');
+    /************************Админка*************************************************/
+    Auth::routes();
+
+    Route::group(['prefix' => 'adminio', 'middleware' => ['auth']], function () {
+
+        //Admin Home
+        Route::get('/', 'Admin\AdminController@index')->name('admin');
+
+        //Admin Products
+        Route::resource('products',     'Shop\ProductController',       [ 'except' => [ 'show' ]]);
+
+        //Admin Categories
+        Route::resource('categories',   'Shop\CategoryController',      [ 'except' => [ 'show' ]]);
+
+        //Admin Pages
+        Route::resource('pages',        'Info\PageController',          [ 'except' => [ 'show' ]]);
+
+    });
+
+
+    /******************Конец*Админка*************************************************/
+
+    Route::get('/parseXl', 'Parse\FromXlsxController@parse');
+    Route::get('/parseSite', 'Parse\FromSiteController@parse');

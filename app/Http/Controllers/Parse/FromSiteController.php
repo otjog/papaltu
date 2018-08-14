@@ -69,6 +69,7 @@ class FromSiteController extends Controller{
         ];
 
         $this->tables = [
+            /*
             'categories'        => [
                 'default'   =>  [ 'active'  => '1' ],
                 'columns'   =>  [ 'name'   => 'ul.breadcrumb > li> a:last' ],
@@ -77,13 +78,20 @@ class FromSiteController extends Controller{
                 'default'   =>  [],
                 'columns'   =>  [ 'src' => 'div.product-img-block div.owl-carousel div.item.item-carousel > a > img'],
             ],
+            */
             'products'          => [
                 'default'   =>  [ 'active' => '1', 'manufacturer_id' => '1' ],
                 'columns'   =>  [
-                    'scu'           => 'div.container > div.row.product-item div.product-sku',
+                    //'scu'           => 'div.container > div.row.product-item div.product-sku',
                     'name'          => 'div.container > div.row.product-item h1',
-                    'description'   => '#tabs_tab_0' ],
+                    //'description'   => '#tabs_tab_0'
+                    'weight'        => 'div.container div#tabs_tab_1 div.table-responsive table.table.table-striped td',
+                    'length'        => 'div.container div#tabs_tab_1 div.table-responsive table.table.table-striped td',
+                    'width'         => 'div.container div#tabs_tab_1 div.table-responsive table.table.table-striped td',
+                    'height'        => 'div.container div#tabs_tab_1 div.table-responsive table.table.table-striped td',
+                ],
             ],
+            /*
             'product_has_price.retail' => [
                 'default'   =>  [ 'active' => '1', 'price_id' => '2', 'currency_id' => '1' ],
                 'columns'   =>  [ 'value'  => 'div.container > div.row.product-item div.product-actions div.top-price > span.price' ],
@@ -92,6 +100,7 @@ class FromSiteController extends Controller{
                 'default'   =>  [],
                 'columns'   =>  [],
             ],
+            */
         ];
 
         $this->pivotTable       = 'products';
@@ -125,6 +134,7 @@ class FromSiteController extends Controller{
     }
 
     public function parse(){
+
         $newDataInTables = $this->read();
 
         $this->store($newDataInTables);
@@ -302,14 +312,67 @@ class FromSiteController extends Controller{
         $searched = $html_dom->find($key);
 
         switch($clearTableName){
+
             case 'products' :
+
                 if($columnName === 'name'){
+
                     return trim(str_replace('Aquatechnica ', '', trim($searched->text())));
-                }elseif($columnName === 'scu'){
+
+                }elseif ($columnName === 'scu'){
+
                     return trim(str_replace('Артикул: ', '', trim($searched->text())));
+
+                }elseif ($columnName === 'weight'){
+
+                    return (float) $this->searchValueInTable($searched, 'Вес :', [' кг']);
+
+                }elseif ($columnName === 'length'){
+
+                    $sizeRaw = $this->searchValueInTable($searched, 'Габаритные размеры Д х Ш х В, мм:', [' ', 'Ø']);
+
+                    if($sizeRaw === null){
+                        $size =  $this->searchValueInTable($searched, 'Диаметр:', ' мм');
+                        if($size !== null)
+                            return (integer)$size / 10;
+                        return null;
+                    }else{
+                        $sizeArray = explode('x', $sizeRaw);
+                        return (integer)$sizeArray[0] / 10;
+                    }
+
+                }elseif ($columnName === 'width'){
+
+                    $sizeRaw = $this->searchValueInTable($searched, 'Габаритные размеры Д х Ш х В, мм:', [' ', 'Ø']);
+
+                    if($sizeRaw === null){
+                        $size = $this->searchValueInTable($searched, 'Высота:', ' мм');
+                        if($size !== null)
+                            return (integer)$size / 10;
+                        return null;
+                    }else{
+                        $sizeArray = explode('x', $sizeRaw);
+                        return (integer)$sizeArray[ count($sizeArray) - 2 ] / 10;
+                    }
+
+                }elseif ($columnName === 'height'){
+
+                    $sizeRaw = $this->searchValueInTable($searched, 'Габаритные размеры Д х Ш х В, мм:', [' ', 'Ø']);
+
+                    if($sizeRaw === null){
+                        $size = $this->searchValueInTable($searched, 'Высота:', ' мм');
+                        if($size !== null)
+                            return (integer)$size / 10;
+                        return null;
+                    }else{
+                        $sizeArray = explode('x', $sizeRaw);
+                        return (integer)$sizeArray[ count($sizeArray) - 1 ] / 10;
+                    }
                 }
+
                 break;
-            case 'product_has_price' :
+
+                case 'product_has_price' :
                 if($columnName === 'value'){
                     return str_replace([' ', 'руб.'], '', trim($searched->text()));
                 }
@@ -861,6 +924,15 @@ class FromSiteController extends Controller{
 
     private function getNextUrl($url, $i){
         return $url.'/page/'.$i;
+    }
+
+    private function searchValueInTable($searched, $prevSiblingValue, $replaceStr){
+        foreach($searched as $key => $td){
+            $pq_td = pq($td);
+            if($pq_td->text() === $prevSiblingValue){
+                return trim( str_replace($replaceStr, '',  trim( $pq_td->next()->text() ) ) );
+            }
+        }
     }
 
 }

@@ -24,6 +24,10 @@ class CreateProductsTable extends Migration
             $table->text('description')->nullable();
             $table->string('thumbnail', 255)->nullable();
             $table->string('unique', 255)->nullable();
+            $table->float('weight', 6, 2)->default(0);
+            $table->integer('length' )->default(0);
+            $table->integer('width' )->default(0);
+            $table->integer('height' )->default(0);
             $table->timestamps();
         });
     }

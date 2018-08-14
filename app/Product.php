@@ -2,9 +2,7 @@
 
 namespace App;
 
-use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Model;
-use sngrl\SphinxSearch\SphinxSearch;
 
 class Product extends Model{
 
@@ -75,7 +73,11 @@ class Product extends Model{
             'products.original_name',
             'products.scu',
             'products.description',
-            'products.thumbnail'
+            'products.thumbnail',
+            'products.weight',
+            'products.length',
+            'products.width',
+            'products.height'
         )
             ->where('id', '=', $id)
 
@@ -222,13 +224,17 @@ class Product extends Model{
     public function getProductsById($idProducts){
 
         return self::select(
-            'id',
-            'manufacturer_id',
-            'category_id',
-            'name',
-            'original_name',
-            'scu',
-            'thumbnail'
+            'products.id',
+            'products.manufacturer_id',
+            'products.category_id',
+            'products.name',
+            'products.original_name',
+            'products.scu',
+            'products.thumbnail',
+            'products.weight',
+            'products.length',
+            'products.width',
+            'products.height'
         )
             ->whereIn('id', $idProducts)
 
@@ -288,6 +294,33 @@ class Product extends Model{
         return self::where('active', 1)
             ->where('category_id', $category_id)
             ->count();
+    }
+
+    public function getParcelParameters($products, $quantity = 1){
+
+        $parameters = [];
+
+        foreach($products as $key=>$product){
+
+            $parameters[] = $this->getParametersForParcel($product, $quantity);
+
+        }
+
+        return $parameters;
+    }
+
+    private function getParametersForParcel($product, $quantity){
+        if( isset($product['quantity']) ){
+            $quantity = $product['quantity'];
+        }
+        return [
+            'weight'    => $product['weight'],
+            'length'    => $product['length'],
+            'width'     => $product['width'],
+            'height'    => $product['height'],
+            'quantity'  => $quantity,
+
+        ];
     }
 
 }
