@@ -80,11 +80,7 @@ class Dpd {
                 'regionCode'    => $this->pickUpRegionCode,
                 'countryCode'   => $this->pickUpCountryCode
             ],
-            'delivery' => [
-                'cityName' => $this->geoData['cityName'],
-                'index' => $this->geoData['index'],
-                'countryCode' => $this->geoData['countryCode']
-            ],
+            'delivery' => $this->geoData,
             'selfPickup' => true, //Доставка от терминала
             'selfDelivery' => $selfDelivery, //Доставка До терминала
             'parcel' => $parcelParameters,
@@ -151,13 +147,6 @@ class Dpd {
 
             }
 
-        }
-
-
-
-        $services = $this->getServiceCost($parcelParameters, false);
-        if( count($services) > 0 ){
-            $data['toDoor']     = $this->getOptimalService($services);
         }
 
         return $data;
@@ -248,9 +237,9 @@ class Dpd {
             switch($paramName){
                 case 'country_code' : $this->geoData['countryCode'] = $paramValue; break;
                 case 'region_code'  : $this->geoData['regionCode']  = $paramValue; break;
-                case 'city_code'    : $this->geoData['cityCode']    = $paramValue; break;
+                case 'city_kladr_id': $this->geoData['cityCode']    = $paramValue; break;
                 case 'city_name'    : $this->geoData['cityName']    = $paramValue; break;
-                case 'city_id'      : $this->geoData['cityId']      = $paramValue; break;
+                case 'city_id'      : $this->geoData['cityId']      = $paramValue; break; //cityId - DPD
                 case 'postal_code'  : $this->geoData['index']       = $paramValue; break;
             }
 
