@@ -42,7 +42,7 @@ class SearchController extends Controller{
 
         $sphinx  = new SphinxSearch();
 
-        $searchIdResult = $sphinx->search($this->query, 'celtic_products_search')->query();
+        $searchIdResult = $sphinx->search($this->query, env( 'SPHINXSEARCH_INDEX' ))->query();
 
         $this->data['template'] ['view']        = 'show';
 

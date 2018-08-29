@@ -83,7 +83,7 @@ class BrandController extends Controller{
         $this->data['data']     ['brand']       = $this->brands->getActiveBrand($id);
 
         if(count($request->query) > 0){
-            $this->data['data']['products'] = $products->getFilteredProductsFromCategory($id, $request->toArray());
+            $this->data['data']['products'] = $products->getFilteredProducts($request->toArray());
 
         }else{
             $this->data['data']['products'] = $products->getActiveProductsOfBrand($id);

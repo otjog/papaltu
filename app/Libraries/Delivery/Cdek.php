@@ -53,6 +53,19 @@ class Cdek {
 
     private $geoData;
 
+    private $destinationTypes = [
+
+        'toTerminal' => [
+            'active' => 1,
+            'selfDelivery' => true,
+        ],
+
+        'toDoor' => [
+            'active' => 1,
+            'selfDelivery' => false,
+        ]
+    ];
+
     public function __construct($geoData){
 
         $this->prepareGeoData($geoData);
@@ -67,11 +80,7 @@ class Cdek {
                 'regionCode'    => $this->pickUpRegionCode,
                 'countryCode'   => $this->pickUpCountryCode
             ],
-            'delivery' => [
-                'cityName' => $this->geoData['cityName'],
-                'index' => $this->geoData['index'],
-                'countryCode' => $this->geoData['countryCode']
-            ],
+            'delivery' => $this->geoData,
             'selfPickup' => true, //Доставка от терминала
             'selfDelivery' => $selfDelivery, //Доставка До терминала
             'parcel' => $parcelParameters,
@@ -108,7 +117,10 @@ class Cdek {
 
         $services = $this->getDpdData( 'getParcelShops', $data );
 
-        return $services->parcelShop;
+        if(isset($services->parcelShop))
+            return $services->parcelShop;
+
+        return $services;
 
     }
 
@@ -122,14 +134,22 @@ class Cdek {
 
     public function getSelfAndToDoorServiceCost($parcelParameters){
 
-        $services = $this->getServiceCost($parcelParameters, true);
-        if( count($services) > 0 ){
-            $data['toTerminal'] = $this->getOptimalService($services);
-        }
+        $data = [];
 
-        $services = $this->getServiceCost($parcelParameters, false);
-        if( count($services) > 0 ){
-            $data['toDoor']     = $this->getOptimalService($services);
+        foreach($this->destinationTypes as $type => ['active' => $active, 'selfDelivery' => $selfDelivery]){
+
+            if($active){
+
+                $services = $this->getServiceCost($parcelParameters, $selfDelivery);
+
+                if( count($services) > 0 ){
+
+                    $data[$type] = $this->getOptimalService($services);
+
+                }
+
+            }
+
         }
 
         return $data;
@@ -154,7 +174,7 @@ class Cdek {
 
         } catch ( Exception $ex ) {
 
-            $this->message = $ex;
+            $this->message = $ex->getMessage();
 
             return false;
         }
@@ -187,7 +207,7 @@ class Cdek {
 
             } catch ( Exception $ex ) {
 
-                $this->message = $ex;
+                $this->setErrorMessage( $ex , $data);
 
                 return [];
             }
@@ -220,14 +240,30 @@ class Cdek {
             switch($paramName){
                 case 'country_code' : $this->geoData['countryCode'] = $paramValue; break;
                 case 'region_code'  : $this->geoData['regionCode']  = $paramValue; break;
-                case 'city_code'    : $this->geoData['cityCode']    = $paramValue; break;
+                case 'city_kladr_id': $this->geoData['cityCode']    = $paramValue; break;
                 case 'city_name'    : $this->geoData['cityName']    = $paramValue; break;
-                case 'city_id'      : $this->geoData['cityId']      = $paramValue; break;
+                case 'city_id'      : $this->geoData['cityId']      = $paramValue; break; //cityId - DPD
                 case 'postal_code'  : $this->geoData['index']       = $paramValue; break;
             }
 
         }
 
+    }
+
+    private function setErrorMessage(Exception $ex, $data){
+
+        switch($ex->getCode()){
+            case 'no-service-available' :
+                $this->message = 'Невозможно выполнить доставку по маршруту ' . $data['pickup']['cityName'] . ' - ' . $data['delivery']['cityName'] . $this->destinationDelivery($data['selfDelivery']) . '.'; break;
+        }
+
+    }
+
+    private function destinationDelivery($selfDelivery){
+        if($selfDelivery)
+            return ' до пункта выдачи';
+        else
+            return ' до адреса клиента';
     }
 
 }

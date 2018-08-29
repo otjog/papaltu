@@ -117,7 +117,10 @@ class Dpd {
 
         $services = $this->getDpdData( 'getParcelShops', $data );
 
-        return $services->parcelShop;
+        if(isset($services->parcelShop))
+            return $services->parcelShop;
+
+        return $services;
 
     }
 

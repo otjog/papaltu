@@ -42,6 +42,8 @@
 
     });
 
+    //Ajax
+    Route::match(['get', 'post'], '/ajax', 'Ajax\AjaxController@index');
 
     /************************Админка*************************************************/
     Auth::routes();

@@ -4,6 +4,6 @@ return array(
     'port'    => 9312,
     'timeout' => 30,
     'indexes' => array(
-        'celtic_products_search' => array ( 'table' => 'products', 'column' => 'id' ),
+        env( 'SPHINXSEARCH_INDEX' ) => array ( 'table' => 'products', 'column' => 'id' ),
     )
 );

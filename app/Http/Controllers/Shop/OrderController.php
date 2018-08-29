@@ -79,24 +79,19 @@ class OrderController extends Controller{
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(Request $request, Product $products, Payment $payments, Shipment $shipments, DeliveryServices $ds){
+    public function create(Request $request, Product $products, Payment $payments){
+
         $token = $request->session()->get('_token');
 
         $basket = $this->baskets->getActiveBasket( $token );
 
         $productsFromBasket = $products->getProductsFromBasket($basket);
 
-        $parcel = $products->getParcelParameters($productsFromBasket);
-
         $this->data['template']['view']         = 'create';
 
         $this->data['data']['basketProducts']   = $productsFromBasket;
 
         $this->data['data']['payments']         = $payments->getActiveMethods();
-
-        $this->data['data']['shipments']        = $shipments->getActiveMethods();
-
-        $this->data['data']['delivery']  = $ds->getDeliveryDataForProduct($request->session(), $parcel);
 
         return view( 'templates.default', $this->data);
     }
@@ -110,7 +105,7 @@ class OrderController extends Controller{
     public function show($id){
 
         $this->data['template']['view'] = 'show';
-        $this->data['data']['order']    = $this->orders->getOrderByBasketIdAndOrderId($id);
+        $this->data['data']['order']    = $this->orders->getOrderById($id);
 
         return view( 'templates.default', $this->data);
     }
@@ -149,12 +144,12 @@ class OrderController extends Controller{
     /*****************Helpers**********************/
 
     private function prepareData($data, $basket){
+
         unset($data['_token']);
 
         $data['ordered']        = 1;
         $data['shop_basket_id'] = $basket->id;
         $data['products']       = $basket->products;
-
 
         $names = explode(' ', $data['full_name']);
 

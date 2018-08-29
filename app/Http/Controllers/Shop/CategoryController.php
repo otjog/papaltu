@@ -78,14 +78,14 @@ class CategoryController extends Controller{
      * @return \Illuminate\Http\Response
      */
     public function show(Request $request, Product $products, $id){
-
+/*
         if( $request->ajax() ){
 
             $this->data['data'] ['products'] = $products->getFilteredProductsFromCategory($id, $request->toArray());
 
             return response()->view( 'components.shop.product.list', $this->data['data'])->header('Cache-Control', 'no-store');
         }
-
+*/
         $category = $this->categories->getCategory($id);
 
         $this->data['template'] ['view']                = 'show';
@@ -99,7 +99,7 @@ class CategoryController extends Controller{
 
         if( count( $request->query ) > 0 ){
 
-            $this->data['data'] ['products'] = $products->getFilteredProductsFromCategory($id, $request->toArray());
+            $this->data['data'] ['products'] = $products->getFilteredProducts($id, $request->toArray());
 
         }else{
 

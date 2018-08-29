@@ -7,44 +7,46 @@ use App\Libraries\Geo\GeoLite;
 
 class GeoData extends Model{
 
-    public function getGeoData($session){
+    public function getGeoData(){
 
-        return $session->get('geoInput', function() use ($session){
+        return session()->get('geoInput', function() {
 
-            return $session->get('geoIp');
+            return session()->get('geoIp');
 
         });
     }
 
     public function setGeoInput($json){
 
-        $objectData = json_decode($json);
+        if($json !== null){
+            $objectData = json_decode($json);
 
-        $geoData = [
-            'postal_code'   => $objectData->data->postal_code,
-            'country_code'  => $this->getCountryCode($objectData->data->country),
-            'country_name'  => $objectData->data->country,
-            'region_code'   => substr($objectData->data->region_kladr_id, 0, 2),
-            'region_name'   => $objectData->data->region,
-            'region_type'   => $objectData->data->region_type,
-            'area_name'     => $objectData->data->area,
-            'area_type'     => $objectData->data->area_type,
-            'city_name'     => $objectData->data->city,
-            'city_type'     => $objectData->data->city_type,
-            'city_kladr_id' => $objectData->data->city_kladr_id,
-            'street_name'   => $objectData->data->street,
-            'street_type'   => $objectData->data->street_type,
-            'latitude'      => $objectData->data->geo_lat,
-            'longitude'     => $objectData->data->geo_lon,
-        ];
+            $geoData = [
+                'postal_code'   => $objectData->data->postal_code,
+                'country_code'  => $this->getCountryCode($objectData->data->country),
+                'country_name'  => $objectData->data->country,
+                'region_code'   => substr($objectData->data->region_kladr_id, 0, 2),
+                'region_name'   => $objectData->data->region,
+                'region_type'   => $objectData->data->region_type,
+                'area_name'     => $objectData->data->area,
+                'area_type'     => $objectData->data->area_type,
+                'city_name'     => $objectData->data->city,
+                'city_type'     => $objectData->data->city_type,
+                'city_kladr_id' => $objectData->data->city_kladr_id,
+                'street_name'   => $objectData->data->street,
+                'street_type'   => $objectData->data->street_type,
+                'latitude'      => $objectData->data->geo_lat,
+                'longitude'     => $objectData->data->geo_lon,
+            ];
 
-        if($geoData['city_name'] === null){
-            $geoData['city_name']       = $objectData->data->settlement;
-            $geoData['city_type' ]      = $objectData->data->settlement_type;
-            $geoData['city_kladr_id']   = $objectData->data->settlement_kladr_id;
+            if($geoData['city_name'] === null){
+                $geoData['city_name']       = $objectData->data->settlement;
+                $geoData['city_type' ]      = $objectData->data->settlement_type;
+                $geoData['city_kladr_id']   = $objectData->data->settlement_kladr_id;
+            }
+
+            session(['geoInput' => $geoData]);
         }
-
-        session(['geoInput' => $geoData]);
 
     }
 
@@ -98,8 +100,8 @@ class GeoData extends Model{
         $data = ['region_name' => $fullRegionName];
 
         foreach($regionTypes as $key => $type){
-            if(stristr($fullRegionName, ' '.$type) !== false){
-                $data['region_name'] = strstr($fullRegionName, ' '.$type, true);
+            if(mb_stripos($fullRegionName, ' '.$type) !== false){
+                $data['region_name'] = mb_stristr($fullRegionName, ' '.$type, true);
                 $data['region_type'] = $key;
             }
         }

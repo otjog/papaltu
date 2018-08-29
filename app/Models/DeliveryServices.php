@@ -10,19 +10,54 @@ use App\Models\GeoData;
 
 class DeliveryServices extends Model{
 
-        private $geoData;
+    private $geoData;
 
-        public function getDeliveryDataForProduct($session, $parcelParameters){
+    private $services;
 
-            $shipments = new Shipment();
+    public function __construct(array $attributes = []){
 
-            $this->services = $shipments->getDeliveryServices();
+        parent::__construct($attributes);
 
-            $geoData = new GeoData();
+        $shipments = new Shipment();
 
-            $this->geoData = $geoData->getGeoData($session);
+        $this->services = $shipments->getDeliveryServices();
+
+        $geoData = new GeoData();
+
+        $this->geoData = $geoData->getGeoData();
+    }
+
+    public function getPrices($parcelParameters){
 
             $data = [];
+
+            foreach($this->services as $services){
+
+                switch($services->alias){
+
+                    case 'dpd'  : $serviceObj = new Dpd( $this->geoData ); break;
+
+                    case 'cdek' : $serviceObj = new Cdek( $this->geoData ); break;
+
+                }
+
+                $data['costs'][$services->alias]  = $serviceObj->getSelfAndToDoorServiceCost($parcelParameters);
+
+                $data['servicesInfo'][$services->alias] = $services;
+            }
+
+            $data['_bestOffer'] = $this->pullBestPrice($data);
+
+            $data['_geo'] = $this->geoData;
+
+            return $data;
+    }
+
+    public function getBestPrices($parcelParameters){
+
+            $data = [];
+
+            $temporary = [];
 
             foreach($this->services as ['alias' => $serviceAlias]){
 
@@ -34,27 +69,46 @@ class DeliveryServices extends Model{
 
                 }
 
-                $data[$serviceAlias]['costs']  = $serviceObj->getSelfAndToDoorServiceCost($parcelParameters);
-
-                $data[$serviceAlias]['points'] = $serviceObj->getPointsInCity();
-
+                $temporary['costs'][$serviceAlias]  = $serviceObj->getSelfAndToDoorServiceCost($parcelParameters);
             }
 
-            $data['_bestOffer'] = $this->getBestPriceOffer($data);
+            $data['_bestOffer'] = $this->pullBestPrice($temporary);
 
             $data['_geo'] = $this->geoData;
 
             return $data;
+    }
+
+    public function getPoints(){
+
+        $data = [];
+
+        foreach($this->services as ['alias' => $serviceAlias]){
+
+            switch($serviceAlias){
+
+                case 'dpd'  : $serviceObj = new Dpd( $this->geoData ); break;
+
+                case 'cdek' : $serviceObj = new Cdek( $this->geoData ); break;
+
+            }
+
+            $data['points'][$serviceAlias] = $serviceObj->getPointsInCity();
 
         }
 
-        private function getBestPriceOffer($data){
+        $data['_geo'] = $this->geoData;
+
+        return $data;
+    }
+
+    private function pullBestPrice($data){
 
             $offers = [];
 
-            foreach($data as $company => $parameters){
+            foreach($data['costs'] as $company => $parameters){
 
-                foreach($parameters['costs'] as $delTo => $cost){
+                foreach($parameters as $delTo => $cost){
 
                     $cost->company = $company;
 

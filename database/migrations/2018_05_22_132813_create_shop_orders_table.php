@@ -24,7 +24,7 @@ class CreateShopOrdersTable extends Migration
             $table->string('middle_name', 45)->nullable();
             $table->string('last_name', 45);
             $table->string('full_name', 100);
-            $table->integer('phone');
+            $table->string('phone', 20);
             $table->string('email', 45);
             $table->string('address', 255);
             $table->string('comment', 255)->nullable();

@@ -138,7 +138,7 @@ class Product extends Model{
 
     }
 
-    public function getFilteredProductsFromCategory($category_id, $parameters){
+    public function getFilteredProducts($parameters){
 
         return self::select(
             'products.id',
@@ -149,8 +149,6 @@ class Product extends Model{
             'products.scu',
             'products.thumbnail'
         )
-            ->where('products.category_id', $category_id)
-
             ->where('products.active', 1)
 
             /************PRICE*******************/
@@ -179,6 +177,11 @@ class Product extends Model{
                 return $query->whereIn('products.manufacturer_id', explode('|', $parameters['manufacturer']));
             })
             ->with('manufacturer')
+
+            /************CATEGORY***************/
+            ->when(isset($parameters['category']), function ($query) use ($parameters) {
+                return $query->whereIn('products.category_id', explode('|', $parameters['category']));
+            })
 
             ->orderBy('products.id')
 

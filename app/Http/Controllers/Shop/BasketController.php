@@ -90,7 +90,7 @@ class BasketController extends Controller{
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Request $request, Product $products, DeliveryServices $ds, $token){
+    public function edit(Product $products, DeliveryServices $ds, $token){
 
         $basket = $this->baskets->getActiveBasket( $token );
 
@@ -98,13 +98,9 @@ class BasketController extends Controller{
 
             $productsFromBasket = $products->getProductsFromBasket($basket);
 
-            $parcel = $products->getParcelParameters($productsFromBasket);
-
-            $this->data['template']['view']         = 'show';
+            $this->data['template']['view']         = 'edit';
 
             $this->data['data']['basketProducts']   = $productsFromBasket;
-
-            $this->data['data']['delivery']  = $ds->getDeliveryDataForProduct($request->session(), $parcel);
 
             return view( 'templates.default', $this->data);
 
@@ -125,9 +121,7 @@ class BasketController extends Controller{
      */
     public function update(Request $request, $token){
 
-        $token = $request->session()->get('_token');
-
-        $basket = $this->baskets->getActiveBasket( $token) ;
+        $basket = $this->baskets->getActiveBasket( $token ) ;
 
         $products = $this->changeQuantityInArray( $request->all() );
 
