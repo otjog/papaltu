@@ -19,7 +19,7 @@ class Dpd {
 
     private $pickUpCountryCode  = 'RU';
 
-    private $test = 1;
+    private $test = 0;
 
     private $dpdHosts = [
         0 => 'http://ws.dpd.ru/services/', //рабочий хост
@@ -216,7 +216,7 @@ class Dpd {
 
         }else{
             //не смогли подключиться к dpd
-            return false;
+            return false;//todo нужно выводить сообщение об ошибке, если не удалось подключиться к dpd
 
         }
 

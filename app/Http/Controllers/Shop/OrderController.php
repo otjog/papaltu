@@ -2,22 +2,22 @@
 
 namespace App\Http\Controllers\Shop;
 
-use App\Models\DeliveryServices;
+use App\Events\NewOrder;
+use App\Libraries\Services\Pay\Contracts\OnlinePayment;
+use App\Models\Shop\Customer;
 use App\Payment;
-use App\Shipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\ShopBasket;
 use App\ShopOrder;
 use App\Product;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\OrderShipped;
 
 class OrderController extends Controller{
 
-
     protected $orders;
+
     protected $baskets;
+
     protected $data;
 
     public function __construct(ShopOrder $orders, ShopBasket $baskets){
@@ -49,28 +49,28 @@ class OrderController extends Controller{
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, Product $products){
+    public function store(Request $request, Payment $payments, OnlinePayment $paymentService, Customer $customers){
 
-        $data = $request->all();
+        $payment = $payments->getMethodById($request->payment_id);
 
-        $basket = $this->baskets->getActiveBasket( $data['_token'] );
+        if($payment[0]->alias === 'online'){
 
-        $data = $this->prepareData($data, $basket);
+            return $paymentService->send($request);
 
-        $order = $this->orders->create($data);
+        }else{
 
-        $basket->order_id = $order->id;
-        $basket->save();
+            $token = $request['_token'];
 
-        Mail::to(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'))
-            ->send(new OrderShipped(
-                [
-                    'data'      => $data,
-                    'products'  =>$products->getProductsFromJson($basket->products)
-                ])
-            );
+            $customer = $customers->findOrCreateCustomer( $request->all() );
 
-        return redirect('orders/'.$order->id)->with('status', 'Заказ оформлен! Скоро с вами свяжется наш менеджер');
+            $basket = $this->baskets->getActiveBasket( $token );
+
+            $order = $this->orders->storeOrder( $request->all(), $basket, $customer );
+
+            event(new NewOrder($order));
+
+            return redirect('orders/'.$order->id)->with('status', 'Заказ оформлен! Скоро с вами свяжется наш менеджер');
+        }
 
     }
 
@@ -83,15 +83,11 @@ class OrderController extends Controller{
 
         $token = $request->session()->get('_token');
 
-        $basket = $this->baskets->getActiveBasket( $token );
+        $this->data['template']['view'] = 'create';
 
-        $productsFromBasket = $products->getProductsFromBasket($basket);
+        $this->data['data']['basket']   = $this->baskets->getActiveBasketWithProducts( $products, $token );
 
-        $this->data['template']['view']         = 'create';
-
-        $this->data['data']['basketProducts']   = $productsFromBasket;
-
-        $this->data['data']['payments']         = $payments->getActiveMethods();
+        $this->data['data']['payments'] = $payments->getActiveMethods();
 
         return view( 'templates.default', $this->data);
     }
@@ -102,10 +98,11 @@ class OrderController extends Controller{
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id){
+    public function show(Product $products, $id){
 
         $this->data['template']['view'] = 'show';
-        $this->data['data']['order']    = $this->orders->getOrderById($id);
+
+        $this->data['data']['order']    = $this->orders->getOrderById($products, $id);
 
         return view( 'templates.default', $this->data);
     }
@@ -142,25 +139,4 @@ class OrderController extends Controller{
     }
 
     /*****************Helpers**********************/
-
-    private function prepareData($data, $basket){
-
-        unset($data['_token']);
-
-        $data['ordered']        = 1;
-        $data['shop_basket_id'] = $basket->id;
-        $data['products']       = $basket->products;
-
-        $names = explode(' ', $data['full_name']);
-
-        for($i = 0; $i < count($names); $i++){
-            switch($i){
-                case 0 : $data['last_name']     = $names[$i];break;
-                case 1 : $data['first_name']    = $names[$i];break;
-                case 2 : $data['middle_name']   = $names[$i];break;
-            }
-        }
-
-        return $data;
-    }
 }

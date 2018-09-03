@@ -264,17 +264,8 @@ class Product extends Model{
 
     }
 
-    public function getProductsFromBasket($basket){
-
-        if($basket === null){
-            return [];
-        }
-
-        return $this->getProductsFromJson($basket['products']);
-
-    }
-
     public function getProductsFromJson($json_string){
+
         $json_products = json_decode($json_string, true);
 
         $id_products = [];
@@ -299,23 +290,39 @@ class Product extends Model{
             ->count();
     }
 
-    public function getParcelParameters($products, $quantity = 1){
+    public function getTotal($products){
+
+        $total = 0;
+
+        foreach($products as $product){
+
+            $total += $product->quantity * $product->prices[0]->pivot->value;
+
+        }
+
+        return $total;
+
+    }
+
+    public function getParcelParameters($products){
 
         $parameters = [];
 
         foreach($products as $key=>$product){
 
-            $parameters[] = $this->getParametersForParcel($product, $quantity);
+            $parameters[] = $this->getParametersForParcel($product);
 
         }
 
         return $parameters;
     }
 
-    private function getParametersForParcel($product, $quantity){
+    private function getParametersForParcel($product, $quantity = 1){
+
         if( isset($product['quantity']) ){
             $quantity = $product['quantity'];
         }
+
         return [
             'weight'    => $product['weight'],
             'length'    => $product['length'],
@@ -325,5 +332,6 @@ class Product extends Model{
 
         ];
     }
+
 
 }

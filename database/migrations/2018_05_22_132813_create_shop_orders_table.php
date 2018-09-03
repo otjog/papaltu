@@ -15,19 +15,16 @@ class CreateShopOrdersTable extends Migration
     {
         Schema::create('shop_orders', function (Blueprint $table) {
             $table->increments('id');
-            $table->tinyInteger('ordered')->unsigned()->default(0);
             $table->integer('shop_basket_id');
             $table->integer('payment_id');
             $table->integer('shipment_id');
-            $table->json('products');
-            $table->string('first_name', 45);
-            $table->string('middle_name', 45)->nullable();
-            $table->string('last_name', 45);
-            $table->string('full_name', 100);
-            $table->string('phone', 20);
-            $table->string('email', 45);
+            $table->integer('customer_id');
             $table->string('address', 255);
             $table->string('comment', 255)->nullable();
+            $table->tinyInteger('paid')->default(0);
+            $table->string('pay_id', 20)->nullable();
+            $table->json('products_json')->nullable();
+            $table->json('address_json')->nullable();
             $table->timestamps();
         });
     }

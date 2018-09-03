@@ -163,6 +163,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\ViewComposerServiceProvider::class,
         Barryvdh\Debugbar\ServiceProvider::class,
+        App\Providers\PaymentServiceProvider::class,
 
     ],
 

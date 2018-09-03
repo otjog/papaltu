@@ -31,6 +31,16 @@
     //Basket
     Route::resource('/baskets',     'Shop\BasketController',    [ 'only' => [ 'store', 'edit', 'update' ]]);
 
+    //Pay
+    Route::group(['prefix' => 'pay'], function(){
+
+        Route::post('/confirm', 'Shop\PayController@confirm');
+
+        Route::post('/execute', 'Shop\PayController@execute');
+
+        Route::post('/redirect/{msg}', 'Shop\PayController@redirect');
+    });
+
     //Forms
     Route::group(['prefix' => 'form'], function () {
 

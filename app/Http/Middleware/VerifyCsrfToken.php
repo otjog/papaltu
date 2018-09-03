@@ -12,6 +12,7 @@ class VerifyCsrfToken extends Middleware
      * @var array
      */
     protected $except = [
-        //
+        'pay/confirm', //сюда приходят вэб хуки от paymaster
+        'pay/execute', //сюда приходят вэб хуки от paymaster
     ];
 }

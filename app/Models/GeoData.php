@@ -76,11 +76,20 @@ class GeoData extends Model{
             'longitude'     => $objectData->location->longitude,
         ];
 
-        $regionData = $this->getRegionData($objectData->subdivisions[0]->names['ru']);
+        if( isset( $objectData->subdivisions[0]->names['ru'] ) ){
 
-        $geoData = array_merge( $geoData, $regionData );
+            $regionData = $this->getRegionData($objectData->subdivisions[0]->names['ru']);
 
-        session(['geoIp' => $geoData]);
+            $geoData = array_merge( $geoData, $regionData );
+
+            session(['geoIp' => $geoData]);
+
+        }else{
+
+            session(['geoIp' => null]);// todo что отдавать, если geoIp NULL????
+
+        }
+
 
     }
 

@@ -9,15 +9,16 @@ use Illuminate\View\View;
 
 class ShopBasketComposer{
 
-    protected $products;
     protected $basket;
 
     public function __construct(Request $request, ShopBasket $basket, Product $products){
-        $this->products = $products;
-        $this->basket   = $basket->getActiveBasket( $request->session()->get('_token') );
+
+        $token = $request->session()->get('_token');
+
+        $this->basket = $basket->getActiveBasketWithProducts( $products, $token );
     }
 
     public function compose(View $view){
-        $view->with('basket', $this->products->getProductsFromBasket($this->basket));
+        $view->with('basket', $this->basket);
     }
 }

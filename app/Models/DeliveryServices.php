@@ -14,13 +14,15 @@ class DeliveryServices extends Model{
 
     private $services;
 
+    private $shipments;
+
     public function __construct(array $attributes = []){
 
         parent::__construct($attributes);
 
-        $shipments = new Shipment();
+        $this->shipments = new Shipment();
 
-        $this->services = $shipments->getDeliveryServices();
+        $this->services = $this->shipments->getDeliveryServices();
 
         $geoData = new GeoData();
 
@@ -29,7 +31,9 @@ class DeliveryServices extends Model{
 
     public function getPrices($parcelParameters){
 
-            $data = [];
+            $data = [
+                'costs' => [],
+            ];
 
             foreach($this->services as $services){
 
@@ -41,12 +45,22 @@ class DeliveryServices extends Model{
 
                 }
 
-                $data['costs'][$services->alias]  = $serviceObj->getSelfAndToDoorServiceCost($parcelParameters);
+                $costs = $serviceObj->getSelfAndToDoorServiceCost($parcelParameters);
 
-                $data['servicesInfo'][$services->alias] = $services;
+                if( count($costs) > 0 ){
+
+                    $data['costs'][$services->alias]  = $serviceObj->getSelfAndToDoorServiceCost($parcelParameters);
+
+                    $data['shipments'][$services->alias] = $services;
+                }
+
             }
 
-            $data['_bestOffer'] = $this->pullBestPrice($data);
+            if( count( $data['costs']) > 0 ){
+                $data['_bestOffer'] = $this->pullBestPrice($data);
+            }else{
+                $data['shipments'] = $this->shipments->getDefaultShipments();
+            }
 
             $data['_geo'] = $this->geoData;
 

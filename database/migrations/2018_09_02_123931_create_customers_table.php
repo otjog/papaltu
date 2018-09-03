@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateShopBasketsTable extends Migration
+class CreateCustomersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,14 @@ class CreateShopBasketsTable extends Migration
      */
     public function up()
     {
-        Schema::create('shop_baskets', function (Blueprint $table) {
+        Schema::create('customers', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('token',40);
-            $table->json('products_json');
-            $table->tinyInteger('paid')->default(0);
-            $table->string('payId', 20)->nullable();
-            $table->integer('order_id')->nullable();
+            $table->string('full_name', 60);
+            $table->string('email', 30);
+            $table->string('phone', 20);
+            $table->string('address', 255);
+            $table->json('address_json')->nullable();
+            $table->json('full_name_json')->nullable();
             $table->timestamps();
         });
     }
@@ -31,6 +32,6 @@ class CreateShopBasketsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('shop_baskets');
+        Schema::dropIfExists('customers');
     }
 }

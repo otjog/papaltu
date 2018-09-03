@@ -59,13 +59,13 @@ class BasketController extends Controller{
         if($basket === null){
             $this->baskets->token     = $token;
 
-            $this->baskets->products  = json_encode(array($request->all()));
+            $this->baskets->products_json  = json_encode(array($request->all()));
 
             $this->baskets->save();
         }else{
             $products = $this->addProductToArray( $basket, $request->all() );
 
-            $basket->products = json_encode($products);
+            $basket->products_json = json_encode($products);
 
             $basket->save();
         }
@@ -90,23 +90,23 @@ class BasketController extends Controller{
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Product $products, DeliveryServices $ds, $token){
+    public function edit(Product $products, $token){
 
-        $basket = $this->baskets->getActiveBasket( $token );
+        $basket = $this->baskets->getActiveBasketWithProducts( $products, $token );
 
         if($basket->order_id === null){
 
-            $productsFromBasket = $products->getProductsFromBasket($basket);
+            $this->data['template']['view'] = 'edit';
 
-            $this->data['template']['view']         = 'edit';
+            $this->data['data']['basket']   = $basket;
 
-            $this->data['data']['basketProducts']   = $productsFromBasket;
+            $this->data['data']['parcels'] = $products->getParcelParameters($basket->products);
 
             return view( 'templates.default', $this->data);
 
         } else {
 
-            return redirect('orders.show', $basket->id . '-' . $basket->order_id);
+            return redirect('orders.show', $basket->order_id);
 
         }
 
@@ -125,7 +125,7 @@ class BasketController extends Controller{
 
         $products = $this->changeQuantityInArray( $request->all() );
 
-        $basket->products = json_encode($products);
+        $basket->products_json = json_encode($products);
 
         $basket->save();
 
@@ -167,7 +167,7 @@ class BasketController extends Controller{
     }
 
     private function addProductToArray($basket, $newProduct){
-        $products = json_decode($basket->products, true);
+        $products = json_decode($basket->products_json, true);
 
         foreach($products as $key => $product){
 

@@ -112,6 +112,8 @@ function Delivery(){
 
         let blurBlock               = wrapBlock.getElementsByClassName('blur');
 
+        console.log(blurBlock);
+
 
         let ajaxReq = new Ajax("GET", queryString, headers);
 
@@ -119,21 +121,13 @@ function Delivery(){
 
             listOfferProgressBar[0].style.display   = 'block';
 
-            listOfferErrorBlock[0].style.display    = 'none';
-
             blurBlock[0].style.opacity = 0.25;
-
-
 
         };
 
         ajaxReq.req.ontimeout = function() {
 
             listOfferProgressBar[0].style.display   = 'none';
-
-            listOfferErrorBlock[0].style.display    = 'block';
-
-            listOfferErrorBlock[0].innerHTML = 'Извините, слишком долгое ожидание ответа';
 
         };
 
@@ -144,8 +138,6 @@ function Delivery(){
             wrapBlock.innerHTML = String(ajaxReq.req.responseText);
 
             listOfferProgressBar[0].style.display   = 'none';
-
-            listOfferErrorBlock[0].style.display    = 'none';
 
             blurBlock[0].style.opacity = 1;
 
