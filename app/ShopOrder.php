@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Events\NewOrder;
 
 class ShopOrder extends Model{
 
@@ -80,6 +81,7 @@ class ShopOrder extends Model{
 
     public function getOrderByPayId($payId){
         return self::select(
+            'id',
             'shop_basket_id',
             'payment_id',
             'shipment_id',
@@ -100,6 +102,7 @@ class ShopOrder extends Model{
         list($basketId, $orderId) = explode('-', $id);
 
         return self::select(
+            'id',
             'shop_basket_id',
             'payment_id',
             'shipment_id',
@@ -125,6 +128,8 @@ class ShopOrder extends Model{
         $data_order = $this->getDataForOrder($data, $basket, $customer);
 
         $order = self::create($data_order);
+
+        event(new NewOrder($order));
 
         $order->relations['customer'] = $customer;
 

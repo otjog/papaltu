@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Shop;
 
-use App\Events\NewOrder;
 use App\Libraries\Services\Pay\Contracts\OnlinePayment;
 use App\Models\Shop\Customer;
 use App\Payment;
@@ -49,25 +48,23 @@ class OrderController extends Controller{
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, Payment $payments, OnlinePayment $paymentService, Customer $customers){
+    public function store(Request $request, Payment $payments, OnlinePayment $paymentService, Customer $customers, Product $products){
+
+        $token = $request['_token'];
+
+        $basket = $this->baskets->getActiveBasketWithProducts( $products, $token );
 
         $payment = $payments->getMethodById($request->payment_id);
 
         if($payment[0]->alias === 'online'){
 
-            return $paymentService->send($request);
+            return $paymentService->send($request, $basket);
 
         }else{
 
-            $token = $request['_token'];
-
             $customer = $customers->findOrCreateCustomer( $request->all() );
 
-            $basket = $this->baskets->getActiveBasket( $token );
-
             $order = $this->orders->storeOrder( $request->all(), $basket, $customer );
-
-            event(new NewOrder($order));
 
             return redirect('orders/'.$order->id)->with('status', 'Заказ оформлен! Скоро с вами свяжется наш менеджер');
         }

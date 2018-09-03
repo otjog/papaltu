@@ -8,6 +8,7 @@ use App\ShopOrder;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Product;
+use App\Models\Shop\Customer;
 
 class PayController extends Controller{
 
@@ -25,9 +26,9 @@ class PayController extends Controller{
 
     }
 
-    public function execute(Request $request, ShopOrder $orders, ShopBasket $baskets){
+    public function execute(Request $request, ShopOrder $orders, ShopBasket $baskets, Customer $customers){
 
-        return $this->payment->execute($request, $orders, $baskets);
+        return $this->payment->execute($request, $orders, $baskets, $customers);
 
     }
 

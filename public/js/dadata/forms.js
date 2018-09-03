@@ -9,7 +9,7 @@ function DaData(id, type){
             type: this.type,
             count: 5,
             onSelect: function(suggestion) {
-                $("#" + self.id + "_json").val(JSON.stringify(suggestion));
+                $("#" + self.id + "_json").val(JSON.stringify(suggestion.data));
 
                 if(self.type === 'ADDRESS'){
 

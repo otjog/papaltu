@@ -3,6 +3,7 @@
 namespace App\Libraries\Services\Pay;
 
 use App\Libraries\Services\Pay\Contracts\OnlinePayment;
+use App\Models\Shop\Customer;
 use App\Product;
 use Illuminate\Http\Request;
 use App\ShopBasket;
@@ -40,9 +41,9 @@ class Paymaster implements OnlinePayment{
         ];
     }
 
-    public function send(Request $request){
+    public function send(Request $request, ShopBasket $basket){
 
-        $query = $this->getQuery($request->all());
+        $query = $this->getQuery($request->all(), $basket);
 
         return redirect()->away($this->send_url.$query);
     }
@@ -71,7 +72,7 @@ class Paymaster implements OnlinePayment{
 
     }
 
-    public function execute(Request $request, ShopOrder $orders, ShopBasket $baskets){
+    public function execute(Request $request, ShopOrder $orders, ShopBasket $baskets, Customer $customers){
 
         $receipt_number = $request['LMI_SYS_PAYMENT_ID'];
 
@@ -81,9 +82,11 @@ class Paymaster implements OnlinePayment{
 
         $paidOrder = $orders->getOrderByPayId( $receipt_number );
 
-        if($paidOrder === null){
+        if( count( $paidOrder ) === 0){
 
             $activeBasket = $baskets->getActiveBasket( $token );
+
+            $customer = $customers->findOrCreateCustomer( $request->all() );
 
             $my_hash = $this->getOurHash($request->all(), $activeBasket);
 
@@ -101,7 +104,7 @@ class Paymaster implements OnlinePayment{
 
             $data = array_merge($add, $request->all());
 
-            $orders->storeOrder($data, $activeBasket);
+            $orders->storeOrder($data, $activeBasket, $customer);
         }
 
     }
@@ -113,23 +116,27 @@ class Paymaster implements OnlinePayment{
         $order = $orders->getOrderByPayId( $receipt_number );
 
         switch($msg){
-            case 'success'  : return redirect('orders/'.$order[0]->id)->with('status', 'Заказ оформлен! Скоро с вами свяжется наш менеджер');
+            case 'success'  : return redirect()->route('orders.show', $order[0]->id)->with('status', 'Заказ оформлен! Скоро с вами свяжется наш менеджер');
         }
 
-        return redirect('orders/create')->with('status', 'Ошибка');
+        return redirect()->route('orders.create')->with('status', 'Ошибка');
 
         //todo сделать разные сообщения об ошибках
     }
 
     //Helpers
-    private function getQuery($parameters){
+    private function getQuery($parameters, $basket){
         $query = '?';
+
+        $query .= 'LMI_MERCHANT_ID='     . urlencode( env('PAYMASTER_SITE_ID') ) . '&';
+        $query .= 'LMI_PAYMENT_AMOUNT='  . urlencode($basket->total) . '&';
+        $query .= 'LMI_CURRENCY='        . urlencode('RUB') . '&';
+        $query .= 'LMI_PAYMENT_NO='      . urlencode($basket->id) . '&';
+        $query .= 'LMI_PAYMENT_DESC='    . urlencode('Товары');
 
         foreach($parameters as $key => $value){
 
-            if($query !== '?'){
-                $query .= '&';
-            }
+            $query .= '&';
 
             $query .= $key . '=' . urlencode($value);
 
