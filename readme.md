@@ -11,15 +11,18 @@
     </li>
     <li>
         Выполнить: <strong>php artisan storage:link</strong>
-    </li>      
+    </li>
+    <li>
+        Выполнить: <strong>php artisan migrate</strong>
+    </li>  
+    <li>
+        Выполнить: <strong>php artisan db:seed</strong>
+    </li>     
     <li>
         Создать следующие папки:
         <ul>
             <li>
                 <strong>public/css</strong>
-            </li>
-            <li>
-                <strong>public/js</strong>
             </li>
             <li>
                 <strong>resource/views</strong>
@@ -37,5 +40,7 @@
     </li>
     <li>
         Из файла <strong>.gitignore</strong> удалить все вышеперечисленные пути
+    </li>
+    <li>Вставить <strong>GeoLite2-City.mmdb</strong> и <strong>GeoLite2-Country.mmdb</strong> в папку <strong>storage/app/public/geolite/</strong>
     </li>
 </ul>

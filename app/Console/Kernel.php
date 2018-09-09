@@ -28,7 +28,7 @@ class Kernel extends ConsoleKernel
         $schedule->call(function () {
             $cur = New CurrencyController();
             $cur->getCur();
-        })->daily();
+        })->everyMinute();
     }
 
     /**

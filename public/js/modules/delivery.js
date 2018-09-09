@@ -102,7 +102,6 @@ function Delivery(){
 
     };
 
-
     //FUNCTIONS
     function sendRequestReturnView(wrapBlock, queryString,  headers){
 
@@ -111,9 +110,6 @@ function Delivery(){
         let listOfferErrorBlock     = wrapBlock.getElementsByClassName('error');
 
         let blurBlock               = wrapBlock.getElementsByClassName('blur');
-
-        console.log(blurBlock);
-
 
         let ajaxReq = new Ajax("GET", queryString, headers);
 

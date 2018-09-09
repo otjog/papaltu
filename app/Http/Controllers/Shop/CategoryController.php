@@ -99,7 +99,7 @@ class CategoryController extends Controller{
 
         if( count( $request->query ) > 0 ){
 
-            $this->data['data'] ['products'] = $products->getFilteredProducts($id, $request->toArray());
+            $this->data['data'] ['products'] = $products->getFilteredProducts($request->toArray());
 
         }else{
 

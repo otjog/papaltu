@@ -26,9 +26,9 @@ class PayController extends Controller{
 
     }
 
-    public function execute(Request $request, ShopOrder $orders, ShopBasket $baskets, Customer $customers){
+    public function execute(Request $request, ShopOrder $orders, ShopBasket $baskets, Customer $customers, Product $products){
 
-        return $this->payment->execute($request, $orders, $baskets, $customers);
+        return $this->payment->execute($request, $orders, $baskets, $customers, $products);
 
     }
 

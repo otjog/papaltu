@@ -20,7 +20,7 @@ class CreateShipmentsTable extends Migration
             $table->string('name', 45);
             $table->string('description', 255)->nullable();
             $table->string('img', 255)->nullable();
-            $table->string('is_service')->unsigned()->default(0);
+            $table->tinyInteger('is_service')->unsigned()->default(0);
             $table->timestamps();
         });
     }

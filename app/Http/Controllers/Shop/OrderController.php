@@ -52,7 +52,7 @@ class OrderController extends Controller{
 
         $token = $request['_token'];
 
-        $basket = $this->baskets->getActiveBasketWithProducts( $products, $token );
+        $basket = $this->baskets->getActiveBasketWithProducts($products, $token );
 
         $payment = $payments->getMethodById($request->payment_id);
 
@@ -64,7 +64,7 @@ class OrderController extends Controller{
 
             $customer = $customers->findOrCreateCustomer( $request->all() );
 
-            $order = $this->orders->storeOrder( $request->all(), $basket, $customer );
+            $order = $this->orders->storeOrder( $request->all(), $basket, $customer, $products );
 
             return redirect('orders/'.$order->id)->with('status', 'Заказ оформлен! Скоро с вами свяжется наш менеджер');
         }

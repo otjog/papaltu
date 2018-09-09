@@ -59,7 +59,7 @@ class BasketController extends Controller{
         if($basket === null){
             $this->baskets->token     = $token;
 
-            $this->baskets->products_json  = json_encode(array($request->all()));
+            $this->baskets->products_json  = json_encode(array( ['id' => $request->id, 'quantity' => $request->quantity] ) );
 
             $this->baskets->save();
         }else{

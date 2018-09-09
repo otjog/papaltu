@@ -135,36 +135,34 @@ for(let f = 0; f < forms.length; f++){
 
 function initMap( json ) {
 
-    console.log(json);
-
-    var geo = json._geo;
+    let geo = json._geo;
 
     delete json._geo;
 
-    var location = {lat: +geo.latitude, lng: +geo.longitude};
+    let location = {lat: +geo.latitude, lng: +geo.longitude};
 
-    var map = new google.maps.Map(
+    let map = new google.maps.Map(
         document.getElementById('map'), {zoom: 12, center: location});
 
-    for(var company in json.points){
+    for(let company in json.points){
 
         if(json.points.hasOwnProperty(company)){
 
-            for(var terminalType in json.points[company]){
+            for(let terminalType in json.points[company]){
 
                 if(json.points[company].hasOwnProperty(terminalType)){
 
-                    for( var terminal in json.points[company][terminalType] ){
+                    for( let terminal in json.points[company][terminalType] ){
 
                         if(json.points[company][terminalType].hasOwnProperty(terminal)){
 
-                            var geoShop = json.points[company][terminalType][terminal].geoCoordinates;
+                            let geoShop = json.points[company][terminalType][terminal].geoCoordinates;
 
-                            var locationShop = {lat: +geoShop.latitude, lng: +geoShop.longitude};
+                            let locationShop = {lat: +geoShop.latitude, lng: +geoShop.longitude};
 
-                            var image = 'http://myshop.loc/storage/img/elements/delivery/' + company + '/marker-' + terminalType + '.png';
+                            let image = 'https://myshop.loc/storage/img/elements/delivery/' + company + '/marker-' + terminalType + '.png';
 
-                            var marker = new google.maps.Marker({position: locationShop, map: map, icon: image});
+                            let marker = new google.maps.Marker({position: locationShop, map: map, icon: image});
 
                         }
 
@@ -179,7 +177,6 @@ function initMap( json ) {
 
     }
 
-    console.log(json);
 }
 //END Maps Google
 

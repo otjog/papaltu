@@ -14,7 +14,7 @@ interface OnlinePayment{
 
     public function confirm(Request $request, ShopBasket $baskets, Product $products);
 
-    public function execute(Request $request, ShopOrder $orders, ShopBasket $baskets, Customer $customers);
+    public function execute(Request $request, ShopOrder $orders, ShopBasket $baskets, Customer $customers, Product $products);
 
     public function redirect(Request $request, ShopOrder $orders, $msg);
 }

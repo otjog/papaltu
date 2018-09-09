@@ -2,98 +2,85 @@
 
 namespace App\Libraries\Delivery;
 
-use SoapClient;
-use Exception;
+use SimpleXMLElement;
 
 class Cdek {
 
-    private $soapClient;
-
-    private $clientNumber       = '1051001516';
-
-    private $clientKey          = '8491BA30A5AE7FBBEEFD7099D9B6249358478A94';
-
-    private $pickUpCity         = 'Белгород';
-
-    private $pickUpRegionCode   = '31';
-
-    private $pickUpCountryCode  = 'RU';
-
     private $test = 1;
 
-    private $dpdHosts = [
-        0 => 'http://ws.dpd.ru/services/', //рабочий хост
-        1 => 'http://wstest.dpd.ru/services/' //тестовый хост
+    private $clientAuthData     = [
+        //Параметры рабочей версии
+        0 => [
+            'Account' => 'f0ccc1a1b95b394277b212cac907b2db',
+            'Secure_password' => '3dedc3d754de58b61c6a58f334e25f7c'
+        ],
+        //Параметры тестовой версии
+        1 => [
+            'Account' => '98f9bf62204c260cc3f902a92dd8b498',
+            'Secure_password' => '3f46ddc6fd72cf5352084ae789bb4ffa'
+        ]
     ];
 
-    private $dpdServices = [
-        //список городов с возможностью доставки с нал.платежом
-        'getCitiesCashPay'              => [
-            'service_name'  => 'geography2',
-            'request'       => true
+    private $senderCityPostCode = '308000';
+
+    private $cdekServices = [
+        //расчет стоимости доставки по параметрам посылок по России и странам ТС.
+        'calculate'      => [
+            'host'      => 'https://api.cdek.ru',
+            'url'       => '/calculator/calculate_price_by_json.php',
+            'method'    => 'POST'
         ],
-        //список пунктов, имеющих ограничения, с указанием режима работы.
-        'getParcelShops'                => [
-            'service_name'  => 'geography2',
-            'request'       => true
+        //список пунктов выдачи заказов
+        'pvzlist'      => [
+            'host'      => 'http://integration.cdek.ru',
+            'url'       => '/pvzlist/v1/xml',
+            'method'    => 'GET'
         ],
-        //список подразделений DPD, не имеющих ограничений
-        'getTerminalsSelfDelivery2'     => [
-            'service_name'  => 'geography2',
-            'request'       => false
-        ],
-        //список сервисов: стоимость доставки по параметрам  посылок по России и странам ТС.
-        'getServiceCostByParcels2'      => [
-            'service_name'  => 'calculator2',
-            'request'       => true
-        ],
+
+        'regions'      => [
+            'host'      => 'https://integration.cdek.ru',
+            'url'       => '/v1/location/regions',
+            'method'    => 'GET'
+        ]
+
     ];
 
     private $message;
 
     private $geoData;
 
-    private $destinationTypes = [
-
-        'toTerminal' => [
-            'active' => 1,
-            'selfDelivery' => true,
-        ],
-
-        'toDoor' => [
-            'active' => 1,
-            'selfDelivery' => false,
-        ]
-    ];
-
     public function __construct($geoData){
 
-        $this->prepareGeoData($geoData);
+        $this->geoData = $this->prepareGeoData($geoData);
 
     }
 
-    public function getServiceCost($parcelParameters, $selfDelivery = true, $serviceCode = null){
+    public function getDeliveryCost($parcelParameters, $serviceTypes){
 
-        $data = [
-            'pickup' => [
-                'cityName'      => $this->pickUpCity,
-                'regionCode'    => $this->pickUpRegionCode,
-                'countryCode'   => $this->pickUpCountryCode
-            ],
-            'delivery' => $this->geoData,
-            'selfPickup' => true, //Доставка от терминала
-            'selfDelivery' => $selfDelivery, //Доставка До терминала
-            'parcel' => $parcelParameters,
-        ];
+        $parcelParameters = $this->getParcelParameters($parcelParameters);
 
-        if($serviceCode !== null){
-            $data['serviceCode'] = $serviceCode;
+        $data = [];
+
+        foreach($serviceTypes as $type){
+
+            switch($type){
+                case 'toTerminal'   :   $tariffs = ['136', '5', '10', '15', '62']; break;
+                case 'toDoor'       :   $tariffs = ['137', '12', '16']; break;
+                default :   break;
+            }
+
+            $services = $this->getServiceCost($parcelParameters, $tariffs);
+
+            if( count($services) > 0 ){
+
+                $optimalService = $services[0];
+
+                $data[$type] = $this->prepareResponse($optimalService);
+
+            }
         }
 
-        $services = $this->getDpdData( 'getServiceCostByParcels2', $data );
-
-        return $services;
-
+        return $data;
     }
 
     public function getPointsInCity(){
@@ -102,168 +89,187 @@ class Cdek {
 
         $points['shops'] =  $this->getParcelShops();
 
-        $points['terminals'] =  $this->getTerminals();
-
         return $points;
 
     }
 
-    public function getParcelShops(){
+    private function getServiceCost($parcelParameters, $tariffs){
+
+        $date = date('Y-m-d');
+
+        $clientAuthData = $this->clientAuthData[ $this->test ];
 
         $data = [
-            'countryCode'   => $this->geoData['countryCode'],
-            'regionCode'    => $this->geoData['regionCode']
+            "version"               => "1.0",
+            "dateExecute"           => $date,
+            "authLogin"             => $clientAuthData['Account'],
+            "secure"                => md5($date . '&' . $clientAuthData['Secure_password']),
+            "senderCityPostCode"    => $this->senderCityPostCode,
+            "receiverCityPostCode"  => $this->geoData['cityPostCode'],
+            "goods"                 => $parcelParameters,
+
         ];
 
-        $services = $this->getDpdData( 'getParcelShops', $data );
+        $services = [];
 
-        if(isset($services->parcelShop))
-            return $services->parcelShop;
+        foreach($tariffs as $tariffId){
+
+            $data["tariffId"] = $tariffId;
+
+            $rawResult = $this->getCdekData('calculate', $data);
+
+            $result = json_decode($rawResult);
+
+            if( isset( $result->result ) ){
+                $services[] = $result->result;
+            }
+
+        }
 
         return $services;
 
     }
 
-    public function getTerminals(){
+    private function getParcelShops(){
 
-        $services = $this->getDpdData( 'getTerminalsSelfDelivery2' );
+        $data = [
+            'regionid'  => json_decode($this->getRegionCode()),
+        ];
 
-        return $services->terminal;
+        $xmlPointsData = $this->getCdekData( 'pvzlist', $data );
+
+        $rawPoints = new SimpleXMLElement($xmlPointsData);
+
+        $points = [];
+
+        foreach($rawPoints as $key=> $point){
+
+            $points[] = $this->prepareResponse($point->attributes());
+
+        }
+
+        return $points;
 
     }
 
-    public function getSelfAndToDoorServiceCost($parcelParameters){
+    private function getRegionCode(){
+
+        $xmlRegionsData = $this->getCdekData('regions');
+
+        $regions = new SimpleXMLElement($xmlRegionsData);
+
+        $region = $regions->xpath("//Region[@regionCodeExt=" . $this->geoData['regionCodeExt'] ."]");
+
+        return $region[0]['regionCode'];
+    }
+
+    private function getCdekData($service_name, $data = []){
+
+        $service = $this->cdekServices[ $service_name ];
+
+        if($service['method'] !== 'POST'){
+            $service[ 'url' ] .= $this->getQuery($data);
+        }
+
+        $ch = curl_init($service['host'] . $service[ 'url' ]);
+
+        if($service['method'] === 'POST'){
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/json;'
+            ));
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        }
+
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        $result = curl_exec($ch);
+
+        curl_close($ch);
+
+        return $result;
+
+    }
+
+    private function getParcelParameters($parcelParameters){
 
         $data = [];
 
-        foreach($this->destinationTypes as $type => ['active' => $active, 'selfDelivery' => $selfDelivery]){
+        foreach($parcelParameters as $scuItem){
 
-            if($active){
+            $quantity = (int)$scuItem['quantity'];
+            unset($scuItem['quantity']);
 
-                $services = $this->getServiceCost($parcelParameters, $selfDelivery);
-
-                if( count($services) > 0 ){
-
-                    $data[$type] = $this->getOptimalService($services);
-
-                }
-
+            for($i = 0; $i < $quantity; $i++){
+                $data[] = $scuItem;
             }
 
         }
 
         return $data;
-    }
 
-    private function connectDpd( $method_name ){
-
-        $service = $this->dpdServices[$method_name]['service_name'];
-
-        if ( !$service ) {
-
-            $this->message = 'В свойствах класса нет сервиса "' . $method_name . '"';
-
-            return false;
-        }
-
-        $host = $this->dpdHosts[$this->test] . $service . '?WSDL';
-
-        try {
-
-            $this->soapClient = new SoapClient( $host , [ 'exceptions' => 1 ]);
-
-        } catch ( Exception $ex ) {
-
-            $this->message = $ex->getMessage();
-
-            return false;
-        }
-
-        return true;
-    }
-
-    private function getDpdData( $method_name, $data = [] ){
-
-        if ( $this->connectDpd( $method_name ) ){
-
-            $data['auth'] = [
-                'clientNumber' => $this->clientNumber,
-                'clientKey' => $this->clientKey
-            ];
-
-            if ( $this->dpdServices[$method_name]['request'] ){
-
-                $request['request'] = $data;
-
-            }else{
-
-                $request = $data;
-
-            }
-
-            try {
-
-                $object = $this->soapClient->$method_name( $request );
-
-            } catch ( Exception $ex ) {
-
-                $this->setErrorMessage( $ex , $data);
-
-                return [];
-            }
-
-            return $object->return;
-
-        }else{
-            //не смогли подключиться к dpd
-            return false;
-
-        }
-
-    }
-
-    private function getOptimalService($services){
-
-        $cost = array_column($services, 'cost');
-
-        $days = array_column($services, 'days');
-
-        array_multisort($cost, SORT_ASC, $days, SORT_ASC, $services);
-
-        return $services[0];
     }
 
     private function prepareGeoData($geoData){
 
+        $data = [];
+
         foreach($geoData as $paramName => $paramValue){
 
             switch($paramName){
-                case 'country_code' : $this->geoData['countryCode'] = $paramValue; break;
-                case 'region_code'  : $this->geoData['regionCode']  = $paramValue; break;
-                case 'city_kladr_id': $this->geoData['cityCode']    = $paramValue; break;
-                case 'city_name'    : $this->geoData['cityName']    = $paramValue; break;
-                case 'city_id'      : $this->geoData['cityId']      = $paramValue; break; //cityId - DPD
-                case 'postal_code'  : $this->geoData['index']       = $paramValue; break;
+                case 'postal_code'  : $data['cityPostCode']   = $paramValue; break;
+                case 'region_code'  : $data['regionCodeExt']  = $paramValue; break;
             }
 
         }
 
+        return $data;
+
     }
 
-    private function setErrorMessage(Exception $ex, $data){
+    private function prepareResponse($data){
 
-        switch($ex->getCode()){
-            case 'no-service-available' :
-                $this->message = 'Невозможно выполнить доставку по маршруту ' . $data['pickup']['cityName'] . ' - ' . $data['delivery']['cityName'] . $this->destinationDelivery($data['selfDelivery']) . '.'; break;
+        $response = [];
+
+        foreach($data as $key => $value){
+            switch($key){
+                //Calculate
+                case 'tariffId'             : $response['service_id']   = $value; break;
+                case 'price'                : $response['price']        = (int)$value; break;
+                case 'deliveryPeriodMin'    :
+                case 'deliveryPeriodMax'    :
+                    if( isset($response['days']) ){
+                        if($response['days'] !== (string)$value){
+
+                            $response['days'] .= '-' . $value;
+                        }
+                    }else{
+                        $response['days'] = (string)$value;
+                    }
+                    break;
+
+                //Points
+                case 'coordX'   : $response['geoCoordinates']['longitude']  = json_decode($value); break;
+                case 'coordY'   : $response['geoCoordinates']['latitude']   = json_decode($value); break;
+            }
         }
 
+        return $response;
     }
 
-    private function destinationDelivery($selfDelivery){
-        if($selfDelivery)
-            return ' до пункта выдачи';
-        else
-            return ' до адреса клиента';
+    private function getQuery($parameters){
+        $query = '?';
+
+        foreach($parameters as $key => $value){
+
+            if($query !== '?')
+                $query .= '&';
+
+            $query .= $key . '=' . urlencode($value);
+
+        }
+
+        return $query;
     }
 
 }

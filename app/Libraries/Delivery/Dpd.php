@@ -53,26 +53,75 @@ class Dpd {
 
     private $geoData;
 
-    private $destinationTypes = [
-
-        'toTerminal' => [
-            'active' => 1,
-            'selfDelivery' => true,
-        ],
-
-        'toDoor' => [
-            'active' => 1,
-            'selfDelivery' => false,
-        ]
-    ];
-
     public function __construct($geoData){
 
-        $this->prepareGeoData($geoData);
+        $this->geoData = $this->prepareGeoData($geoData);
 
     }
 
-    public function getServiceCost($parcelParameters, $selfDelivery = true, $serviceCode = null){
+    public function getDeliveryCost($parcelParameters, $serviceTypes){
+
+        $data = [];
+
+        foreach($serviceTypes as $type){
+
+            switch($type){
+                case 'toTerminal'   : $selfDelivery = true; break;
+                case 'toDoor'       : $selfDelivery = false; break;
+                default :   break;
+            }
+
+            $services = $this->getServiceCost($parcelParameters, $selfDelivery);
+
+            if( count($services) > 0 ){
+
+                $optimalService = $this->getOptimalService($services);
+
+                $data[$type] = $this->prepareResponse($optimalService);
+
+            }
+        }
+
+        return $data;
+    }
+
+    public function getPointsInCity(){
+
+        $points = [];
+
+        $points['shops'] =  $this->getParcelShops();
+
+        $points['terminals'] =  $this->getTerminals();
+
+        return $points;
+
+    }
+
+    private function getTerminals(){
+
+        $services = $this->getDpdData( 'getTerminalsSelfDelivery2' );
+
+        return $services->terminal;
+
+    }
+
+    private function getParcelShops(){
+
+        $data = [
+            'countryCode'   => $this->geoData['countryCode'],
+            'regionCode'    => $this->geoData['regionCode']
+        ];
+
+        $services = $this->getDpdData( 'getParcelShops', $data );
+
+        if(isset($services->parcelShop))
+            return $services->parcelShop;
+
+        return $services;
+
+    }
+
+    private function getServiceCost($parcelParameters, $selfDelivery = true, $serviceCode = null){
 
         $data = [
             'pickup' => [
@@ -94,65 +143,6 @@ class Dpd {
 
         return $services;
 
-    }
-
-    public function getPointsInCity(){
-
-        $points = [];
-
-        $points['shops'] =  $this->getParcelShops();
-
-        $points['terminals'] =  $this->getTerminals();
-
-        return $points;
-
-    }
-
-    public function getParcelShops(){
-
-        $data = [
-            'countryCode'   => $this->geoData['countryCode'],
-            'regionCode'    => $this->geoData['regionCode']
-        ];
-
-        $services = $this->getDpdData( 'getParcelShops', $data );
-
-        if(isset($services->parcelShop))
-            return $services->parcelShop;
-
-        return $services;
-
-    }
-
-    public function getTerminals(){
-
-        $services = $this->getDpdData( 'getTerminalsSelfDelivery2' );
-
-        return $services->terminal;
-
-    }
-
-    public function getSelfAndToDoorServiceCost($parcelParameters){
-
-        $data = [];
-
-        foreach($this->destinationTypes as $type => ['active' => $active, 'selfDelivery' => $selfDelivery]){
-
-            if($active){
-
-                $services = $this->getServiceCost($parcelParameters, $selfDelivery);
-
-                if( count($services) > 0 ){
-
-                    $data[$type] = $this->getOptimalService($services);
-
-                }
-
-            }
-
-        }
-
-        return $data;
     }
 
     private function connectDpd( $method_name ){
@@ -235,27 +225,43 @@ class Dpd {
 
     private function prepareGeoData($geoData){
 
+        $data = [];
+
         foreach($geoData as $paramName => $paramValue){
 
             switch($paramName){
-                case 'country_code' : $this->geoData['countryCode'] = $paramValue; break;
-                case 'region_code'  : $this->geoData['regionCode']  = $paramValue; break;
-                case 'city_kladr_id': $this->geoData['cityCode']    = $paramValue; break;
-                case 'city_name'    : $this->geoData['cityName']    = $paramValue; break;
-                case 'city_id'      : $this->geoData['cityId']      = $paramValue; break; //cityId - DPD
-                case 'postal_code'  : $this->geoData['index']       = $paramValue; break;
+                case 'country_code' : $data['countryCode'] = $paramValue; break;
+                case 'region_code'  : $data['regionCode']  = $paramValue; break;
+                case 'city_kladr_id': $data['cityCode']    = $paramValue; break;
+                case 'city_name'    : $data['cityName']    = $paramValue; break;
+                case 'city_id'      : $data['cityId']      = $paramValue; break; //cityId - DPD
+                case 'postal_code'  : $data['index']       = $paramValue; break;
             }
 
         }
 
+        return $data;
+
+    }
+
+    private function prepareResponse($data){
+
+        $response = [];
+
+        foreach($data as $key => $value){
+            switch($key){
+                case 'serviceCode'  : $response['service_id']   = $value; break;
+                case 'days'         : $response['days']         = $value; break;
+                case 'cost'         : $response['price']        = $value; break;
+            }
+        }
+
+        return $response;
     }
 
     private function setErrorMessage(Exception $ex, $data){
 
-        switch($ex->getCode()){
-            case 'no-service-available' :
-                $this->message = 'Невозможно выполнить доставку по маршруту ' . $data['pickup']['cityName'] . ' - ' . $data['delivery']['cityName'] . $this->destinationDelivery($data['selfDelivery']) . '.'; break;
-        }
+        //todo отслеживать ошибки
 
     }
 

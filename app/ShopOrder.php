@@ -66,11 +66,11 @@ class ShopOrder extends Model{
 
         if( count( $order ) > 0){
 
-            $order[0]->products = $products->getProductsFromJson($order[0]->products_json);
+            $order[0]->products = json_decode($order[0]->products_json);
 
             $order[0]->total = $products->getTotal($order[0]->products);
 
-            $order[0]->count_scu = count($order[0]->products);
+            $order[0]->count_scu = count((array)$order[0]->products);
 
             return $order[0];
 
@@ -123,30 +123,30 @@ class ShopOrder extends Model{
             ->first();
     }
 
-    public function storeOrder($data, $basket, $customer){
+    public function storeOrder($data, $basket, $customer, Product $products){
 
-        $data_order = $this->getDataForOrder($data, $basket, $customer);
+        $data_order = $this->getDataForOrder($data, $basket, $customer, $products);
 
         $order = self::create($data_order);
 
-        event(new NewOrder($order));
-
         $order->relations['customer'] = $customer;
-
-        $order->products =
 
         $basket->order_id = $order->id;
 
         $basket->save();
 
+        event(new NewOrder($order));
+
         return $order;
     }
 
-    private function getDataForOrder($data, $basket, $customer){
+    private function getDataForOrder($data, $basket, $customer, Product $products){
+
+        $productsFromBasket = $products->getProductsFromJson( $basket->products_json );
 
         $data_order = [
             'shop_basket_id'    => $basket->id,
-            'products_json'     => $basket->products_json,
+            'products_json'     => $productsFromBasket->toJson(),
             'customer_id'       => $customer->id,
         ];
 

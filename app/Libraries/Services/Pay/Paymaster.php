@@ -72,7 +72,7 @@ class Paymaster implements OnlinePayment{
 
     }
 
-    public function execute(Request $request, ShopOrder $orders, ShopBasket $baskets, Customer $customers){
+    public function execute(Request $request, ShopOrder $orders, ShopBasket $baskets, Customer $customers, Product $products){
 
         $receipt_number = $request['LMI_SYS_PAYMENT_ID'];
 
@@ -104,7 +104,7 @@ class Paymaster implements OnlinePayment{
 
             $data = array_merge($add, $request->all());
 
-            $orders->storeOrder($data, $activeBasket, $customer);
+            $orders->storeOrder($data, $activeBasket, $customer, $products);
         }
 
     }

@@ -79,3 +79,5 @@
 
     Route::get('/parseXl', 'Parse\FromXlsxController@parse');
     Route::get('/parseSite', 'Parse\FromSiteController@parse');
+    Route::get('/curs', 'Price\CurrencyController@getCur');
+

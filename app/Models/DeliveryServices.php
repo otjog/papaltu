@@ -6,6 +6,7 @@ use App\Shipment;
 use Illuminate\Database\Eloquent\Model;
 use App\Libraries\Delivery\Dpd;
 use App\Libraries\Delivery\Cdek;
+use App\Libraries\Delivery\Pochta;
 use App\Models\GeoData;
 
 class DeliveryServices extends Model{
@@ -15,6 +16,8 @@ class DeliveryServices extends Model{
     private $services;
 
     private $shipments;
+
+    private $serviceTypes = [ 'toTerminal', 'toDoor' ];
 
     public function __construct(array $attributes = []){
 
@@ -39,17 +42,30 @@ class DeliveryServices extends Model{
 
                 switch($services->alias){
 
-                    case 'dpd'  : $serviceObj = new Dpd( $this->geoData ); break;
+                    case 'dpd'      :
+                        $serviceObj = new Dpd( $this->geoData );
+                        $serviceTypes = $this->serviceTypes;
+                        break;
 
-                    case 'cdek' : $serviceObj = new Cdek( $this->geoData ); break;
+                    case 'cdek'     :
+                        $serviceObj = new Cdek( $this->geoData );
+                        $serviceTypes = $this->serviceTypes;
+                        break;
+
+                    case 'pochta'   :
+                        $serviceObj = new Pochta( $this->geoData );
+                        $serviceTypes = ['toTerminal'];
+                        break;
+
+                    default : break; //todo сделать выход из foreach
 
                 }
 
-                $costs = $serviceObj->getSelfAndToDoorServiceCost($parcelParameters);
+                $costs = $serviceObj->getDeliveryCost($parcelParameters, $serviceTypes);
 
                 if( count($costs) > 0 ){
 
-                    $data['costs'][$services->alias]  = $serviceObj->getSelfAndToDoorServiceCost($parcelParameters);
+                    $data['costs'][$services->alias]  = $costs;
 
                     $data['shipments'][$services->alias] = $services;
                 }
@@ -77,13 +93,26 @@ class DeliveryServices extends Model{
 
                 switch($serviceAlias){
 
-                    case 'dpd'  : $serviceObj = new Dpd( $this->geoData ); break;
+                    case 'dpd'      :
+                        $serviceObj = new Dpd( $this->geoData );
+                        $serviceTypes = $this->serviceTypes;
+                        break;
 
-                    case 'cdek' : $serviceObj = new Cdek( $this->geoData ); break;
+                    case 'cdek'     :
+                        $serviceObj = new Cdek( $this->geoData );
+                        $serviceTypes = $this->serviceTypes;
+                        break;
+
+                    case 'pochta'   :
+                        $serviceObj = new Pochta( $this->geoData );
+                        $serviceTypes = ['toTerminal'];
+                        break;
+
+                    default : break; //todo сделать выход из foreach
 
                 }
 
-                $temporary['costs'][$serviceAlias]  = $serviceObj->getSelfAndToDoorServiceCost($parcelParameters);
+                $temporary['costs'][$serviceAlias]  = $serviceObj->getDeliveryCost($parcelParameters, $serviceTypes);
             }
 
             $data['_bestOffer'] = $this->pullBestPrice($temporary);
@@ -124,9 +153,9 @@ class DeliveryServices extends Model{
 
                 foreach($parameters as $delTo => $cost){
 
-                    $cost->company = $company;
+                    $cost['company']    = $company;
 
-                    $cost->deliveryTo = $delTo;
+                    $cost['deliveryTo'] = $delTo;
 
                     $offers[] = $cost;
 
@@ -134,7 +163,7 @@ class DeliveryServices extends Model{
 
             }
 
-            $cost = array_column($offers, 'cost');
+            $cost = array_column($offers, 'price');
 
             $days = array_column($offers, 'days');
 

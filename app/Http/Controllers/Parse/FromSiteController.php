@@ -74,11 +74,11 @@ class FromSiteController extends Controller{
                 'default'   =>  [ 'active'  => '1' ],
                 'columns'   =>  [ 'name'   => 'ul.breadcrumb > li> a:last' ],
             ],
+            */
             'images'            => [
                 'default'   =>  [],
                 'columns'   =>  [ 'src' => 'div.product-img-block div.owl-carousel div.item.item-carousel > a > img'],
             ],
-            */
             'products'          => [
                 'default'   =>  [ 'active' => '1', 'manufacturer_id' => '1' ],
                 'columns'   =>  [
@@ -96,11 +96,12 @@ class FromSiteController extends Controller{
                 'default'   =>  [ 'active' => '1', 'price_id' => '2', 'currency_id' => '1' ],
                 'columns'   =>  [ 'value'  => 'div.container > div.row.product-item div.product-actions div.top-price > span.price' ],
             ],
+            */
             'product_has_image'            => [
                 'default'   =>  [],
                 'columns'   =>  [],
             ],
-            */
+
         ];
 
         $this->pivotTable       = 'products';
@@ -118,6 +119,7 @@ class FromSiteController extends Controller{
         $this->thumbImageFolder = 'storage/img/shop/product/thumbnail/';
 
         $this->customGroupIterator = [
+            /*
             '/nasosnoe_oborudovanie/poverkhnostnye_ehlektronasosy',
             '/nasosnoe_oborudovanie/pogruzhnye_ehlektronasosy_dlja_skvazhin_i_komplektujushhie',
             '/nasosnoe_oborudovanie/ehlektronasosy_drenazhnye',
@@ -128,6 +130,7 @@ class FromSiteController extends Controller{
             '/rasshiritelnye_baki_gidroakkumuljatory_mnogofunkcionalnye_baki_i_membrany/rasshiritelnye_baki__ehkspansomaty__dlja_sistem_otoplenija',
             '/rasshiritelnye_baki_gidroakkumuljatory_mnogofunkcionalnye_baki_i_membrany',
             '/rasshiritelnye_baki_gidroakkumuljatory_mnogofunkcionalnye_baki_i_membrany/membrany_dlja_gidroakkumuljatorov_i_rasshiritelnykh_bakov',
+            */
             '/rasshiritelnye_baki_gidroakkumuljatory_mnogofunkcionalnye_baki_i_membrany/zapasnye_chasti_i_ehlementy_kreplenija_bakov'
         ];
 
@@ -197,7 +200,6 @@ class FromSiteController extends Controller{
                     break;
 
                 case 'products' :
-
                     $this->storeProducts($newDataInTables[ $this->pivotTable ]);
                     break;
 
@@ -206,6 +208,7 @@ class FromSiteController extends Controller{
                     break;
 
                 case 'product_has_image' :
+
                     $this->storeProductsImages($newDataInTables [ 'product_has_image' ] );
                     break;
 
@@ -287,7 +290,7 @@ class FromSiteController extends Controller{
             if(count( $tableData['columns'] ) > 0){
                 foreach($tableData['columns'] as $columnName => $key){
 
-                    $value = $this->getValue($tableName, $html_dom, $columnName, $key);
+                    $value = $this->getValue($tableName, $columnName, $html_dom, $key);
 
                     if( $value !== null || $value !== '' ){
 
@@ -306,7 +309,7 @@ class FromSiteController extends Controller{
 
     }
 
-    private function getValue($tableName, $html_dom, $columnName, $key){
+    private function getValue($tableName, $columnName, $html_dom, $key){
         list($clearTableName) = explode('.', $tableName);
 
         $searched = $html_dom->find($key);
@@ -625,6 +628,8 @@ class FromSiteController extends Controller{
                 $image = $this->getCurrentTableRow($imagesCollection, 'src', $currentParameters[ 'src' ] );
 
                 if($image !==  null){
+
+                    dump($data['new']);
                     $result = $this->getArrayForInsert([], $data['new']);
 
                     $result['product_id']    = $product->id;
@@ -834,7 +839,7 @@ class FromSiteController extends Controller{
             $dstImageData['height'] /= $ratio;
             $margin['y'] = ($this->imageParameters[$roleImage]['height'] - $dstImageData['height']) / 2;
         }else{
-            $dstImageData['width'] /= $ratio;
+            $dstImageData['width'] *= $ratio;
             $margin['x'] = ($this->imageParameters[$roleImage]['width'] - $dstImageData['width']) / 2;
         }
 

@@ -2,11 +2,21 @@
 
 namespace App;
 
+use App\Models\Shop\Currency;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model{
 
     protected $fillable = ['brand_id', 'category_id', 'manufacturer_id', 'active', 'name', 'scu'];
+
+    private $currencies;
+
+    public function __construct(array $attributes = []){
+        parent::__construct($attributes);
+
+        $this->currencies = new Currency();
+
+    }
 
     public function brands(){
         return $this->belongsToMany('App\Brand', 'product_has_brand')->withTimestamps();
@@ -25,7 +35,7 @@ class Product extends Model{
     }
 
     public function prices(){
-        return $this->belongsToMany('App\Price', 'product_has_price')->withPivot('value')->withTimestamps();
+        return $this->belongsToMany('App\Price', 'product_has_price')->withPivot('value', 'currency_id')->withTimestamps();
     }
 
     /*******************************/
@@ -65,7 +75,7 @@ class Product extends Model{
 
     public function getActiveProduct($id){
 
-        return self::select(
+        $products = self::select(
             'products.id',
             'products.manufacturer_id',
             'products.category_id',
@@ -101,13 +111,20 @@ class Product extends Model{
             /************CATEGORY***************/
             ->with('category')
 
-            ->first();
+            ->get();
+
+            if( isset($products[0])){
+                $products = $this->setMainCurrencyPriceValue($products);
+                return $products[0];
+            }else{
+                return null;
+            }
 
     }
 
     public function getActiveProductsFromCategory($category_id){
 
-        return self::select(
+        $products =  self::select(
             'products.id',
             'products.manufacturer_id',
             'products.active',
@@ -136,11 +153,14 @@ class Product extends Model{
 
             ->get();
 
+
+        return $this->setMainCurrencyPriceValue($products);
+
     }
 
     public function getFilteredProducts($parameters){
 
-        return self::select(
+        $products = self::select(
             'products.id',
             'products.manufacturer_id',
             'products.category_id',
@@ -152,13 +172,15 @@ class Product extends Model{
             ->where('products.active', 1)
 
             /************PRICE*******************/
+            /*
             ->when(isset($parameters['price']), function ($query) use ($parameters) {
                 return $query->whereHas('prices', function($query) use ($parameters) {
                     $query->where('name', '=', 'retail')
                         ->where('product_has_price.active', '=', '1')
-                        ->whereBetween('value', explode('|', $parameters['price']));
+                        ->whereBetween('value', (explode('|', $parameters['price'])) );
                 });
             })
+            */
             ->with(['prices' => function ($query) {
                 $query->where('name', '=', 'retail')
                     ->where('product_has_price.active', '=', '1');
@@ -187,11 +209,29 @@ class Product extends Model{
 
             ->get();
 
+
+        $products = $this->setMainCurrencyPriceValue($products);
+
+        $filtered = $products->filter(function ($value, $key) use ($parameters){
+
+            $price = $value->prices[0]->value;
+
+            $min_max_array = (explode('|', $parameters['price']));
+
+            return $price > $min_max_array[0] & $price < $min_max_array[1];
+        });
+
+        //todo переделать выборку
+        // Значения из фильтра приходят в рублях,
+        // а значения для товарах хранятся в разной валюте
+
+        return $filtered;
+
     }
 
     public function getActiveProductsOfBrand($brand_id){
 
-        return self::select(
+        $products = self::select(
             'products.id',
             'products.manufacturer_id',
             'products.name',
@@ -222,11 +262,13 @@ class Product extends Model{
             ->orderBy('products.name')
 
             ->get();
+
+        return $this->setMainCurrencyPriceValue($products);
     }
 
     public function getProductsById($idProducts){
 
-        return self::select(
+        $products = self::select(
             'products.id',
             'products.manufacturer_id',
             'products.category_id',
@@ -262,6 +304,8 @@ class Product extends Model{
 
             ->get();
 
+        return $this->setMainCurrencyPriceValue($products);
+
     }
 
     public function getProductsFromJson($json_string){
@@ -296,7 +340,7 @@ class Product extends Model{
 
         foreach($products as $product){
 
-            $total += $product->quantity * $product->prices[0]->pivot->value;
+            $total += $product->quantity * $product->prices[0]->value;
 
         }
 
@@ -331,6 +375,31 @@ class Product extends Model{
             'quantity'  => $quantity,
 
         ];
+    }
+
+    private function setMainCurrencyPriceValue($products){
+
+        $currencies = $this->currencies->getAllCurrencies();
+
+        foreach($products as $key => $product){
+
+            if( isset( $product->prices[0] ) ){
+
+                $currencyId = $product->prices[0]->pivot->currency_id;
+
+                $currency = $currencies->first(function ($value, $key) use ($currencyId){
+                    return $value->id === $currencyId;
+                });
+
+                $price = $currency->value * $product->prices[0]->pivot->value;
+
+                $product->prices[0]->value = round($price, 0);
+            }
+
+        }
+
+        return $products;
+
     }
 
 

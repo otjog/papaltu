@@ -9,7 +9,7 @@ class Price extends Model
     protected $fillable = ['name'];
 
     public function products(){
-        return $this->belongsToMany('App\Product', 'product_has_price')->withPivot('value')->withTimestamps();
+        return $this->belongsToMany('App\Product', 'product_has_price')->withPivot('value', 'currency_id')->withTimestamps();
     }
 
     public function getPriceProducts($price_name){

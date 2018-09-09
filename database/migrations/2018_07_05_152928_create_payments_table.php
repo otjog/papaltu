@@ -16,6 +16,7 @@ class CreatePaymentsTable extends Migration
         Schema::create('payments', function (Blueprint $table) {
             $table->increments('id');
             $table->tinyInteger('active')->unsigned()->default(0);
+            $table->string('alias', 10);
             $table->string('name', 45);
             $table->string('description', 255)->nullable();
             $table->string('img', 255)->nullable();

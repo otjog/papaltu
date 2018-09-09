@@ -10,6 +10,9 @@ class DatabaseSeeder extends Seeder
      * @return void
      */
     public function run(){
-         $this->call(PricesAndCurrencySeeder::class);
+        $this->call(PricesAndCurrencySeeder::class);
+        $this->call(FilterTableSeeder::class);
+        $this->call(PaymentTableSeeder::class);
+        $this->call(ShipmentTableSeeder::class);
     }
 }
