@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Shop;
 
 use App\Http\Controllers\Controller;
+use App\Models\Seo\MetaTagsCreater;
 use App\ShopBasket;
 use Illuminate\Http\Request;
 use App\Category;
@@ -11,8 +12,12 @@ use App\Product;
 class CategoryController extends Controller{
 
     protected $categories;
+
     protected $baskets;
+
     protected $data;
+
+    protected $metaTagsCreater;
 
     /**
      * Создание нового экземпляра контроллера.
@@ -20,10 +25,15 @@ class CategoryController extends Controller{
      * @param  Category $categories
      * @return void
      */
-    public function __construct(Category $categories, ShopBasket $baskets){
-        $this->categories   = $categories;
-        $this->baskets      = $baskets;
-        $this->data         = [
+    public function __construct(Category $categories, ShopBasket $baskets, MetaTagsCreater $metaTagsCreater){
+
+        $this->categories       = $categories;
+
+        $this->baskets          = $baskets;
+
+        $this->metaTagsCreater  = $metaTagsCreater;
+
+        $this->data             = [
             'template'  => [
                 'component'     => 'shop',
                 'resource'      => 'category',
@@ -73,19 +83,13 @@ class CategoryController extends Controller{
     /**
      * Display the specified resource.
      *
+     * @param  Request $request
      * @param  Product $products
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return array
      */
     public function show(Request $request, Product $products, $id){
-/*
-        if( $request->ajax() ){
 
-            $this->data['data'] ['products'] = $products->getFilteredProductsFromCategory($id, $request->toArray());
-
-            return response()->view( 'components.shop.product.list', $this->data['data'])->header('Cache-Control', 'no-store');
-        }
-*/
         $category = $this->categories->getCategory($id);
 
         $this->data['template'] ['view']                = 'show';
@@ -106,6 +110,8 @@ class CategoryController extends Controller{
             $this->data['data'] ['products'] = $products->getActiveProductsFromCategory($id);
 
         }
+
+        $this->data['meta'] = $this->metaTagsCreater->getMetaTags($this->data);
 
         return view( 'templates.default', $this->data);
     }

@@ -6,22 +6,31 @@ use App\Http\Controllers\Controller;
 use App\ShopBasket;
 use Illuminate\Http\Request;
 use App\Product;
+use App\Models\Seo\MetaTagsCreater;
 
 class ProductController extends Controller{
 
     protected $products;
+
     protected $baskets;
+
     protected $data;
 
+    protected $metaTagsCreater;
     /**
      * Создание нового экземпляра контроллера.
      *
      * @param  Product $products
      * @return void
      */
-    public function __construct(Product $products, ShopBasket $baskets ){
+    public function __construct(Product $products, ShopBasket $baskets, MetaTagsCreater $metaTagsCreater ){
+
         $this->products = $products;
+
         $this->baskets = $baskets;
+
+        $this->metaTagsCreater = $metaTagsCreater;
+
         $this->data = [
             'template' => [
                 'component' => 'shop',
@@ -71,6 +80,8 @@ class ProductController extends Controller{
         $this->data['template']['custom'][] = 'shop-icons';
 
         $this->data['data']['product']  = $this->products->getActiveProduct($id);
+
+        $this->data['meta'] = $this->metaTagsCreater->getMetaTags($this->data);
 
         return view( 'templates.default', $this->data);
     }

@@ -22,6 +22,9 @@
     //Categories
     Route::resource('/categories',  'Shop\CategoryController',  [ 'only' => [ 'index', 'show' ]]);
 
+    //Brands
+    Route::resource('/brands',  'Shop\BrandController',     [ 'only' => [ 'index', 'show' ]]);
+
     //Orders
     Route::resource('/orders',      'Shop\OrderController',     [ 'only' => [ 'store', 'create', 'show' ]]);
 
