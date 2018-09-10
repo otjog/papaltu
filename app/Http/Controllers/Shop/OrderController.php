@@ -52,15 +52,17 @@ class OrderController extends Controller{
 
         $token = $request['_token'];
 
-        $basket = $this->baskets->getActiveBasketWithProducts($products, $token );
-
         $payment = $payments->getMethodById($request->payment_id);
 
         if($payment[0]->alias === 'online'){
 
+            $basket = $this->baskets->getActiveBasketWithProducts($products, $token );
+
             return $paymentService->send($request, $basket);
 
         }else{
+
+            $basket = $this->baskets->getActiveBasket( $token );
 
             $customer = $customers->findOrCreateCustomer( $request->all() );
 
