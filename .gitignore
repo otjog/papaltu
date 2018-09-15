@@ -1,10 +1,7 @@
 /node_modules
 /public/hot
 /public/storage
-/public/css
-/public/.htaccess
-/public/favicon.ico
-/resources/views
+/resources/views/inclusion/*
 /storage/*.key
 /vendor
 /.idea

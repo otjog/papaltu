@@ -26,16 +26,15 @@ class FromXlsxController extends Controller{
                 'columns'   =>  [ 'id'   => 'D' ],
                 'compare'   =>  'id'
             ],
-
-
+            */
             'images'            => [
                 'default'   =>  [],
-                'columns'   =>  ['src' => 'H'],
+                'columns'   =>  ['src' => 'L'],
             ],
- */
+
             'products'          => [
-                'default'   =>  [ 'manufacturer_id' => '1' ],
-                'columns'   =>  [ 'scu' => 'B', 'weight' => 'D', 'length' => 'E', 'width' => 'F', 'height' => 'G' ],
+                'default'   =>  [ 'manufacturer_id' => '1', 'thumbnail' => null, 'weight' => 0, 'length' => 0, 'width' => 0, 'height' => 0, ],
+                'columns'   =>  [ 'scu' => 'B', 'name' => 'C', 'weight' => 'F', 'length' => 'G', 'width' => 'H', 'height' => 'I', 'category_id' => 'J','active' => 'M' ],
                 'compare'   =>  'scu'
             ],
 
@@ -44,18 +43,17 @@ class FromXlsxController extends Controller{
                 'default'   =>  [ 'active' => '1', 'price_id' => '3' ],
                 'columns'   =>  [ 'value'  => 'C' ],
             ],
-
-
+            */
             'product_has_price.retail' => [
                 'default'   =>  [ 'active' => '1', 'price_id' => '1' ],
-                'columns'   =>  [ 'value'  => 'E', 'currency_id' => 'F' ],//currency_id может принимать, как сам id так и код: RUB; EUR; USD и т.п.
+                'columns'   =>  [ 'value'  => 'D', 'currency_id' => 'E' ],//currency_id может принимать, как сам id так и код: RUB; EUR; USD и т.п.
             ],
 
             'product_has_image' => [
                 'default'   =>  [],
                 'columns'   =>  [],
             ],
-            */
+
     ];
 
     private $imageParameters = [
@@ -89,7 +87,7 @@ class FromXlsxController extends Controller{
 
     public function __construct(Request $request, Product $product, Category $category, Image $image){
 
-        $this->pathToFile   = public_path('/storage/parse/mastergas.xlsx');
+        $this->pathToFile   = public_path('/storage/parse/celtic.xlsx');
 
         $this->startRow     = '2';
 
