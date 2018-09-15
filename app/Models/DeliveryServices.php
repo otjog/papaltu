@@ -85,41 +85,7 @@ class DeliveryServices extends Model{
 
     public function getBestPrices($parcelParameters){
 
-            $data = [];
-
-            $temporary = [];
-
-            foreach($this->services as ['alias' => $serviceAlias]){
-
-                switch($serviceAlias){
-
-                    case 'dpd'      :
-                        $serviceObj = new Dpd( $this->geoData );
-                        $serviceTypes = $this->serviceTypes;
-                        break;
-
-                    case 'cdek'     :
-                        $serviceObj = new Cdek( $this->geoData );
-                        $serviceTypes = $this->serviceTypes;
-                        break;
-
-                    case 'pochta'   :
-                        $serviceObj = new Pochta( $this->geoData );
-                        $serviceTypes = ['toTerminal'];
-                        break;
-
-                    default : break; //todo сделать выход из foreach
-
-                }
-
-                $temporary['costs'][$serviceAlias]  = $serviceObj->getDeliveryCost($parcelParameters, $serviceTypes);
-            }
-
-            $data['_bestOffer'] = $this->pullBestPrice($temporary);
-
-            $data['_geo'] = $this->geoData;
-
-            return $data;
+        return $this->getPrices($parcelParameters);
     }
 
     public function getPoints(){
