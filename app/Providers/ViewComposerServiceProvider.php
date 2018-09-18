@@ -17,6 +17,7 @@ class ViewComposerServiceProvider extends ServiceProvider{
             'App\Http\ViewComposers\PageMenuComposer'       => 'modules.menu.page',
             'App\Http\ViewComposers\ShopBasketComposer'     => 'modules.shop_basket.default',
             'App\Http\ViewComposers\ProductFilterComposer'  => 'modules.product_filter.default',
+            'App\Http\ViewComposers\BannerComposer'         => 'modules.banner.default',
         ]);
     }
 

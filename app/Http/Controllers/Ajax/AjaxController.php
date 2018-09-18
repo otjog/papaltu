@@ -64,7 +64,7 @@ class AjaxController extends Controller{
                     }
 
                     switch($viewReload){
-                        case 'best-offer'   : $data[ $module ] =  $ds->getBestPrices( $parcels ); break;
+                        case 'best-offer'   : $data[ $module ] =  $ds->getBestPrice( $parcels ); break;
                         case 'offers'       : $data[ $module ] =  $ds->getPrices( $parcels ); break;
                         case 'offers-points':
                             $prices = $ds->getPrices( $parcels );

@@ -83,7 +83,7 @@ class DeliveryServices extends Model{
             return $data;
     }
 
-    public function getBestPrices($parcelParameters){
+    public function getBestPrice($parcelParameters){
 
         return $this->getPrices($parcelParameters);
     }
