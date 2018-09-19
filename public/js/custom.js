@@ -3,9 +3,12 @@
 let quantity = {
     'buttons': {
         'increment' : document.getElementsByClassName('quantity_inc'),
-        'decrement' : document.getElementsByClassName('quantity_dec')
+        'decrement' : document.getElementsByClassName('quantity_dec'),
+        'delete'    : document.getElementsByClassName('quantity_del'),
+        'update'    : document.getElementsByClassName('quantity_upd')
     },
-    'inputs' : document.getElementsByClassName('quantity_input')
+    'inputs'    : document.getElementsByClassName('quantity_input'),
+    'form'      : document.getElementById('basket_form')
 };
 
 for(let buttonsType in quantity.buttons){
@@ -16,10 +19,29 @@ for(let buttonsType in quantity.buttons){
 
            if(quantity.buttons[ buttonsType].hasOwnProperty(buttonIndex)){
 
-               quantity.buttons[ buttonsType ][ buttonIndex ].addEventListener('click', function(e){
-                   e = e || event;
-                   changeQuantity(e, buttonIndex)
-               });
+               switch(buttonsType){
+                   case 'increment':
+                   case 'decrement':
+                       quantity.buttons[ buttonsType ][ buttonIndex ].addEventListener('click', function(e){
+                           e = e || event;
+                           changeQuantity(e, buttonIndex)
+                       });
+                       break;
+                   case 'delete':
+                       quantity.buttons[ buttonsType ][ buttonIndex ].addEventListener('click', function(e){
+                           quantity.inputs[buttonIndex].value = 0;
+                           quantity.form.submit();
+                       });
+                       break;
+                   case 'update':
+                       quantity.buttons[ buttonsType ][ buttonIndex ].addEventListener('click', function(e){
+                           //любая кнопка обновляет все товары
+                           quantity.form.submit();
+                       });
+                       break;
+               }
+
+
 
            }
 
@@ -30,7 +52,7 @@ for(let buttonsType in quantity.buttons){
 }
 
 function changeQuantity(e, buttonIndex){
-
+console.log(buttonIndex);
     let minValue = e.target.dataset.quantityMinValue;
 
     if ( e.target.classList.contains('quantity_inc')) {
@@ -41,7 +63,6 @@ function changeQuantity(e, buttonIndex){
     }
 }
 //END Quantity Button
-
 
 /* FancyBox************/
 
