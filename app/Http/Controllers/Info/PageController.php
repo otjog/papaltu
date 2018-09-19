@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Info;
 
-use App\Page;
+use App\Models\Site\Page;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 

@@ -1,11 +1,15 @@
 <?php
 
-namespace App;
+namespace App\Models\Shop\Order;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Events\NewOrder;
+use App\Models\Shop\Product\Product;
 
-class ShopOrder extends Model{
+class Order extends Model{
+
+
+    protected $table = 'shop_orders';
 
     protected $fillable = [
         'shop_basket_id',
@@ -21,15 +25,15 @@ class ShopOrder extends Model{
     ];
 
     public function shopBasket(){
-        return $this->belongsTo('App\ShopBasket', 'shop_basket_id');
+        return $this->belongsTo('App\Models\Shop\Order\Basket', 'shop_basket_id');
     }
 
     public function shipment(){
-        return $this->belongsTo('App\Shipment');
+        return $this->belongsTo('App\Models\Shop\Order\Shipment');
     }
 
     public function payment(){
-        return $this->belongsTo('App\Payment');
+        return $this->belongsTo('App\Models\Shop\Order\Payment');
     }
 
     public function customer(){

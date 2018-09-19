@@ -1,13 +1,13 @@
 <?php
 
-namespace App;
+namespace App\Models\Site;
 
 use Illuminate\Database\Eloquent\Model;
 
 class Page extends Model{
 
     public function page_menus(){
-        return $this->belongsToMany('App\PageMenu', 'page_menu_has_page')->withTimestamps();
+        return $this->belongsToMany('App\Models\Site\PageMenu', 'page_menu_has_page')->withTimestamps();
     }
 
     public function getAllPages(){

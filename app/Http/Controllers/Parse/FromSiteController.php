@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Parse;
 
-use App\Category;
+use App\Models\Shop\Category\Category;
 use App\Http\Controllers\Controller;
-use App\Image;
+use App\Models\Shop\Product\Image;
 use Illuminate\Http\Request;
 use phpQuery;
-use App\Product;
+use App\Models\Shop\Product\Product;
 use Illuminate\Support\Facades\DB;
 
 class FromSiteController extends Controller{

@@ -1,13 +1,16 @@
 <?php
 
-namespace App;
+namespace App\Models\Shop\Order;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Shop\Product\Product;
 
-class ShopBasket extends Model{
+class Basket extends Model{
+
+    protected $table = 'shop_baskets';
 
     public function shopOrder(){
-        return $this->hasOne('App\ShopOrder', 'order_id');
+        return $this->hasOne('App\Models\Shop\Order\Order', 'order_id');
     }
 
     public function getActiveBasket($token){

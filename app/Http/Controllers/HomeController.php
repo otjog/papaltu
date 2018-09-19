@@ -2,26 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Category;
-use App\Brand;
-
 class HomeController extends Controller{
 
     protected $categories;
     protected $data;
 
-    public function __construct(Category $categories){
-        $this->categories = $categories;
+    public function __construct(){
         $this->data = [
             'template' => []
         ];
     }
 
-    public function index(Brand $brands){
+    public function index(){
 
         $this->data['template'] ['banner']  = 'default';
-        $this->data['data']     ['brands']  =  $brands->getActiveBrands();
 
         $this->data['template'] ['custom'][]  = 'shop-icons';
 

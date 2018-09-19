@@ -1,8 +1,8 @@
 <?php
 
-namespace App;
+namespace App\Models\Shop\Product;
 
-use App\Models\Shop\Currency;
+use App\Models\Shop\Price\Currency;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model{
@@ -23,27 +23,27 @@ class Product extends Model{
     }
 
     public function brands(){
-        return $this->belongsToMany('App\Brand', 'product_has_brand')->withTimestamps();
+        return $this->belongsToMany('App\Models\Shop\Product\Brand', 'product_has_brand')->withTimestamps();
     }
 
     public function images(){
-        return $this->belongsToMany('App\Image', 'product_has_image')->withTimestamps();
+        return $this->belongsToMany('App\Models\Shop\Product\Image', 'product_has_image')->withTimestamps();
     }
 
     public function category(){
-        return $this->belongsTo('App\Category');
+        return $this->belongsTo(    'App\Models\Shop\Category\Category');
     }
 
     public function manufacturer(){
-        return $this->belongsTo('App\Manufacturer');
+        return $this->belongsTo(    'App\Models\Shop\Product\Manufacturer');
     }
 
     public function prices(){
-        return $this->belongsToMany('App\Price', 'product_has_price')->withPivot('value', 'currency_id')->withTimestamps();
+        return $this->belongsToMany('App\\Models\Shop\Price\Price', 'product_has_price')->withPivot('value', 'currency_id')->withTimestamps();
     }
 
     public function discounts(){
-        return $this->belongsToMany('App\Models\Shop\Discount', 'product_has_discount')->withPivot('value')->withTimestamps();
+        return $this->belongsToMany('App\Models\Shop\Price\Discount', 'product_has_discount')->withPivot('value')->withTimestamps();
     }
 
     /*******************************/
