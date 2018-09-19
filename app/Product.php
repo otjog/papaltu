@@ -11,10 +11,14 @@ class Product extends Model{
 
     private $currencies;
 
+    private $date;
+
     public function __construct(array $attributes = []){
         parent::__construct($attributes);
 
-        $this->currencies = new Currency();
+        $this->currencies   = new Currency();
+
+        $this->date         = date('Y-m-d');
 
     }
 
@@ -36,6 +40,10 @@ class Product extends Model{
 
     public function prices(){
         return $this->belongsToMany('App\Price', 'product_has_price')->withPivot('value', 'currency_id')->withTimestamps();
+    }
+
+    public function discounts(){
+        return $this->belongsToMany('App\Models\Shop\Discount', 'product_has_discount')->withPivot('value')->withTimestamps();
     }
 
     /*******************************/
@@ -99,6 +107,13 @@ class Product extends Model{
                 ->where('product_has_price.active', '=', '1');
             }])
 
+            /************DISCOUNT***************/
+            ->with(['discounts' => function ($query) {
+                $query->select('name', 'type', 'to_date')
+                    ->where('active', '=', 1)
+                    ->whereDate('to_date', '>=', $this->date);
+            }])
+
             /************BRAND******************/
             ->with('brands')
 
@@ -115,6 +130,7 @@ class Product extends Model{
 
             if( isset($products[0])){
                 $products = $this->setMainCurrencyPriceValue($products);
+                dump($products);
                 return $products[0];
             }else{
                 return null;
@@ -141,6 +157,13 @@ class Product extends Model{
             ->with(['prices' => function ($query) {
                 $query->where('name', '=', 'retail')
                     ->where('product_has_price.active', '=', '1');
+            }])
+
+            /************DISCOUNT***************/
+            ->with(['discounts' => function ($query) {
+                $query->select('name', 'type', 'to_date')
+                    ->where('active', '=', 1)
+                    ->whereDate('to_date', '>=', $this->date);
             }])
 
             /************BRAND******************/
@@ -184,6 +207,13 @@ class Product extends Model{
             ->with(['prices' => function ($query) {
                 $query->where('name', '=', 'retail')
                     ->where('product_has_price.active', '=', '1');
+            }])
+
+            /************DISCOUNT***************/
+            ->with(['discounts' => function ($query) {
+                $query->select('name', 'type', 'to_date')
+                    ->where('active', '=', 1)
+                    ->whereDate('to_date', '>=', $this->date);
             }])
 
             /************BRAND*******************/
@@ -247,6 +277,13 @@ class Product extends Model{
                     ->where('product_has_price.active', '=', '1');
             }])
 
+            /************DISCOUNT***************/
+            ->with(['discounts' => function ($query) {
+                $query->select('name', 'type', 'to_date')
+                    ->where('active', '=', 1)
+                    ->whereDate('to_date', '>=', $this->date);
+            }])
+
             /************BRAND******************/
             ->with(['brands' => function ($query) use ($brand_id){
                 $query->where('active', '=', 1)
@@ -291,6 +328,13 @@ class Product extends Model{
                     ->where('product_has_price.active', '=', '1');
             }])
 
+            /************DISCOUNT***************/
+            ->with(['discounts' => function ($query) {
+                $query->select('name', 'type', 'to_date')
+                    ->where('active', '=', 1)
+                    ->whereDate('to_date', '>=', $this->date);
+            }])
+
             /************BRAND******************/
             ->with('brands')
 
@@ -326,12 +370,6 @@ class Product extends Model{
         }
 
         return $products;
-    }
-
-    public function checkActiveProductsInCategory($category_id){
-        return self::where('active', 1)
-            ->where('category_id', $category_id)
-            ->count();
     }
 
     public function getTotal($products){
@@ -392,6 +430,24 @@ class Product extends Model{
                 });
 
                 $price = $currency->value * $product->prices[0]->pivot->value;
+
+                $sale = 0;
+
+                if( count($product->discounts) > 0 ){
+
+                    switch($product->discounts[0]->type){
+                        case 'percent'  :
+                            $sale = $product->discounts[0]->pivot->value/100 * $price;
+                            $price = $price - $sale;
+                            break;
+                        case 'value'    :
+                            $sale = $product->discounts[0]->pivot->value;
+                            $price = $price - $sale;
+                            break;
+                    }
+                }
+
+                $product->prices[0]->sale = round($sale, 0);
 
                 $product->prices[0]->value = round($price, 0);
             }
