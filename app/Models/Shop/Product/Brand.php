@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models\Shop\Product;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -9,7 +9,7 @@ class Brand extends Model{
     protected $fillable = ['name'];
 
     public function products(){
-        return $this->belongsToMany('App\Product', 'product_has_brand')->withTimestamps();
+        return $this->belongsToMany('App\Models\Shop\Product\Product', 'product_has_brand')->withTimestamps();
     }
 
     public function getActiveBrands(){

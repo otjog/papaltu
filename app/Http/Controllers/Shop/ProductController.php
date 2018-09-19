@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Shop;
 
 use App\Http\Controllers\Controller;
-use App\ShopBasket;
+use App\Models\Shop\Order\Basket;
 use Illuminate\Http\Request;
-use App\Product;
+use App\Models\Shop\Product\Product;
 use App\Models\Seo\MetaTagsCreater;
 
 class ProductController extends Controller{
@@ -23,7 +23,7 @@ class ProductController extends Controller{
      * @param  Product $products
      * @return void
      */
-    public function __construct(Product $products, ShopBasket $baskets, MetaTagsCreater $metaTagsCreater ){
+    public function __construct(Product $products, Basket $baskets, MetaTagsCreater $metaTagsCreater ){
 
         $this->products = $products;
 

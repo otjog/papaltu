@@ -4,9 +4,8 @@ namespace App\Http\Controllers\Search;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Product;
-use App\Http\Controllers\Shop\BasketController;
-use App\ShopBasket;
+use App\Models\Shop\Product\Product;
+use App\Models\Shop\Order\Basket;
 use sngrl\SphinxSearch\SphinxSearch;
 
 class SearchController extends Controller{
@@ -21,7 +20,7 @@ class SearchController extends Controller{
      *
      * @return void
      */
-    public function __construct(Request $request, Product $products, ShopBasket $baskets){
+    public function __construct(Request $request, Product $products, Basket $baskets){
 
         $this->products = $products;
         $this->baskets  = $baskets;

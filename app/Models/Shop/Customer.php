@@ -16,7 +16,7 @@ class Customer extends Model{
     ];
 
     public function shopOrders(){
-        return $this->hasMany('App\ShopOrder');
+        return $this->hasMany('App\Order');
     }
 
 

@@ -2,7 +2,7 @@
 
 namespace App\Http\ViewComposers;
 
-use App\PageMenu;
+use App\Models\Site\PageMenu;
 use Illuminate\View\View;
 
 class PageMenuComposer{

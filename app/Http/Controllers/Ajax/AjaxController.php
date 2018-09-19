@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Ajax;
 
-use App\Product;
+use App\Models\Shop\Product\Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\DeliveryServices;
+use App\Models\Shop\Services\Delivery;
 use App\Models\GeoData;
 
 class AjaxController extends Controller{
@@ -45,7 +45,7 @@ class AjaxController extends Controller{
 
                 case 'delivery' :
 
-                    $ds = new DeliveryServices();
+                    $ds = new Delivery();
 
                     if( count($request->all()) > 0 ){
                         $parcels = [];

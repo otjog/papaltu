@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Shop\Services;
 
-use App\Shipment;
+use App\Models\Shop\Order\Shipment;
 use Illuminate\Database\Eloquent\Model;
 use App\Libraries\Delivery\Dpd;
 use App\Libraries\Delivery\Cdek;
 use App\Libraries\Delivery\Pochta;
-use App\Models\GeoData;
+use App\Models\Geo\GeoData;
 
-class DeliveryServices extends Model{
+class Delivery extends Model{
 
     private $geoData;
 

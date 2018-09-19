@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Price;
 
 use App\Http\Controllers\Controller;
 use phpQuery;
-use App\Product;
-use App\Category;
-use App\Price;
+use App\Models\Shop\Product\Product;
+use App\Models\Shop\Category\Category;
+use App\Models\Shop\Price\Price;
 use Illuminate\Support\Facades\DB;
 
 class ParseController extends Controller{

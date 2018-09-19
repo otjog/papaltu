@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Shop;
 
-use App\Brand;
+use App\Models\Shop\Product\Brand;
 use App\Models\Seo\MetaTagsCreater;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Product;
-use App\ShopBasket;
+use App\Models\Shop\Product\Product;
+use App\Models\Shop\Order\Basket;
 
 class BrandController extends Controller{
 
@@ -23,7 +23,7 @@ class BrandController extends Controller{
      *
      * @return void
      */
-    public function __construct(Brand $brands, ShopBasket $baskets, MetaTagsCreater $metaTagsCreater){
+    public function __construct(Brand $brands, Basket $baskets, MetaTagsCreater $metaTagsCreater){
 
         $this->brands   = $brands;
 

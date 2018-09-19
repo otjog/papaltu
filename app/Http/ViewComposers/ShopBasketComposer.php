@@ -2,8 +2,8 @@
 
 namespace App\Http\ViewComposers;
 
-use App\ShopBasket;
-use App\Product;
+use App\Models\Shop\Order\Basket;
+use App\Models\Shop\Product\Product;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -11,7 +11,7 @@ class ShopBasketComposer{
 
     protected $basket;
 
-    public function __construct(Request $request, ShopBasket $basket, Product $products){
+    public function __construct(Request $request, Basket $basket, Product $products){
 
         $token = $request->session()->get('_token');
 

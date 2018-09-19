@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Parse;
 
-use App\Category;
+use App\Models\Shop\Category\Category;
 use App\Http\Controllers\Controller;
-use App\Image;
-use App\Models\Shop\Currency;
-use App\Price;
+use App\Models\Shop\Product\Image;
+use App\Models\Shop\Price\Currency;
+use App\Models\Shop\Price\Price;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use App\Product;
+use App\Models\Shop\Product\Product;
 use Illuminate\Support\Facades\DB;
 
 class FromXlsxController extends Controller{

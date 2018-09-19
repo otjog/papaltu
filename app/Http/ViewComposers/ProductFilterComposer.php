@@ -2,8 +2,8 @@
 
 namespace App\Http\ViewComposers;
 
-use App\Filter;
-use App\Product;
+use App\Models\Shop\Category\Filter;
+use App\Models\Shop\Product\Product;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 

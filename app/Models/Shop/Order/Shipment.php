@@ -1,13 +1,13 @@
 <?php
 
-namespace App;
+namespace App\Models\Shop\Order;
 
 use Illuminate\Database\Eloquent\Model;
 
 class Shipment extends Model{
 
     public function shopOrders(){
-        return $this->hasMany('App\ShopOrder');
+        return $this->hasMany('App\Models\Shop\Order\Order');
     }
 
     public function getActiveMethods(){

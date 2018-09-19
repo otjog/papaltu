@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers\Shop;
 
-use App\Models\DeliveryServices;
-use App\Product;
-use App\ShopBasket;
+use App\Models\Shop\Product\Product;
+use App\Models\Shop\Order\Basket;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -14,7 +13,7 @@ class BasketController extends Controller{
 
     protected $data;
 
-    public function __construct(ShopBasket $baskets){
+    public function __construct(Basket $baskets){
         $this->baskets = $baskets;
         $this->data = [
             'template'  =>  [
