@@ -130,7 +130,7 @@ class Product extends Model{
 
             if( isset($products[0])){
                 $products = $this->setMainCurrencyPriceValue($products);
-                dump($products);
+
                 return $products[0];
             }else{
                 return null;

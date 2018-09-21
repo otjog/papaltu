@@ -1,7 +1,9 @@
+<h1>Версия Alpha 0.1</h1>
+
 <p>После клонирования необходимо произвести следующие действия:</p>
 <ul>
     <li>
-        Выполнить: <strong>composer update</strong>
+        Выполнить: <strong>composer install</strong>
     </li>
     <li>
         Создать файл <strong>.env</strong> и заполнить его
@@ -19,15 +21,6 @@
         Выполнить: <strong>php artisan db:seed</strong>
     </li>     
     <li>
-        Создать следующие папки:
-        <ul>
-            <li>
-                <strong>public/css</strong>
-            </li>
-            <li>
-                <strong>resource/views</strong>
-            </li>                        
-        </ul>
         Создать следующие файлы:
         <ul>
             <li>
