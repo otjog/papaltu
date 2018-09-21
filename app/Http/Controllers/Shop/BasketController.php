@@ -13,13 +13,20 @@ class BasketController extends Controller{
 
     protected $data;
 
+    protected $template_name;
+
     public function __construct(Basket $baskets){
+
+        $this->template_name = env('SITE_TEMPLATE');
+
         $this->baskets = $baskets;
+
         $this->data = [
             'template'  =>  [
                 'component' => 'shop',
                 'resource'  => 'basket'
-            ]
+            ],
+            'template_name' => $this->template_name
         ];
     }
 

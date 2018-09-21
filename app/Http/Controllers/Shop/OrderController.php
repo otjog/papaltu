@@ -19,9 +19,16 @@ class OrderController extends Controller{
 
     protected $data;
 
+    protected $template_name;
+
     public function __construct(Order $orders, Basket $baskets){
+
+        $this->template_name = env('SITE_TEMPLATE');
+
         $this->orders   = $orders;
+
         $this->baskets  = $baskets;
+
         $this->data = [
             'template'  =>  [
                 'component' => 'shop',
@@ -29,7 +36,8 @@ class OrderController extends Controller{
             ],
             'data'      => [
                 'chunk' => 3
-            ]
+            ],
+            'template_name' => $this->template_name
         ];
     }
 

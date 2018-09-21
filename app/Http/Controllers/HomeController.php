@@ -5,11 +5,18 @@ namespace App\Http\Controllers;
 class HomeController extends Controller{
 
     protected $categories;
+
     protected $data;
 
+    protected $template_name;
+
     public function __construct(){
+
+        $this->template_name = env('SITE_TEMPLATE');
+
         $this->data = [
-            'template' => []
+            'template' => [],
+            'template_name' => $this->template_name
         ];
     }
 

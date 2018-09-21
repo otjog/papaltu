@@ -11,9 +11,14 @@ use sngrl\SphinxSearch\SphinxSearch;
 class SearchController extends Controller{
 
     protected $data;
+
     protected $products;
+
     protected $query;
+
     protected $baskets;
+
+    protected $template_name;
 
     /**
      * Создание нового экземпляра контроллера.
@@ -22,9 +27,14 @@ class SearchController extends Controller{
      */
     public function __construct(Request $request, Product $products, Basket $baskets){
 
+        $this->template_name = env('SITE_TEMPLATE');
+
         $this->products = $products;
+
         $this->baskets  = $baskets;
+
         $this->query    = $request->search;
+
         $this->data     = [
             'template'  => [
                 'component'     => 'shop',
@@ -32,7 +42,8 @@ class SearchController extends Controller{
             ],
             'data'      => [
                 'product_chunk' => 4
-            ]
+            ],
+            'template_name' => $this->template_name
         ];
 
     }
