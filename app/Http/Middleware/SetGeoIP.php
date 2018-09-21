@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use App\Models\GeoData;
+use App\Models\Geo\GeoData;
 
 class SetGeoIP{
 

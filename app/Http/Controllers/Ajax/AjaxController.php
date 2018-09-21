@@ -6,7 +6,7 @@ use App\Models\Shop\Product\Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Shop\Services\Delivery;
-use App\Models\GeoData;
+use App\Models\Geo\GeoData;
 
 class AjaxController extends Controller{
 
