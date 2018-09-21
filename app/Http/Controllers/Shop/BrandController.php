@@ -18,12 +18,16 @@ class BrandController extends Controller{
     protected $data;
 
     protected $metaTagsCreater;
+
+    protected $template_name;
     /**
      * Создание нового экземпляра контроллера.
      *
      * @return void
      */
     public function __construct(Brand $brands, Basket $baskets, MetaTagsCreater $metaTagsCreater){
+
+        $this->template_name = env('SITE_TEMPLATE');
 
         $this->brands   = $brands;
 
@@ -38,7 +42,8 @@ class BrandController extends Controller{
             ],
             'data'      => [
                 'product_chunk' => 4
-            ]
+            ],
+            'template_name' => $this->template_name
         ];
 
     }

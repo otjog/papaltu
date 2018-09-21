@@ -17,6 +17,8 @@ class ProductController extends Controller{
     protected $data;
 
     protected $metaTagsCreater;
+
+    protected $template_name;
     /**
      * Создание нового экземпляра контроллера.
      *
@@ -24,6 +26,8 @@ class ProductController extends Controller{
      * @return void
      */
     public function __construct(Product $products, Basket $baskets, MetaTagsCreater $metaTagsCreater ){
+
+        $this->template_name = env('SITE_TEMPLATE');
 
         $this->products = $products;
 
@@ -35,7 +39,8 @@ class ProductController extends Controller{
             'template' => [
                 'component' => 'shop',
                 'resource'  => 'product'
-            ]
+            ],
+            'template_name' => $this->template_name
         ];
     }
 

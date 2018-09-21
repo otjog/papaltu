@@ -19,6 +19,8 @@ class CategoryController extends Controller{
 
     protected $metaTagsCreater;
 
+    protected $template_name;
+
     /**
      * Создание нового экземпляра контроллера.
      *
@@ -26,6 +28,8 @@ class CategoryController extends Controller{
      * @return void
      */
     public function __construct(Category $categories, Basket $baskets, MetaTagsCreater $metaTagsCreater){
+
+        $this->template_name = env('SITE_TEMPLATE');
 
         $this->categories       = $categories;
 
@@ -40,7 +44,8 @@ class CategoryController extends Controller{
                 ],
             'data'      => [
                 'product_chunk' => 3
-            ]
+            ],
+            'template_name' => $this->template_name
         ];
 
     }
