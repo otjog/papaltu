@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers\Info;
 
-use App\Page;
+use App\Models\Site\Page;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 class PageController extends Controller{
 
     protected $pages;
+
     protected $data;
+
+    protected $template_name;
 
     /**
      * Создание нового экземпляра контроллера.
@@ -18,12 +21,17 @@ class PageController extends Controller{
      * @return void
      */
     public function __construct(Page $pages){
+
+        $this->template_name = env('SITE_TEMPLATE');
+
         $this->pages = $pages;
+
         $this->data = [
             'template' => [
                 'component' => 'info',
                 'resource'  => 'page'
-            ]
+            ],
+            'template_name' => $this->template_name
         ];
     }
 
@@ -86,7 +94,7 @@ class PageController extends Controller{
 
         $this->data['data']['page']  = $this->pages->getPage($id);
 
-        return view('components.info.page.edit', $this->data);
+        return view($this->template_name . 'components.info.page.edit', $this->data);
     }
 
     /**

@@ -12,12 +12,13 @@ class ViewComposerServiceProvider extends ServiceProvider{
      * @return void
      */
     public function boot(){
+        $template = env('SITE_TEMPLATE');
         View::composers([
-            'App\Http\ViewComposers\CategoryMenuComposer'   => 'modules.menu.shop',
-            'App\Http\ViewComposers\PageMenuComposer'       => 'modules.menu.page',
-            'App\Http\ViewComposers\ShopBasketComposer'     => 'modules.shop_basket.default',
-            'App\Http\ViewComposers\ProductFilterComposer'  => 'modules.product_filter.default',
-            'App\Http\ViewComposers\BannerComposer'         => 'modules.banner.default',
+            'App\Http\ViewComposers\CategoryMenuComposer'   => $template . '.modules.menu.shop',
+            'App\Http\ViewComposers\PageMenuComposer'       => $template . '.modules.menu.page',
+            'App\Http\ViewComposers\ShopBasketComposer'     => $template . '.modules.shop_basket.default',
+            'App\Http\ViewComposers\ProductFilterComposer'  => $template . '.modules.product_filter.default',
+            'App\Http\ViewComposers\BannerComposer'         => $template . '.modules.banner.default',
         ]);
     }
 

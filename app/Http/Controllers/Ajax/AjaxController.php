@@ -2,18 +2,20 @@
 
 namespace App\Http\Controllers\Ajax;
 
-use App\Product;
+use App\Models\Shop\Product\Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\DeliveryServices;
-use App\Models\GeoData;
+use App\Models\Shop\Services\Delivery;
+use App\Models\Geo\GeoData;
 
 class AjaxController extends Controller{
 
     public function index(Request $request){
 
+        $template_name = env('SITE_TEMPLATE');
+
         //Return
-        $data = [];
+        $data = ['template_name' => $template_name];
 
         //Component-Header
         $component_template = $request->header('X-Component');
@@ -45,7 +47,7 @@ class AjaxController extends Controller{
 
                 case 'delivery' :
 
-                    $ds = new DeliveryServices();
+                    $ds = new Delivery();
 
                     if( count($request->all()) > 0 ){
                         $parcels = [];
@@ -74,7 +76,7 @@ class AjaxController extends Controller{
                         case 'map'          : return response( $data[ $module ] = $ds->getPoints() );
                     }
 
-                    return response()->view('modules.' . $module . '.reload.' . $viewReload, $data);
+                    return response()->view($template_name . '.modules.' . $module . '.reload.' . $viewReload, $data);
 
                 case 'product_filter' :
 
@@ -82,7 +84,7 @@ class AjaxController extends Controller{
 
                     $result = $products->getFilteredProducts($request->toArray());
 
-                    return response()->view( 'modules.' . $module . '.reload.' . $viewReload, ['filtered_products' => $result])->header('Cache-Control', 'no-store');
+                    return response()->view( $template_name . '.modules.' . $module . '.reload.' . $viewReload, ['filtered_products' => $result, 'template_name' => $template_name])->header('Cache-Control', 'no-store');
 
                 case 'geo'  :
 

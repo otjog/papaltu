@@ -4,12 +4,12 @@ namespace App\Http\Controllers\Shop;
 
 use App\Libraries\Services\Pay\Contracts\OnlinePayment;
 use App\Models\Shop\Customer;
-use App\Payment;
+use App\Models\Shop\Order\Payment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\ShopBasket;
-use App\ShopOrder;
-use App\Product;
+use App\Models\Shop\Order\Basket;
+use App\Models\Shop\Order\Order;
+use App\Models\Shop\Product\Product;
 
 class OrderController extends Controller{
 
@@ -19,9 +19,16 @@ class OrderController extends Controller{
 
     protected $data;
 
-    public function __construct(ShopOrder $orders, ShopBasket $baskets){
+    protected $template_name;
+
+    public function __construct(Order $orders, Basket $baskets){
+
+        $this->template_name = env('SITE_TEMPLATE');
+
         $this->orders   = $orders;
+
         $this->baskets  = $baskets;
+
         $this->data = [
             'template'  =>  [
                 'component' => 'shop',
@@ -29,7 +36,8 @@ class OrderController extends Controller{
             ],
             'data'      => [
                 'chunk' => 3
-            ]
+            ],
+            'template_name' => $this->template_name
         ];
     }
 

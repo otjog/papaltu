@@ -3,7 +3,7 @@
 namespace App\Models\Site;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Product;
+use App\Models\Shop\Product\Product;
 
 class Banner extends Model{
 

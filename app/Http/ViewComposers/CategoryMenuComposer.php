@@ -2,7 +2,7 @@
 
 namespace App\Http\ViewComposers;
 
-use App\Category;
+use App\Models\Shop\Category\Category;
 use Illuminate\View\View;
 
 class CategoryMenuComposer{

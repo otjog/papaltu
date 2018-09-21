@@ -4,10 +4,10 @@ namespace App\Libraries\Services\Pay;
 
 use App\Libraries\Services\Pay\Contracts\OnlinePayment;
 use App\Models\Shop\Customer;
-use App\Product;
+use App\Models\Shop\Product\Product;
 use Illuminate\Http\Request;
-use App\ShopBasket;
-use App\ShopOrder;
+use App\Models\Shop\Order\Basket;
+use App\Models\Shop\Order\Order;
 
 class Paymaster implements OnlinePayment{
 
@@ -41,14 +41,14 @@ class Paymaster implements OnlinePayment{
         ];
     }
 
-    public function send(Request $request, ShopBasket $basket){
+    public function send(Request $request, Basket $basket){
 
         $query = $this->getQuery($request->all(), $basket);
 
         return redirect()->away($this->send_url.$query);
     }
 
-    public function confirm(Request $request, ShopBasket $baskets, Product $products){
+    public function confirm(Request $request, Basket $baskets, Product $products){
 
         $request_shop_id = $request['LMI_MERCHANT_ID'];
 
@@ -72,7 +72,7 @@ class Paymaster implements OnlinePayment{
 
     }
 
-    public function execute(Request $request, ShopOrder $orders, ShopBasket $baskets, Customer $customers, Product $products){
+    public function execute(Request $request, Order $orders, Basket $baskets, Customer $customers, Product $products){
 
         $receipt_number = $request['LMI_SYS_PAYMENT_ID'];
 
@@ -109,7 +109,7 @@ class Paymaster implements OnlinePayment{
 
     }
 
-    public function redirect(Request $request, ShopOrder $orders, $msg){
+    public function redirect(Request $request, Order $orders, $msg){
 
         $receipt_number = $request['LMI_SYS_PAYMENT_ID'];
 

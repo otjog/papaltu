@@ -4,28 +4,37 @@ namespace App\Http\Controllers\Search;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Product;
-use App\Http\Controllers\Shop\BasketController;
-use App\ShopBasket;
+use App\Models\Shop\Product\Product;
+use App\Models\Shop\Order\Basket;
 use sngrl\SphinxSearch\SphinxSearch;
 
 class SearchController extends Controller{
 
     protected $data;
+
     protected $products;
+
     protected $query;
+
     protected $baskets;
+
+    protected $template_name;
 
     /**
      * Создание нового экземпляра контроллера.
      *
      * @return void
      */
-    public function __construct(Request $request, Product $products, ShopBasket $baskets){
+    public function __construct(Request $request, Product $products, Basket $baskets){
+
+        $this->template_name = env('SITE_TEMPLATE');
 
         $this->products = $products;
+
         $this->baskets  = $baskets;
+
         $this->query    = $request->search;
+
         $this->data     = [
             'template'  => [
                 'component'     => 'shop',
@@ -33,7 +42,8 @@ class SearchController extends Controller{
             ],
             'data'      => [
                 'product_chunk' => 4
-            ]
+            ],
+            'template_name' => $this->template_name
         ];
 
     }

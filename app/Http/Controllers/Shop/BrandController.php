@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Shop;
 
-use App\Brand;
+use App\Models\Shop\Product\Brand;
 use App\Models\Seo\MetaTagsCreater;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Product;
-use App\ShopBasket;
+use App\Models\Shop\Product\Product;
+use App\Models\Shop\Order\Basket;
 
 class BrandController extends Controller{
 
@@ -18,12 +18,16 @@ class BrandController extends Controller{
     protected $data;
 
     protected $metaTagsCreater;
+
+    protected $template_name;
     /**
      * Создание нового экземпляра контроллера.
      *
      * @return void
      */
-    public function __construct(Brand $brands, ShopBasket $baskets, MetaTagsCreater $metaTagsCreater){
+    public function __construct(Brand $brands, Basket $baskets, MetaTagsCreater $metaTagsCreater){
+
+        $this->template_name = env('SITE_TEMPLATE');
 
         $this->brands   = $brands;
 
@@ -38,7 +42,8 @@ class BrandController extends Controller{
             ],
             'data'      => [
                 'product_chunk' => 4
-            ]
+            ],
+            'template_name' => $this->template_name
         ];
 
     }
