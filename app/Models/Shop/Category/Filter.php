@@ -3,10 +3,11 @@
 namespace App\Models\Shop\Category;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Shop\Product\Product;
 
 class Filter extends Model{
 
-    public function getActiveFilters( $request, $products){
+    public function getActiveFilters( $request, Product $products){
 
         $filters =  self::select(
             'filters.id',
@@ -21,15 +22,16 @@ class Filter extends Model{
         return $this->getParametersForFilters( $request, $products, $filters);
     }
 
-    public function getParametersForFilters( $request, $products, $filters ){
+    public function getParametersForFilters( $request, Product $products, $filters ){
 
         $temporary = [];
         $category_id    = $request->route()->parameters;
         $old_values     = $request->toArray();
 
-        $productsInCategory = $products->getActiveProductsFromCategory($category_id);
+        $productsInCategory = $products->getActiveProductsFromCategoryWithFilterParameters($category_id);
 
         if( count($productsInCategory) > 0){
+
             foreach($filters as $filter){
 
                 switch($filter['alias']){
@@ -47,10 +49,10 @@ class Filter extends Model{
                         break;
 
                     case 'price'        :
-                        $prices = $productsInCategory->pluck('prices');
+                        $prices = $productsInCategory->pluck('price');
                         $values = [
-                            $prices->flatten()->min('value'),
-                            $prices->flatten()->max('value'),
+                            $prices->min('value'),
+                            $prices->max('value'),
                         ];
                         $filter['values']       = $values;
                         $filter['old_values']   = $this->addOldValues($old_values, $filter['alias']);

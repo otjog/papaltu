@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Price;
 
+use App\Models\Shop\Product\Product;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 
@@ -9,7 +10,7 @@ class CurrencyController extends Controller{
 
     private $url = 'http://www.cbr.ru/scripts/XML_daily.asp';
 
-    public function getCur(){
+    public function getCur(Product $products){
 
         $xmlString = $this->connectToSite();
 
@@ -21,6 +22,10 @@ class CurrencyController extends Controller{
                 case 'EUR' : $this->updateCur($cur); break;
             }
         }
+
+        $pricesWithNotMainCurrency = $products->getProductsWithAnotherCurrencyPrice();
+
+        dump($pricesWithNotMainCurrency[57]);
 
     }
 
@@ -36,6 +41,8 @@ class CurrencyController extends Controller{
     private function updateCur($curXml){
         $cur = DB::table('currency')->where('char_code', $curXml->CharCode)->first();
 
+        $time = time();
+
         $floatValue = str_replace(',', '.', $curXml->Value);
 
         if($cur === null){
@@ -44,14 +51,14 @@ class CurrencyController extends Controller{
                     'name' => $curXml->Name,
                     'char_code' => $curXml->CharCode,
                     'value' => $floatValue,
-                    'created_at' => date('Y-m-d H:i:s',time()),
-                    'updated_at' => date('Y-m-d H:i:s',time())
+                    'created_at' => date('Y-m-d H:i:s',$time),
+                    'updated_at' => date('Y-m-d H:i:s',$time)
                 ]
             );
         }else{
             DB::table('currency')
                 ->where('char_code', $curXml->CharCode)
-                ->update(['value' => $floatValue, 'updated_at' => date('Y-m-d H:i:s',time())]);
+                ->update(['value' => $floatValue, 'updated_at' => date('Y-m-d H:i:s',$time)]);
         }
 
     }

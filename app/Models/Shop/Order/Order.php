@@ -70,9 +70,15 @@ class Order extends Model{
 
         if( count( $order ) > 0){
 
-            $order[0]->products = json_decode($order[0]->products_json);
+            $order[0]->products = $products->getProductsFromJson($order[0]->products_json);
 
-            $order[0]->total = $products->getTotal($order[0]->products);
+            $jsonArray = json_decode($order[0]->products_json, true);
+
+            foreach($jsonArray as ["id" => $productId, "order_price" => $productPrice]){
+                $order[0]->products[ $productId ]->relations['price']['order_value'] = $productPrice;
+            }
+
+            $order[0]->total = $products->getTotal($order[0]->products, 'order_value');
 
             $order[0]->count_scu = count((array)$order[0]->products);
 
@@ -148,9 +154,15 @@ class Order extends Model{
 
         $productsFromBasket = $products->getProductsFromJson( $basket->products_json );
 
+        $productsBasketObject = json_decode( $basket->products_json );
+
+        foreach ($productsBasketObject as $productObject){
+            $productObject->order_price = $productsFromBasket[ $productObject->id ]->relations['price']['value'];
+        }
+
         $data_order = [
             'shop_basket_id'    => $basket->id,
-            'products_json'     => $productsFromBasket->toJson(),
+            'products_json'     => json_encode($productsBasketObject),
             'customer_id'       => $customer->id,
         ];
 

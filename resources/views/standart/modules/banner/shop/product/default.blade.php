@@ -13,12 +13,12 @@
                 @endif
                 <div class="banner_price">
 
-                    @if( isset($banner->data->prices[0]->sale) && $banner->data->prices[0]->sale > 0)
+                    @if( isset($banner->data->price['sale']) && $banner->data->price['sale'] > 0)
                         <span>
-                            {{$banner->data->prices[0]->value + $banner->data->prices[0]->sale}}<small>руб</small>
+                            {{$banner->data->price['value'] + $banner->data->price['sale']}}<small>руб</small>
                         </span>
                     @endif
-                        {{$banner->data->prices[0]->value}}<small>руб</small>
+                        {{$banner->data->price['value']}}<small>руб</small>
                 </div>
                 <div class="banner_product_name ">{{$banner->data->name}}</div>
                 <div class="button banner_button"><a href="{{ route('products.show', $banner->data->id) }}">Купить сейчас</a></div>

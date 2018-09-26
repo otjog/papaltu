@@ -69,12 +69,12 @@ class FromSiteController extends Controller{
         ];
 
         $this->tables = [
-            /*
+
             'categories'        => [
                 'default'   =>  [ 'active'  => '1' ],
                 'columns'   =>  [ 'name'   => 'ul.breadcrumb > li> a:last' ],
             ],
-            */
+
             'images'            => [
                 'default'   =>  [],
                 'columns'   =>  [ 'src' => 'div.product-img-block div.owl-carousel div.item.item-carousel > a > img'],
@@ -91,12 +91,12 @@ class FromSiteController extends Controller{
                     'height'        => 'div.container div#tabs_tab_1 div.table-responsive table.table.table-striped td',
                 ],
             ],
-            /*
+
             'product_has_price.retail' => [
                 'default'   =>  [ 'active' => '1', 'price_id' => '2', 'currency_id' => '1' ],
                 'columns'   =>  [ 'value'  => 'div.container > div.row.product-item div.product-actions div.top-price > span.price' ],
             ],
-            */
+
             'product_has_image'            => [
                 'default'   =>  [],
                 'columns'   =>  [],
@@ -137,7 +137,6 @@ class FromSiteController extends Controller{
     }
 
     public function parse(){
-
         $newDataInTables = $this->read();
 
         $this->store($newDataInTables);
@@ -208,7 +207,6 @@ class FromSiteController extends Controller{
                     break;
 
                 case 'product_has_image' :
-
                     $this->storeProductsImages($newDataInTables [ 'product_has_image' ] );
                     break;
 
@@ -629,7 +627,6 @@ class FromSiteController extends Controller{
 
                 if($image !==  null){
 
-                    dump($data['new']);
                     $result = $this->getArrayForInsert([], $data['new']);
 
                     $result['product_id']    = $product->id;
@@ -662,8 +659,9 @@ class FromSiteController extends Controller{
 
     private function getCurrentTableRow($collection, $columnName, $columnValue){
         return $collection->first(function($value, $key) use ($columnName, $columnValue){
-            return $value->$columnName === $columnValue;
+            return $value->$columnName == $columnValue;
         });
+        //todo не точное сравнение!!!
     }
 
     private function addTimeStamp($currentParameters){
@@ -763,7 +761,6 @@ class FromSiteController extends Controller{
         DB::table('product_has_price')
             ->where('active', 1)
             ->whereIn('product_id',    $columns['products_id'])
-            ->whereIn('price_id',      $columns['prices_id'])
             ->update(['active' => 0]
             );
     }

@@ -32,7 +32,7 @@
                         <a href="{{ route('products.show', $product->id) }}">
                             {{ $product->name }}
                         </a>
-                        <span class="text-muted">{{ $product->prices[0]->value }}</span>
+                        <span class="text-muted">{{ $product->price['value'] }}</span>
                         <span class="text-muted small"><small>руб</small></span>
                     </div>
                     <div class="order-2 col-6   order-lg-3 col-lg-6">
@@ -62,7 +62,7 @@
                                 </div>
                             </div>
                             <div class="col-10 col-lg-4 py-3 text-center">
-                                <span>{{ $product->prices[0]->value * $product->quantity }}</span>
+                                <span>{{ $product->price['value'] * $product->quantity }}</span>
                                 <small>руб</small>
                             </div>
                             <div class="col-12 col-lg-2 py-3 d-none d-lg-block text-center text-muted">
