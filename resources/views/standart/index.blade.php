@@ -19,7 +19,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <link rel="stylesheet" href="{{ asset('css/bootstrap/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/jquery/jquery.fancybox.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/fancybox/jquery.fancybox.css') }}">
     <link rel="stylesheet" href="{{ asset('css/jquery/jquery-ui.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/' . $template_name .'/custom.css') }}">
     <link rel="stylesheet" href="{{ asset('css/' . $template_name .'/template.css') }}">
