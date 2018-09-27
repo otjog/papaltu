@@ -48,7 +48,7 @@
     Route::group(['prefix' => 'form'], function () {
 
         //GeoData
-        Route::post('geodata', function (\Illuminate\Http\Request $request, \App\Models\GeoData $geoData){
+        Route::post('geodata', function (\Illuminate\Http\Request $request, \App\Models\Geo\GeoData $geoData){
             $geoData->setGeoInput( $request->address_json );
             return back();
         })->name('GetGeo');
