@@ -417,6 +417,7 @@ class FromXlsxController extends Controller{
         }
 
         return $data;
+
     }
 
     private function storeImagesAndGetRelatedParameters($imagesParameters){
@@ -640,7 +641,6 @@ class FromXlsxController extends Controller{
         DB::table('product_has_price')
             ->where('active', 1)
             ->whereIn('product_id',    $columns['products_id'])
-            ->whereIn('price_id',      $columns['prices_id'])
             ->update(['active' => 0]
             );
     }
@@ -716,7 +716,7 @@ class FromXlsxController extends Controller{
             $dstImageData['height'] /= $ratio;
             $margin['y'] = ($this->imageParameters[$roleImage]['height'] - $dstImageData['height']) / 2;
         }else{
-            $dstImageData['width'] /= $ratio;
+            $dstImageData['width'] *= $ratio;
             $margin['x'] = ($this->imageParameters[$roleImage]['width'] - $dstImageData['width']) / 2;
         }
 
@@ -792,20 +792,6 @@ class FromXlsxController extends Controller{
             'Э' => 'E',     'Ю' => 'Yu',    'Я' => 'Ya',
         );
         return strtr($string, $converter);
-    }
-
-    private function preparePriceValue($value, $priceType){
-        $value = str_replace(' ', '', $value);
-
-        return $value;
-    }
-
-    private function prepareImageValue($path){
-        $path = str_replace('/resize.php?file=', '', $path);
-        $path = str_replace('&size=300', '', $path);
-
-        return $path;
-
     }
 
     /**************************************/

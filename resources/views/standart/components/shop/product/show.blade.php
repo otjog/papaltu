@@ -32,24 +32,24 @@
 <!-- Right Column -->
 <div class="col-lg-5 order-3">
     <div class="product_description">
-        <div class="product_category">{{$product->category->name}}</div>
+        <div class="product_category">{{$product->category['name']}}</div>
         <div class="product_scu">Артикул: {{$product->scu}}</div>
         <h1 class="product_name">{{$product->name}}</h1>
 
-        @isset($product->prices[0]->value)
+        @isset($product->price['value'])
 
-            @if( isset($product->prices[0]->sale) && $product->prices[0]->sale > 0)
+            @if( isset($product->price['sale']) && $product->price['sale'] > 0)
 
                 <div class="product_price text-muted mr-3 clearfix">
                     <s>
-                        <small>{{$product->prices[0]->value + $product->prices[0]->sale}}</small><small>руб</small>
+                        <small>{{$product->price['value'] + $product->price['sale']}}</small><small>руб</small>
                     </s>
                 </div>
 
             @endif
 
             <div class="product_price clearfix">
-                {{ $product->prices[0]->value }}
+                {{ $product->price['value'] }}
                 <small>руб</small>
             </div>
 

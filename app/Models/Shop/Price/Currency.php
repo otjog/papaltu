@@ -25,4 +25,10 @@ class Currency extends Model{
             ->get();
     }
 
+    public function getMainCurrency(){
+        return self::select('id', 'name', 'char_code', 'value')
+            ->where('main', '1')
+            ->get();
+    }
+
 }

@@ -37,9 +37,9 @@
                                 <span class="my-0">
                                     {{ $product->name }}
                                 </span>
-                                <small class="text-muted">{{ $product->prices[0]->value }} x {{$product->quantity}}шт.</small>
+                                <small class="text-muted">{{ $product->price['value'] }} x {{$product->quantity}}шт.</small>
                             </div>
-                            <span class="ml-2">{{ $product->prices[0]->value * $product->quantity }}
+                            <span class="ml-2">{{ $product->price['value'] * $product->quantity }}
                                 <small>руб</small>
                             </span>
                         </li>
