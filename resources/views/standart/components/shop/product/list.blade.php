@@ -28,20 +28,20 @@
                                         <div class="text-center text-light"><i class="fas fa-shopping-basket fa-7x"></i></div>
                                     @endempty
 
-                                    <span class="card-title text-dark"><u>{{ $product->manufacturer->name . ' ' . $product->name }}</u></span>
+                                    <span class="card-title text-dark"><u>{{ $product->manufacturer['name'] . ' ' . $product->name }}</u></span>
                                 </a>
                             </div>
 
-                            @isset($product->prices[0]->value)
+                            @isset($product->price['value'])
                                 <div class="card-footer bg-white">
                                     <div class="row">
                                         <div class="col-6 price category-product text-left">
                                             <div class="row">
                                                 <div class="col-12" style="margin-bottom: -1.2rem">
-                                                    @if( isset($product->prices[0]->sale) && $product->prices[0]->sale > 0)
+                                                    @if( isset($product->price['sale']) && $product->price['sale'] > 0)
                                                         <span class="small text-danger">
                                                             <s>
-                                                                {{$product->prices[0]->value + $product->prices[0]->sale}}<small>руб</small>
+                                                                {{$product->price['value'] + $product->price['sale']}}<small>руб</small>
                                                             </s>
                                                         </span>
                                                     @endif
@@ -49,7 +49,7 @@
                                                 </div>
 
                                                 <div class="col-12 pt-3">
-                                                    <span>{{ $product->prices[0]->value}}</span><small>руб</small>
+                                                    <span>{{ $product->price['value']}}</span><small>руб</small>
                                                 </div>
                                             </div>
 
@@ -72,6 +72,9 @@
             @endforeach
         @endif
     </div>
+
+    @include($template_name .'.modules.pagination.default')
+
 </div>
 
 <!-- Shop Page Navigation -->

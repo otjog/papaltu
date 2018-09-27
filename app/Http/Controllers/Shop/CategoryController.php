@@ -103,12 +103,19 @@ class CategoryController extends Controller{
         $this->data['data']     ['category']            = $category;
         $this->data['data']     ['children_categories'] = $this->categories->getActiveChildrenCategories($id);
         $this->data['data']     ['header_page']         = $category[0]->name;
+        $this->data['data']     ['parameters']          = [];
 
         $this->data['template']['custom'][] = 'shop-icons';
 
         if( count( $request->query ) > 0 ){
 
-            $this->data['data'] ['products'] = $products->getFilteredProducts($request->toArray());
+            $parameters = $request->toArray();
+
+            $parameters['category'] = $id;
+
+            $this->data['data'] ['products'] = $products->getFilteredProducts($parameters);
+
+            $this->data['data'] ['parameters'] = $request->toArray();
 
         }else{
 

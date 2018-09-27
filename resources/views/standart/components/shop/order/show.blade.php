@@ -74,7 +74,7 @@
                     </div>
 
                     <div class="col-lg-2 text-center">
-                        <span class="text-muted">{{ $product->prices[0]->value }}</span>
+                        <span class="text-muted">{{ $product->price['order_value'] }}</span>
                         <span class="text-muted small"><i class="fas fa-ruble-sign"></i></span>
                     </div>
 
@@ -83,7 +83,7 @@
                     </div>
 
                     <div class="col-lg-2 text-center">
-                        <span>{{ $product->prices[0]->value * $product->quantity }}</span>
+                        <span>{{ $product->price['order_value'] * $product->quantity }}</span>
                         <span class="small"><i class="fas fa-ruble-sign"></i></span>
                     </div>
 

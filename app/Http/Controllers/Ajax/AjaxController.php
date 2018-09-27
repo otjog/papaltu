@@ -84,7 +84,23 @@ class AjaxController extends Controller{
 
                     $result = $products->getFilteredProducts($request->toArray());
 
-                    return response()->view( $template_name . '.modules.' . $module . '.reload.' . $viewReload, ['filtered_products' => $result, 'template_name' => $template_name])->header('Cache-Control', 'no-store');
+                    $path = stristr($request->session()->previousUrl(), '?', true);
+
+                    if($path === false){
+                        $path = $request->session()->previousUrl();
+                    }
+
+                    $result->setPath($path);
+
+                    return response()
+                        ->view( $template_name . '.modules.' . $module . '.reload.' . $viewReload,
+                            [
+                                'filtered_products' => $result,
+                                'template_name' => $template_name,
+                                'data' => ['parameters' => $request->toArray()]
+                                ]
+                        )
+                        ->header('Cache-Control', 'no-store');
 
                 case 'geo'  :
 

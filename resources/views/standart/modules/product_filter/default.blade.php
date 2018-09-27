@@ -5,6 +5,7 @@
             <form name="product_filter" role="form" method="GET">
 
                 <input
+
                         type="hidden"
                         name="{{key( $route_value )}}"
                         value="{{ $route_value[ key( $route_value ) ] }}"

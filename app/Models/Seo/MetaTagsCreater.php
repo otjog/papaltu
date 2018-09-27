@@ -38,9 +38,9 @@ class MetaTagsCreater extends Model{
 
         $productName = mb_strtolower($data['product']->name);
 
-        $manufacturerName = mb_strtolower($data['product']['manufacturer']->name);
+        $manufacturerName = mb_strtolower($data['product']['manufacturer']['name']);
 
-        $categoryName = mb_strtolower($data['product']['category']->name);
+        $categoryName = mb_strtolower($data['product']['category']['name']);
 
         $title = $data['product']->name . ' ' . $manufacturerName . ' - купить, цена, инструкция и фото в интернет-магазине ' . $this->siteName;
 

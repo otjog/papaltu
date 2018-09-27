@@ -2,23 +2,24 @@
 
 namespace App\Models\Shop\Product;
 
-use App\Models\Shop\Price\Currency;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use JustBetter\PaginationWithHavings\PaginationWithHavings;
 
 class Product extends Model{
 
+    use PaginationWithHavings;
+
     protected $fillable = ['brand_id', 'category_id', 'manufacturer_id', 'active', 'name', 'scu'];
 
-    private $currencies;
-
     private $date;
+
+    private $pagination = 15;
 
     public function __construct(array $attributes = []){
         parent::__construct($attributes);
 
-        $this->currencies   = new Currency();
-
-        $this->date         = date('Y-m-d');
+        $this->date = date('Y-m-d');
 
     }
 
@@ -39,7 +40,7 @@ class Product extends Model{
     }
 
     public function prices(){
-        return $this->belongsToMany('App\\Models\Shop\Price\Price', 'product_has_price')->withPivot('value', 'currency_id')->withTimestamps();
+        return $this->belongsToMany('App\Models\Shop\Price\Price', 'product_has_price')->withPivot('value', 'currency_id')->withTimestamps();
     }
 
     public function discounts(){
@@ -64,23 +65,6 @@ class Product extends Model{
             ->get();
     }
 
-    public function getActiveProducts(){
-        return self::select(
-            'products.id',
-            'products.category_id',
-            'products.active',
-            'products.name',
-            'products.original_name',
-            'products.scu',
-            'products.description',
-            'products.thumbnail',
-            'products.unique'
-        )
-            ->where('products.active', 1)
-            ->orderBy('products.name')
-            ->get();
-    }
-
     public function getActiveProduct($id){
 
         $products = self::select(
@@ -95,42 +79,77 @@ class Product extends Model{
             'products.weight',
             'products.length',
             'products.width',
-            'products.height'
+            'products.height',
+            'prices.id                      as price_id',
+            'prices.name                    as price_name',
+            'product_has_price.value        as price_pivot_value',
+            'currency.value                 as price_pivot_currencyValue',
+            'currency.char_code             as price_pivot_currencyCode',
+            'currency.id                    as price_pivot_currencyId',
+            'discounts.id                   as discounts_id',
+            'discounts.name                 as discounts_name',
+            'discounts.type                 as discounts_type',
+            'product_has_discount.value     as discounts_pivot_value',
+            'manufacturers.id               as manufacturer_id',
+            'manufacturers.name             as manufacturer_name',
+            'categories.id                  as category_id',
+            'categories.name                as category_name',
+
+            DB::raw(
+                'CASE discounts.type
+                           WHEN "percent"
+                                    THEN ROUND( ( product_has_price.value - (product_has_price.value / 100 * product_has_discount.value) ) * currency.value )
+                           WHEN "value"
+                                    THEN ROUND( (product_has_price.value * currency.value) - product_has_discount.value )
+                           ELSE ROUND( product_has_price.value * currency.value )
+                        END AS price_value'
+            ),
+            DB::raw(
+                'CASE discounts.type
+                           WHEN "percent"
+                                    THEN ROUND( product_has_price.value / 100 * product_has_discount.value * currency.value )
+                           WHEN "value"
+                                    THEN ROUND( product_has_discount.value * currency.value )
+                           ELSE 0
+                        END AS price_sale'
+            )
         )
-            ->where('id', '=', $id)
+            ->where('products.id', '=', $id)
 
-            ->where('active', '=', 1)
+            ->where('products.active', '=', 1)
 
-            /************PRICE******************/
-            ->with(['prices' => function ($query) {
-                $query->where('name', '=', 'retail')
-                ->where('product_has_price.active', '=', '1');
-            }])
+            /************PRICE*******************/
+            ->leftJoin('product_has_price', function ($join) {
+                $join->on('products.id', '=', 'product_has_price.product_id')
+                    ->where('product_has_price.active', '=', '1');
+            })
+            ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
-            /************DISCOUNT***************/
-            ->with(['discounts' => function ($query) {
-                $query->select('name', 'type', 'to_date')
-                    ->where('active', '=', 1)
+            /************CURRENCY****************/
+            ->join('currency', 'currency.id', '=', 'product_has_price.currency_id')
+
+            /************DISCOUNT****************/
+            ->leftJoin('product_has_discount', 'products.id', '=', 'product_has_discount.product_id')
+            ->leftJoin('discounts', function ($join) {
+                $join->on('discounts.id', '=', 'product_has_discount.discount_id')
+                    ->where('discounts.active', '=', '1')
                     ->whereDate('to_date', '>=', $this->date);
-            }])
+            })
 
             /************BRAND******************/
             ->with('brands')
 
-            /************IMAGE******************/
-            ->with('images')
-
             /************MANUFACTURER***********/
-            ->with('manufacturer')
+            ->join('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
 
             /************CATEGORY***************/
-            ->with('category')
+            ->join('categories', 'categories.id', '=', 'products.category_id')
 
             ->get();
 
             if( isset($products[0])){
-                $products = $this->setMainCurrencyPriceValue($products);
-
+                $products = $this->addRelationCollections($products);
+                //dd($products[0]->name);
                 return $products[0];
             }else{
                 return null;
@@ -140,44 +159,142 @@ class Product extends Model{
 
     public function getActiveProductsFromCategory($category_id){
 
-        $products =  self::select(
+        $products = self::select(
             'products.id',
             'products.manufacturer_id',
             'products.active',
             'products.name',
             'products.original_name',
             'products.scu',
-            'products.thumbnail'
+            'products.thumbnail',
+            'prices.id                      as price_id',
+            'prices.name                    as price_name',
+            'product_has_price.value        as price_pivot_value',
+            'product_has_price.value        as price_value',
+            'currency.value                 as price_pivot_currencyValue',
+            'currency.char_code             as price_pivot_currencyCode',
+            'currency.id                    as price_pivot_currencyId',
+            'discounts.id                   as discounts_id',
+            'discounts.name                 as discounts_name',
+            'discounts.type                 as discounts_type',
+            'product_has_discount.value     as discounts_pivot_value',
+            'manufacturers.id               as manufacturer_id',
+            'manufacturers.name             as manufacturer_name',
+
+            DB::raw(
+                'CASE discounts.type
+                           WHEN "percent"
+                                    THEN ROUND( ( product_has_price.value - (product_has_price.value / 100 * product_has_discount.value) ) * currency.value )
+                           WHEN "value"
+                                    THEN ROUND( (product_has_price.value * currency.value) - product_has_discount.value )
+                           ELSE ROUND( product_has_price.value * currency.value )
+                        END AS price_value'
+            ),
+            DB::raw(
+                'CASE discounts.type
+                           WHEN "percent"
+                                    THEN ROUND( product_has_price.value / 100 * product_has_discount.value * currency.value )
+                           WHEN "value"
+                                    THEN ROUND( product_has_discount.value * currency.value )
+                           ELSE 0
+                        END AS price_sale'
+            )
         )
             ->where('products.category_id', $category_id)
 
             ->where('products.active', 1)
 
-            /************PRICE******************/
-            ->with(['prices' => function ($query) {
-                $query->where('name', '=', 'retail')
+            /************PRICE*******************/
+            ->leftJoin('product_has_price', function ($join) {
+                $join->on('products.id', '=', 'product_has_price.product_id')
                     ->where('product_has_price.active', '=', '1');
-            }])
+            })
+            ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
-            /************DISCOUNT***************/
-            ->with(['discounts' => function ($query) {
-                $query->select('name', 'type', 'to_date')
-                    ->where('active', '=', 1)
+            /************CURRENCY****************/
+            ->join('currency', 'currency.id', '=', 'product_has_price.currency_id')
+
+            /************DISCOUNT****************/
+            ->leftJoin('product_has_discount', 'products.id', '=', 'product_has_discount.product_id')
+            ->leftJoin('discounts', function ($join) {
+                $join->on('discounts.id', '=', 'product_has_discount.discount_id')
+                    ->where('discounts.active', '=', '1')
                     ->whereDate('to_date', '>=', $this->date);
-            }])
+            })
 
             /************BRAND******************/
             ->with('brands')
 
             /************MANUFACTURER***********/
-            ->with('manufacturer')
+            ->join('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
+
+            ->orderBy('products.name')
+
+            ->paginate($this->pagination);
+
+        return $this->addRelationCollections($products);
+
+    }
+
+    public function getActiveProductsFromCategoryWithFilterParameters($category_id){
+
+        $products =  self::select(
+            'product_has_price.value        as price_pivot_value',
+            'manufacturers.id               as manufacturer_id',
+            'manufacturers.name             as manufacturer_name',
+
+            DB::raw(
+                'CASE discounts.type
+                           WHEN "percent"
+                                    THEN ROUND( ( product_has_price.value - (product_has_price.value / 100 * product_has_discount.value) ) * currency.value )
+                           WHEN "value"
+                                    THEN ROUND( (product_has_price.value * currency.value) - product_has_discount.value )
+                           ELSE ROUND( product_has_price.value * currency.value )
+                        END AS price_value'
+            ),
+            DB::raw(
+                'CASE discounts.type
+                           WHEN "percent"
+                                    THEN ROUND( product_has_price.value / 100 * product_has_discount.value * currency.value )
+                           WHEN "value"
+                                    THEN ROUND( product_has_discount.value * currency.value )
+                           ELSE 0
+                        END AS price_sale'
+            )
+        )
+            ->where('products.category_id', $category_id)
+
+            ->where('products.active', 1)
+
+            /************PRICE*******************/
+            ->leftJoin('product_has_price', function ($join) {
+                $join->on('products.id', '=', 'product_has_price.product_id')
+                    ->where('product_has_price.active', '=', '1');
+            })
+            ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
+
+            /************CURRENCY****************/
+            ->join('currency', 'currency.id', '=', 'product_has_price.currency_id')
+
+            /************DISCOUNT****************/
+            ->leftJoin('product_has_discount', 'products.id', '=', 'product_has_discount.product_id')
+            ->leftJoin('discounts', function ($join) {
+                $join->on('discounts.id', '=', 'product_has_discount.discount_id')
+                    ->where('discounts.active', '=', '1')
+                    ->whereDate('to_date', '>=', $this->date);
+            })
+
+            /************BRAND******************/
+            ->with('brands')
+
+            /************MANUFACTURER***********/
+            ->join('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
 
             ->orderBy('products.name')
 
             ->get();
 
-
-        return $this->setMainCurrencyPriceValue($products);
+        return $this->addRelationCollections($products);
 
     }
 
@@ -190,31 +307,69 @@ class Product extends Model{
             'products.name',
             'products.original_name',
             'products.scu',
-            'products.thumbnail'
+            'products.thumbnail',
+            'prices.id                      as price_id',
+            'prices.name                    as price_name',
+            'product_has_price.value        as price_pivot_value',
+            'currency.value                 as price_pivot_currencyValue',
+            'currency.char_code             as price_pivot_currencyCode',
+            'currency.id                    as price_pivot_currencyId',
+            'discounts.id                   as discounts_id',
+            'discounts.name                 as discounts_name',
+            'discounts.type                 as discounts_type',
+            'product_has_discount.value     as discounts_pivot_value',
+            'manufacturers.id               as manufacturer_id',
+            'manufacturers.name             as manufacturer_name',
+
+            DB::raw(
+                'CASE discounts.type
+                           WHEN "percent"
+                                    THEN ROUND( ( product_has_price.value - (product_has_price.value / 100 * product_has_discount.value) ) * currency.value )
+                           WHEN "value"
+                                    THEN ROUND( (product_has_price.value * currency.value) - product_has_discount.value )
+                           ELSE ROUND( product_has_price.value * currency.value )
+                        END AS price_value'
+            ),
+            DB::raw(
+                'CASE discounts.type
+                           WHEN "percent"
+                                    THEN ROUND( product_has_price.value / 100 * product_has_discount.value * currency.value )
+                           WHEN "value"
+                                    THEN ROUND( product_has_discount.value * currency.value )
+                           ELSE 0
+                        END AS price_sale'
+            )
         )
+
             ->where('products.active', 1)
 
             /************PRICE*******************/
-            /*
-            ->when(isset($parameters['price']), function ($query) use ($parameters) {
-                return $query->whereHas('prices', function($query) use ($parameters) {
-                    $query->where('name', '=', 'retail')
-                        ->where('product_has_price.active', '=', '1')
-                        ->whereBetween('value', (explode('|', $parameters['price'])) );
-                });
-            })
-            */
-            ->with(['prices' => function ($query) {
-                $query->where('name', '=', 'retail')
+            ->leftJoin('product_has_price', function ($join) {
+                $join->on('products.id', '=', 'product_has_price.product_id')
                     ->where('product_has_price.active', '=', '1');
-            }])
+            })
+            ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
-            /************DISCOUNT***************/
-            ->with(['discounts' => function ($query) {
-                $query->select('name', 'type', 'to_date')
-                    ->where('active', '=', 1)
+            ->when(isset($parameters['price']), function ($query) use ($parameters) {
+
+                list($min, $max) = (explode('|', $parameters['price']));
+
+                return $query->having('price_value', '>=', ($min))
+                    ->having('price_value', '<=', ($max));
+
+            })
+
+            /************CURRENCY****************/
+            ->join('currency', 'currency.id', '=', 'product_has_price.currency_id')
+
+            /************DISCOUNT****************/
+            ->leftJoin('product_has_discount', 'products.id', '=', 'product_has_discount.product_id')
+            ->leftJoin('discounts', function ($join) {
+                $join->on('discounts.id', '=', 'product_has_discount.discount_id')
+                    ->where('discounts.active', '=', '1')
                     ->whereDate('to_date', '>=', $this->date);
-            }])
+            })
+
 
             /************BRAND*******************/
             ->when(isset($parameters['brand']), function ($query) use ($parameters) {
@@ -228,61 +383,83 @@ class Product extends Model{
             ->when(isset($parameters['manufacturer']), function ($query) use ($parameters) {
                 return $query->whereIn('products.manufacturer_id', explode('|', $parameters['manufacturer']));
             })
-            ->with('manufacturer')
+            ->join('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
 
             /************CATEGORY***************/
             ->when(isset($parameters['category']), function ($query) use ($parameters) {
                 return $query->whereIn('products.category_id', explode('|', $parameters['category']));
             })
 
-            ->orderBy('products.id')
+            ->orderBy('products.name')
 
-            ->get();
+            ->paginate($this->pagination);
 
-
-        $products = $this->setMainCurrencyPriceValue($products);
-
-        $filtered = $products->filter(function ($value, $key) use ($parameters){
-
-            $price = $value->prices[0]->value;
-
-            $min_max_array = (explode('|', $parameters['price']));
-
-            return $price > $min_max_array[0] & $price < $min_max_array[1];
-        });
-
-        //todo переделать выборку
-        // Значения из фильтра приходят в рублях,
-        // а значения для товарах хранятся в разной валюте
-
-        return $filtered;
+        return $this->addRelationCollections($products);
 
     }
 
     public function getActiveProductsOfBrand($brand_id){
 
-        $products = self::select(
+        $products =  self::select(
             'products.id',
             'products.manufacturer_id',
+            'products.category_id',
             'products.name',
             'products.original_name',
             'products.scu',
-            'products.thumbnail'
+            'products.thumbnail',
+            'prices.id                      as price_id',
+            'prices.name                    as price_name',
+            'product_has_price.value        as price_pivot_value',
+            'currency.value                 as price_pivot_currencyValue',
+            'currency.char_code             as price_pivot_currencyCode',
+            'currency.id                    as price_pivot_currencyId',
+            'discounts.id                   as discounts_id',
+            'discounts.name                 as discounts_name',
+            'discounts.type                 as discounts_type',
+            'product_has_discount.value     as discounts_pivot_value',
+            'manufacturers.id               as manufacturer_id',
+            'manufacturers.name             as manufacturer_name',
+
+            DB::raw(
+                'CASE discounts.type
+                           WHEN "percent"
+                                    THEN ROUND( ( product_has_price.value - (product_has_price.value / 100 * product_has_discount.value) ) * currency.value )
+                           WHEN "value"
+                                    THEN ROUND( (product_has_price.value * currency.value) - product_has_discount.value )
+                           ELSE ROUND( product_has_price.value * currency.value )
+                        END AS price_value'
+            ),
+            DB::raw(
+                'CASE discounts.type
+                           WHEN "percent"
+                                    THEN ROUND( product_has_price.value / 100 * product_has_discount.value * currency.value )
+                           WHEN "value"
+                                    THEN ROUND( product_has_discount.value * currency.value )
+                           ELSE 0
+                        END AS price_sale'
+            )
         )
+
             ->where('products.active', 1)
 
-            /************PRICE******************/
-            ->with(['prices' => function ($query) {
-                $query->where('name', '=', 'retail')
+            /************PRICE*******************/
+            ->leftJoin('product_has_price', function ($join) {
+                $join->on('products.id', '=', 'product_has_price.product_id')
                     ->where('product_has_price.active', '=', '1');
-            }])
+            })
+            ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
-            /************DISCOUNT***************/
-            ->with(['discounts' => function ($query) {
-                $query->select('name', 'type', 'to_date')
-                    ->where('active', '=', 1)
+            /************CURRENCY****************/
+            ->join('currency', 'currency.id', '=', 'product_has_price.currency_id')
+
+            /************DISCOUNT****************/
+            ->leftJoin('product_has_discount', 'products.id', '=', 'product_has_discount.product_id')
+            ->leftJoin('discounts', function ($join) {
+                $join->on('discounts.id', '=', 'product_has_discount.discount_id')
+                    ->where('discounts.active', '=', '1')
                     ->whereDate('to_date', '>=', $this->date);
-            }])
+            })
 
             /************BRAND******************/
             ->with(['brands' => function ($query) use ($brand_id){
@@ -291,21 +468,19 @@ class Product extends Model{
             }])
 
             /************MANUFACTURER***********/
-            ->with('manufacturer')
-
-            /************CATEGORY***************/
-            ->with('category')
+            ->join('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
 
             ->orderBy('products.name')
 
-            ->get();
+            ->paginate($this->pagination);
 
-        return $this->setMainCurrencyPriceValue($products);
+        return $this->addRelationCollections($products);
+
     }
 
     public function getProductsById($idProducts){
 
-        $products = self::select(
+        $products =  self::select(
             'products.id',
             'products.manufacturer_id',
             'products.category_id',
@@ -316,69 +491,104 @@ class Product extends Model{
             'products.weight',
             'products.length',
             'products.width',
-            'products.height'
+            'products.height',
+            'prices.id                      as price_id',
+            'prices.name                    as price_name',
+            'product_has_price.value        as price_pivot_value',
+            'currency.value                 as price_pivot_currencyValue',
+            'currency.char_code             as price_pivot_currencyCode',
+            'currency.id                    as price_pivot_currencyId',
+            'discounts.id                   as discounts_id',
+            'discounts.name                 as discounts_name',
+            'discounts.type                 as discounts_type',
+            'product_has_discount.value     as discounts_pivot_value',
+            'manufacturers.id               as manufacturer_id',
+            'manufacturers.name             as manufacturer_name',
+
+            DB::raw(
+                'CASE discounts.type
+                           WHEN "percent"
+                                    THEN ROUND( ( product_has_price.value - (product_has_price.value / 100 * product_has_discount.value) ) * currency.value )
+                           WHEN "value"
+                                    THEN ROUND( (product_has_price.value * currency.value) - product_has_discount.value )
+                           ELSE ROUND( product_has_price.value * currency.value )
+                        END AS price_value'
+            ),
+            DB::raw(
+                'CASE discounts.type
+                           WHEN "percent"
+                                    THEN ROUND( product_has_price.value / 100 * product_has_discount.value * currency.value )
+                           WHEN "value"
+                                    THEN ROUND( product_has_discount.value * currency.value )
+                           ELSE 0
+                        END AS price_sale'
+            )
         )
-            ->whereIn('id', $idProducts)
+            ->whereIn('products.id', $idProducts)
 
-            ->where('active', '=', 1)
+            ->where('products.active', 1)
 
-            /************PRICE******************/
-            ->with(['prices' => function ($query) {
-                $query->where('name', '=', 'retail')
+            /************PRICE*******************/
+            ->leftJoin('product_has_price', function ($join) {
+                $join->on('products.id', '=', 'product_has_price.product_id')
                     ->where('product_has_price.active', '=', '1');
-            }])
+            })
+            ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
-            /************DISCOUNT***************/
-            ->with(['discounts' => function ($query) {
-                $query->select('name', 'type', 'to_date')
-                    ->where('active', '=', 1)
+            /************CURRENCY****************/
+            ->join('currency', 'currency.id', '=', 'product_has_price.currency_id')
+
+            /************DISCOUNT****************/
+            ->leftJoin('product_has_discount', 'products.id', '=', 'product_has_discount.product_id')
+            ->leftJoin('discounts', function ($join) {
+                $join->on('discounts.id', '=', 'product_has_discount.discount_id')
+                    ->where('discounts.active', '=', '1')
                     ->whereDate('to_date', '>=', $this->date);
-            }])
+            })
 
             /************BRAND******************/
             ->with('brands')
 
             /************MANUFACTURER***********/
-            ->with('manufacturer')
-
-            /************CATEGORY***************/
-            ->with('category')
+            ->join('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
 
             ->orderBy('products.name')
 
             ->get();
 
-        return $this->setMainCurrencyPriceValue($products);
+        return $this->addRelationCollections($products);
 
     }
 
     public function getProductsFromJson($json_string){
 
-        $json_products = json_decode($json_string, true);
+        $jsonArray = json_decode($json_string, true);
 
         $id_products = [];
 
-        foreach($json_products as $json_product){
-            $id_products[] = $json_product['id'];
+        foreach($jsonArray as ["id" => $productId]){
+            $id_products[] = $productId;
         }
 
-        $products = $this->getProductsById($id_products);
-        $products = $products->keyBy('id');
+        $productsCollect = $this->getProductsById($id_products);
 
-        foreach($json_products as $json_product){
-            $products[$json_product['id']]->quantity = $json_product['quantity'];
+        $productsCollect = $productsCollect->keyBy('id');
+
+        foreach($jsonArray as ["id" => $productId, "quantity" => $productQuantity]){
+            $productsCollect[ $productId ]->quantity = $productQuantity;
         }
 
-        return $products;
+        return $productsCollect;
+
     }
 
-    public function getTotal($products){
+    public function getTotal($products, $columnName = 'value'){
 
         $total = 0;
 
         foreach($products as $product){
 
-            $total += $product->quantity * $product->prices[0]->value;
+            $total += $product->quantity * $product->price[ $columnName ];
 
         }
 
@@ -415,47 +625,39 @@ class Product extends Model{
         ];
     }
 
-    private function setMainCurrencyPriceValue($products){
+    private function addRelationCollections($products){
 
-        $currencies = $this->currencies->getAllCurrencies();
+        foreach ( $products as $product){
 
-        foreach($products as $key => $product){
+            foreach ($product->original as $key => $value){
 
-            if( isset( $product->prices[0] ) ){
+                $match = explode('_', $key);
 
-                $currencyId = $product->prices[0]->pivot->currency_id;
+                switch($match[0]){
 
-                $currency = $currencies->first(function ($value, $key) use ($currencyId){
-                    return $value->id === $currencyId;
-                });
+                    case 'price'       :
+                    case 'category'    :
+                    case 'discounts'   :
+                    case 'manufacturer':
 
-                $price = $currency->value * $product->prices[0]->pivot->value;
+                        if( !isset($data[ $match[0] ]) ){
+                            $data[ $match[0] ] = [] ;
+                        }
 
-                $sale = 0;
+                        switch( $match[1] ){
+                            case 'pivot'    : $data[ $match[0] ] [ $match[1] ] [ $match[2] ] = $value; break;
+                            default         : $data[ $match[0] ] [ $match[1] ] = $value; break;
+                        }
+                        $product->relations[ $match[0] ] = collect($data[ $match[0] ]);
 
-                if( count($product->discounts) > 0 ){
-
-                    switch($product->discounts[0]->type){
-                        case 'percent'  :
-                            $sale = $product->discounts[0]->pivot->value/100 * $price;
-                            $price = $price - $sale;
-                            break;
-                        case 'value'    :
-                            $sale = $product->discounts[0]->pivot->value;
-                            $price = $price - $sale;
-                            break;
-                    }
+                        break;
                 }
 
-                $product->prices[0]->sale = round($sale, 0);
-
-                $product->prices[0]->value = round($price, 0);
             }
 
         }
 
         return $products;
-
     }
 
 
