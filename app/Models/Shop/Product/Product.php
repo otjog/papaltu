@@ -2,28 +2,24 @@
 
 namespace App\Models\Shop\Product;
 
-use App\Models\Shop\Price\Currency;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use JustBetter\PaginationWithHavings\PaginationWithHavings;
 
 class Product extends Model{
 
+    use PaginationWithHavings;
+
     protected $fillable = ['brand_id', 'category_id', 'manufacturer_id', 'active', 'name', 'scu'];
 
-    private $currencies;
-
-    private $mainCurrency;
-
     private $date;
+
+    private $pagination = 15;
 
     public function __construct(array $attributes = []){
         parent::__construct($attributes);
 
-        $this->currencies   = new Currency();
-//todo слишком много запросов
-        $this->mainCurrency = $this->currencies->getMainCurrency();
-
-        $this->date         = date('Y-m-d');
+        $this->date = date('Y-m-d');
 
     }
 
@@ -163,7 +159,7 @@ class Product extends Model{
 
     public function getActiveProductsFromCategory($category_id){
 
-        $products =  self::select(
+        $products = self::select(
             'products.id',
             'products.manufacturer_id',
             'products.active',
@@ -174,6 +170,7 @@ class Product extends Model{
             'prices.id                      as price_id',
             'prices.name                    as price_name',
             'product_has_price.value        as price_pivot_value',
+            'product_has_price.value        as price_value',
             'currency.value                 as price_pivot_currencyValue',
             'currency.char_code             as price_pivot_currencyCode',
             'currency.id                    as price_pivot_currencyId',
@@ -233,7 +230,7 @@ class Product extends Model{
 
             ->orderBy('products.name')
 
-            ->get();
+            ->paginate($this->pagination);
 
         return $this->addRelationCollections($products);
 
@@ -395,7 +392,7 @@ class Product extends Model{
 
             ->orderBy('products.name')
 
-            ->get();
+            ->paginate($this->pagination);
 
         return $this->addRelationCollections($products);
 
@@ -475,7 +472,7 @@ class Product extends Model{
 
             ->orderBy('products.name')
 
-            ->get();
+            ->paginate($this->pagination);
 
         return $this->addRelationCollections($products);
 
@@ -591,7 +588,7 @@ class Product extends Model{
 
         foreach($products as $product){
 
-            $total += $product->quantity * $product->price['value'];
+            $total += $product->quantity * $product->price[ $columnName ];
 
         }
 

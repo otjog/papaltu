@@ -11,6 +11,7 @@
         "geoip2/geoip2": "~2.0",
         "guzzlehttp/guzzle": "^6.3",
         "huasituo/laravel-phpquery": "^1.0",
+        "justbetter/laravel-pagination-with-havings": "^1.0",
         "laravel/framework": "5.6.*",
         "laravel/scout": "^4.0",
         "laravel/tinker": "^1.0",

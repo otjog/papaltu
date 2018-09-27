@@ -72,6 +72,9 @@
             @endforeach
         @endif
     </div>
+
+    @include($template_name .'.modules.pagination.default')
+
 </div>
 
 <!-- Shop Page Navigation -->
