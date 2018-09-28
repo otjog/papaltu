@@ -5,12 +5,11 @@
 
     <div class="container fill_height">
         <div class="row fill_height">
-            <?php dd($banner)?>
             <div class="banner_product_image"><img class="float left img-fluid" src="{{ URL::asset('storage/img/banners/shop/products/' . $banner->data->id . '.png') }}" alt=""></div>
             <div class="col-lg-5 offset-lg-4 fill_height">
                 <div class="banner_content">
 
-                    @if($banner->img !== null)
+                    @if($banner->title !== null)
                         <h2 class="banner_text">{{$banner->title}}</h2>
                     @endif
                     <div class="banner_price">
