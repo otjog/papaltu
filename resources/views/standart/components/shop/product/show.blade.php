@@ -36,7 +36,7 @@
         <div class="product_scu">Артикул: {{$product->scu}}</div>
         <h1 class="product_name">{{$product->name}}</h1>
 
-        @isset($product->price['value'])
+        @if( isset($product->price['value']) && $product->price['value'] !== null)
 
             @if( isset($product->price['sale']) && $product->price['sale'] > 0)
 
@@ -81,7 +81,12 @@
 
                 </form>
             </div>
-        @endisset
+
+        @else
+            <div class="alert alert-warning">
+                Мы не смогли отобразить цену. Позвоните нам и мы всё исправим.
+            </div>
+        @endif
 
         <div class="my-4 py-3 border-top">
 
