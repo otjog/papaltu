@@ -126,7 +126,7 @@ class Product extends Model{
             ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
             /************CURRENCY****************/
-            ->join('currency', 'currency.id', '=', 'product_has_price.currency_id')
+            ->leftJoin('currency', 'currency.id', '=', 'product_has_price.currency_id')
 
             /************DISCOUNT****************/
             ->leftJoin('product_has_discount', 'products.id', '=', 'product_has_discount.product_id')
@@ -140,10 +140,10 @@ class Product extends Model{
             ->with('brands')
 
             /************MANUFACTURER***********/
-            ->join('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
+            ->leftJoin('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
 
             /************CATEGORY***************/
-            ->join('categories', 'categories.id', '=', 'products.category_id')
+            ->leftJoin('categories', 'categories.id', '=', 'products.category_id')
 
             ->get();
 
@@ -212,7 +212,7 @@ class Product extends Model{
             ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
             /************CURRENCY****************/
-            ->join('currency', 'currency.id', '=', 'product_has_price.currency_id')
+            ->leftJoin('currency', 'currency.id', '=', 'product_has_price.currency_id')
 
             /************DISCOUNT****************/
             ->leftJoin('product_has_discount', 'products.id', '=', 'product_has_discount.product_id')
@@ -226,11 +226,11 @@ class Product extends Model{
             ->with('brands')
 
             /************MANUFACTURER***********/
-            ->join('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
+            ->leftJoin('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
 
-            ->orderBy('products.name')
+            ->orderBy('products.name');
 
-            ->paginate($this->pagination);
+            $products = $products->paginate($this->pagination);
 
         return $this->addRelationCollections($products);
 
@@ -274,7 +274,7 @@ class Product extends Model{
             ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
             /************CURRENCY****************/
-            ->join('currency', 'currency.id', '=', 'product_has_price.currency_id')
+            ->leftJoin('currency', 'currency.id', '=', 'product_has_price.currency_id')
 
             /************DISCOUNT****************/
             ->leftJoin('product_has_discount', 'products.id', '=', 'product_has_discount.product_id')
@@ -288,7 +288,7 @@ class Product extends Model{
             ->with('brands')
 
             /************MANUFACTURER***********/
-            ->join('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
+            ->leftJoin('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
 
             ->orderBy('products.name')
 
@@ -360,7 +360,7 @@ class Product extends Model{
             })
 
             /************CURRENCY****************/
-            ->join('currency', 'currency.id', '=', 'product_has_price.currency_id')
+            ->leftJoin('currency', 'currency.id', '=', 'product_has_price.currency_id')
 
             /************DISCOUNT****************/
             ->leftJoin('product_has_discount', 'products.id', '=', 'product_has_discount.product_id')
@@ -383,7 +383,7 @@ class Product extends Model{
             ->when(isset($parameters['manufacturer']), function ($query) use ($parameters) {
                 return $query->whereIn('products.manufacturer_id', explode('|', $parameters['manufacturer']));
             })
-            ->join('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
+            ->leftJoin('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
 
             /************CATEGORY***************/
             ->when(isset($parameters['category']), function ($query) use ($parameters) {
@@ -451,7 +451,7 @@ class Product extends Model{
             ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
             /************CURRENCY****************/
-            ->join('currency', 'currency.id', '=', 'product_has_price.currency_id')
+            ->leftJoin('currency', 'currency.id', '=', 'product_has_price.currency_id')
 
             /************DISCOUNT****************/
             ->leftJoin('product_has_discount', 'products.id', '=', 'product_has_discount.product_id')
@@ -468,7 +468,7 @@ class Product extends Model{
             }])
 
             /************MANUFACTURER***********/
-            ->join('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
+            ->leftJoin('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
 
             ->orderBy('products.name')
 
@@ -478,7 +478,7 @@ class Product extends Model{
 
     }
 
-    public function getProductsById($idProducts){
+    public function getProductsById($idProducts, $paginate = true){
 
         $products =  self::select(
             'products.id',
@@ -536,7 +536,7 @@ class Product extends Model{
             ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
             /************CURRENCY****************/
-            ->join('currency', 'currency.id', '=', 'product_has_price.currency_id')
+            ->leftJoin('currency', 'currency.id', '=', 'product_has_price.currency_id')
 
             /************DISCOUNT****************/
             ->leftJoin('product_has_discount', 'products.id', '=', 'product_has_discount.product_id')
@@ -550,11 +550,15 @@ class Product extends Model{
             ->with('brands')
 
             /************MANUFACTURER***********/
-            ->join('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
+            ->leftJoin('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
 
-            ->orderBy('products.name')
+            ->orderBy('products.name');
 
-            ->get();
+            if($paginate){
+                $products = $products->paginate($this->pagination);
+            }else{
+                $products = $products->get();
+            }
 
         return $this->addRelationCollections($products);
 
@@ -570,7 +574,7 @@ class Product extends Model{
             $id_products[] = $productId;
         }
 
-        $productsCollect = $this->getProductsById($id_products);
+        $productsCollect = $this->getProductsById($id_products, $paginate = false);
 
         $productsCollect = $productsCollect->keyBy('id');
 
@@ -659,6 +663,5 @@ class Product extends Model{
 
         return $products;
     }
-
 
 }

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use phpQuery;
 use App\Models\Shop\Product\Product;
 use Illuminate\Support\Facades\DB;
+use Exception;
 
 class FromSiteController extends Controller{
 
@@ -21,6 +22,8 @@ class FromSiteController extends Controller{
     private $categoryLinkKey;
 
     private $productLinkKey;
+
+    private $pagination;
 
     private $customGroupIterator;
 
@@ -43,15 +46,17 @@ class FromSiteController extends Controller{
     private $image;
 
     public function __construct(Request $request, Product $product, Category $category, Image $image){
-        $this->host             = 'http://aprilgroup.ru';
+        $this->host             = '';   //'http://aprilgroup.ru'
 
         $this->startPathName    = '';
 
         $this->queryUrl         = '';
 
-        $this->categoryLinkKey  = 'div#collapse11  a[href=#collapse28]';
+        $this->categoryLinkKey  = '';   //'div#collapse11  a[href=#collapse28]';
 
-        $this->productLinkKey   = '#shop-products > div.items > div.product > div.product-box a.product-title';
+        $this->productLinkKey   = '';   //'#shop-products > div.items > div.product > div.product-box a.product-title';
+
+        $this->pagination       = '';   //?PAGEN_1=
 
         $this->imageParameters = [
             'thumb' => [
@@ -72,29 +77,29 @@ class FromSiteController extends Controller{
 
             'categories'        => [
                 'default'   =>  [ 'active'  => '1' ],
-                'columns'   =>  [ 'name'   => 'ul.breadcrumb > li> a:last' ],
+                'columns'   =>  [ 'name'   => '/*jquery_lang*/' ],
             ],
 
             'images'            => [
                 'default'   =>  [],
-                'columns'   =>  [ 'src' => 'div.product-img-block div.owl-carousel div.item.item-carousel > a > img'],
+                'columns'   =>  [ 'src' => '/*jquery_lang*/'],
             ],
             'products'          => [
                 'default'   =>  [ 'active' => '1', 'manufacturer_id' => '1' ],
                 'columns'   =>  [
-                    //'scu'           => 'div.container > div.row.product-item div.product-sku',
-                    'name'          => 'div.container > div.row.product-item h1',
-                    //'description'   => '#tabs_tab_0'
-                    'weight'        => 'div.container div#tabs_tab_1 div.table-responsive table.table.table-striped td',
-                    'length'        => 'div.container div#tabs_tab_1 div.table-responsive table.table.table-striped td',
-                    'width'         => 'div.container div#tabs_tab_1 div.table-responsive table.table.table-striped td',
-                    'height'        => 'div.container div#tabs_tab_1 div.table-responsive table.table.table-striped td',
+                    'scu'           => '/*jquery_lang*/',
+                    'name'          => '/*jquery_lang*/',
+                    'description'   => '/*jquery_lang*/',
+                    'weight'        => '/*jquery_lang*/',
+                    'length'        => '/*jquery_lang*/',
+                    'width'         => '/*jquery_lang*/',
+                    'height'        => '/*jquery_lang*/',
                 ],
             ],
 
             'product_has_price.retail' => [
-                'default'   =>  [ 'active' => '1', 'price_id' => '2', 'currency_id' => '1' ],
-                'columns'   =>  [ 'value'  => 'div.container > div.row.product-item div.product-actions div.top-price > span.price' ],
+                'default'   =>  [ 'active' => '1', 'price_id' => '1', 'currency_id' => '1' ],
+                'columns'   =>  [ 'value'  => '/*jquery_lang*/' ],
             ],
 
             'product_has_image'            => [
@@ -119,24 +124,13 @@ class FromSiteController extends Controller{
         $this->thumbImageFolder = 'storage/img/shop/product/thumbnail/';
 
         $this->customGroupIterator = [
-            /*
-            '/nasosnoe_oborudovanie/poverkhnostnye_ehlektronasosy',
-            '/nasosnoe_oborudovanie/pogruzhnye_ehlektronasosy_dlja_skvazhin_i_komplektujushhie',
-            '/nasosnoe_oborudovanie/ehlektronasosy_drenazhnye',
-            '/stancii_avtomaticheskogo_vodosnabzhenija_ehlementy_i_komplektujushhie/sav_s_gidroakkumuljatorom',
-            '/stancii_avtomaticheskogo_vodosnabzhenija_ehlementy_i_komplektujushhie/komplektujushhie_stancij_avtomaticheskogo_vodosnabzhenija',
-            '/cirkuljacionnye_nasosy',
-            '/gidroakkumuljatory_i_rasshiritelnye_baki/gidroakkumuljatori',
-            '/rasshiritelnye_baki_gidroakkumuljatory_mnogofunkcionalnye_baki_i_membrany/rasshiritelnye_baki__ehkspansomaty__dlja_sistem_otoplenija',
-            '/rasshiritelnye_baki_gidroakkumuljatory_mnogofunkcionalnye_baki_i_membrany',
-            '/rasshiritelnye_baki_gidroakkumuljatory_mnogofunkcionalnye_baki_i_membrany/membrany_dlja_gidroakkumuljatorov_i_rasshiritelnykh_bakov',
-            */
-            '/rasshiritelnye_baki_gidroakkumuljatory_mnogofunkcionalnye_baki_i_membrany/zapasnye_chasti_i_ehlementy_kreplenija_bakov'
+            // '/rasshiritelnye_baki_gidroakkumuljatory_mnogofunkcionalnye_baki_i_membrany/zapasnye_chasti_i_ehlementy_kreplenija_bakov'
         ];
 
     }
 
     public function parse(){
+
         $newDataInTables = $this->read();
 
         $this->store($newDataInTables);
@@ -148,9 +142,9 @@ class FromSiteController extends Controller{
 
         $groupIteraror = $this->getGroupIterator();
 
-        foreach($groupIteraror as $group){
+        foreach($groupIteraror as $anchor){
 
-            $itemIterator = $this->getItemIterator( $group );
+            $itemIterator = $this->getItemIterator( $anchor );
 
             foreach ($itemIterator as $item) {
 
@@ -219,7 +213,9 @@ class FromSiteController extends Controller{
     private function getGroupIterator(){
 
         if( count($this->customGroupIterator) > 0 ){
+
             return $this->customGroupIterator;
+
         }else{
 
             $url = $this->host . $this->startPathName;
@@ -229,9 +225,9 @@ class FromSiteController extends Controller{
 
     }
 
-    private function getItemIterator( $group ){
+    private function getItemIterator($anchor ){
 
-        $url = $this->host . $group . $this->queryUrl;
+        $url = $this->host . $anchor . $this->queryUrl;
 
         $result = [];
 
@@ -242,13 +238,17 @@ class FromSiteController extends Controller{
             $pq_links = $this->getIteratorElements($nextUrl, $this->productLinkKey);
 
             if(count( $pq_links ) === 0){
+
                 break;
+
             }
 
             $different = array_diff($pq_links, $result);
 
             if( count( $different ) === 0){
+
                 break;
+
             }
 
             $result = array_merge($result, $pq_links);
@@ -267,7 +267,7 @@ class FromSiteController extends Controller{
 
         $links = $html_dom->find($linkName);
 
-        $pq_links = array_map('pq', $links->elements);
+        $pq_links = array_map([$this, 'pickHref'], $links->elements);
 
         phpQuery::unloadDocuments($html_dom->documentID);
 
@@ -276,7 +276,8 @@ class FromSiteController extends Controller{
 
     private function getCurrentParameters($item){
 
-        $html = $this->getHtmlPage($this->host . $item->attr( 'href' ) );
+        $html = $this->getHtmlPage($this->host . $item);
+
         $html_dom = phpQuery::newDocument($html);
 
         $currentParameters = [];
@@ -383,7 +384,7 @@ class FromSiteController extends Controller{
                     $images = [];
                     foreach($searched as $image){
                         $pq_image = pq($image);
-                        $images[] = $this->host . '/' . str_replace('100x108', '800x860', $pq_image->attr('src'));
+                        $images[] = $pq_image->attr('src');
                     }
                     return $images;
                 }
@@ -497,62 +498,65 @@ class FromSiteController extends Controller{
 
                 $srcImageData = $this->getImageData($src);
 
-                /*****************Create Image************************/
-                $image = $this->loadImage($src, $srcImageData['const_ext']);
+                if($srcImageData){
+                    /*****************Create Image************************/
+                    $image = $this->loadImage($src, $srcImageData['const_ext']);
 
-                $squareImage = $this->createNewImage($image, $srcImageData, 'big');
+                    $squareImage = $this->createNewImage($image, $srcImageData, 'big');
 
-                if($squareImage){
+                    if($squareImage){
 
-                    $imageName  = $this->getNewImageName($this->mainImageFolder, $sc_value . $this->imageParameters['big']['addition'], $srcImageData['extension']);
+                        $imageName  = $this->getNewImageName($this->mainImageFolder, $sc_value . $this->imageParameters['big']['addition'], $srcImageData['extension']);
 
-                    $newImage   = $this->saveImage($squareImage, $imageName, $this->mainImageFolder, $srcImageData['const_ext']);
+                        $newImage   = $this->saveImage($squareImage, $imageName, $this->mainImageFolder, $srcImageData['const_ext']);
 
-                    if($newImage !== false){
+                        if($newImage !== false){
 
-                        $tableRow = $this->getCurrentTableRow($imagesCollection, 'src', $imageName);
+                            $tableRow = $this->getCurrentTableRow($imagesCollection, 'src', $imageName);
 
-                        if($tableRow !== null){
+                            if($tableRow !== null){
 
-                            $data['images']['update'] = $this->getArrayForUpdate(['src' => $imageName], $tableRow, $data['images']['update']);
+                                $data['images']['update'] = $this->getArrayForUpdate(['src' => $imageName], $tableRow, $data['images']['update']);
 
-                        }else{
+                            }else{
 
-                            $result = $this->getArrayForInsert(['src' => $imageName], $data['images']['new'], 'src');
+                                $result = $this->getArrayForInsert(['src' => $imageName], $data['images']['new'], 'src');
 
-                            if($result !== false) {
-                                $data['images']['new'][] = $result;
-                                $data['product_has_image'][] = [ 'product_' . $this->compareColumn  => $sc_value, 'src' => $result['src']];
+                                if($result !== false) {
+                                    $data['images']['new'][] = $result;
+                                    $data['product_has_image'][] = [ 'product_' . $this->compareColumn  => $sc_value, 'src' => $result['src']];
+                                }
+
                             }
 
                         }
 
                     }
-
-                }
-                /*****************End Image***************************/
+                    /*****************End Image***************************/
 
 
-                /*****************Create Thumb************************/
-                if($key === 0){
+                    /*****************Create Thumb************************/
+                    if($key === 0){
 
-                    $thumb = $this->createNewImage($image, $srcImageData, 'thumb');
+                        $thumb = $this->createNewImage($image, $srcImageData, 'thumb');
 
-                    if($thumb){
+                        if($thumb){
 
-                        $thumbName = $this->getNewImageName($this->thumbImageFolder, $sc_value . $this->imageParameters['thumb']['addition'], $srcImageData['extension']);
-                        $newThumb = $this->saveImage($thumb, $thumbName, $this->thumbImageFolder, $srcImageData['const_ext']);
+                            $thumbName = $this->getNewImageName($this->thumbImageFolder, $sc_value . $this->imageParameters['thumb']['addition'], $srcImageData['extension']);
+                            $newThumb = $this->saveImage($thumb, $thumbName, $this->thumbImageFolder, $srcImageData['const_ext']);
 
-                        if($newThumb !== false){
+                            if($newThumb !== false){
 
-                            $data['products'][$sc_value]['thumbnail'] = $thumbName;
+                                $data['products'][$sc_value]['thumbnail'] = $thumbName;
+
+                            }
 
                         }
 
                     }
-
+                    /*****************End Thumb************************/
                 }
-                /*****************End Thumb************************/
+
             }
 
         }
@@ -761,6 +765,7 @@ class FromSiteController extends Controller{
         DB::table('product_has_price')
             ->where('active', 1)
             ->whereIn('product_id',    $columns['products_id'])
+            ->whereIn('price_id',      $columns['prices_id'])
             ->update(['active' => 0]
             );
     }
@@ -768,11 +773,38 @@ class FromSiteController extends Controller{
     //todo переименовать функцию
     private function getImageData($src){
 
-        list($imageData['width'], $imageData['height'], $imageData['const_ext']) =  getimagesize($src);
+        try{
 
-        $imageData['extension'] = $this->getExtensionImage($imageData['const_ext']);
+            list($imageData['width'], $imageData['height'], $imageData['const_ext']) =  getimagesize($src);
 
-        return $imageData;
+            $imageData['extension'] = $this->getExtensionImage($imageData['const_ext']);
+
+            return $imageData;
+
+
+        }catch (Exception $e){
+
+            try{
+
+                $filename='storage/img/shop/product/temporary.file';
+
+                file_put_contents($filename,file_get_contents($src));
+
+                list($imageData['width'], $imageData['height'], $imageData['const_ext']) =  getimagesize($src);
+
+                $imageData['extension'] = $this->getExtensionImage($imageData['const_ext']);
+
+                return $imageData;
+
+            }catch (Exception $e){
+
+                file_put_contents('storage/img/shop/product/exc.txt', $src, FILE_APPEND);
+
+                return false;
+
+            }
+
+        }
 
     }
 
@@ -925,7 +957,7 @@ class FromSiteController extends Controller{
     }
 
     private function getNextUrl($url, $i){
-        return $url.'/page/'.$i;
+        return $url . $this->pagination . $i;
     }
 
     private function searchValueInTable($searched, $prevSiblingValue, $replaceStr){
@@ -935,6 +967,11 @@ class FromSiteController extends Controller{
                 return trim( str_replace($replaceStr, '',  trim( $pq_td->next()->text() ) ) );
             }
         }
+    }
+
+    private function pickHref($anchor){
+        $anchor = pq($anchor);
+        return $anchor->attr('href');
     }
 
 }
