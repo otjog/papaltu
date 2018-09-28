@@ -32,7 +32,7 @@
                                 </a>
                             </div>
 
-                            @isset($product->price['value'])
+                            @if( isset($product->price['value']) && $product->price['value'] !== null)
                                 <div class="card-footer bg-white">
                                     <div class="row">
                                         <div class="col-6 price category-product text-left">
@@ -64,7 +64,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            @endisset
+                            @endif
 
                         </div>
                     @endforeach

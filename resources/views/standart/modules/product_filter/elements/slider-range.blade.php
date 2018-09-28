@@ -25,12 +25,12 @@
                     min="{{$values['static'][0]}}"
                     max="{{$values['static'][1]}}"
                     value="{{$values['dynamic'][$i]}}"
-                    name="{{$alias}}[ {{$i}} ]"
+                    name="{{$filter['alias']}}[ {{$i}} ]"
                     size="6"
                     data-filter-type="slider"
                     data-filter-slider-input-index="0"
                     data-filter-default-value="{{$values['static'][$i]}}"
-                    data-filter-name="{{$alias}}"
+                    data-filter-name="{{$filter['alias']}}"
             />
         </div>
     @endfor

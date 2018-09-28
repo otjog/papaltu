@@ -7,7 +7,7 @@ use App\Models\Shop\Product\Product;
 
 class Filter extends Model{
 
-    public function getActiveFilters( $request, Product $products){
+    public function getActiveFiltersWithParameters($request, Product $products){
 
         $filters =  self::select(
             'filters.id',
@@ -20,53 +20,92 @@ class Filter extends Model{
             ->get();
 
         return $this->getParametersForFilters( $request, $products, $filters);
+
     }
 
     public function getParametersForFilters( $request, Product $products, $filters ){
 
         $temporary = [];
+
         $category_id    = $request->route()->parameters;
+
         $old_values     = $request->toArray();
 
         $productsInCategory = $products->getActiveProductsFromCategoryWithFilterParameters($category_id);
 
         if( count($productsInCategory) > 0){
 
-            foreach($filters as $filter){
+            foreach($filters as $key => $filter){
 
                 switch($filter['alias']){
 
                     case 'manufacturer' :
-                        $manufacturers = $productsInCategory->pluck('manufacturer');
-                        $filter['values']       = $manufacturers->pluck('name', 'id');
+
+                        /* если решим показывать в фильтре товары без производителя
+                        $manufacturers = $productsInCategory->map(function ($value, $key){
+                            $manufacturer = $value->relations['manufacturer'];
+
+                             if($manufacturer['id'] !== null && $manufacturer['name'] !== null){
+                                 return [ 'id' => $manufacturer['id'], 'name' => $manufacturer['name'] ];
+                             }
+                             return [ 'id' => 0, 'name' => 'Не задан' ];
+
+                        });
+*/
+
+                        $manufacturers  = $productsInCategory->pluck('manufacturer');
+
+                        $distinctManfs  = $manufacturers->pluck('name', 'id');
+
+                        $filter['values']   = $distinctManfs->filter(function ($value, $key) {
+                            return $key !== '' && $value !== null;
+                        });
+
                         $filter['old_values']   = $this->addOldValues($old_values, $filter['alias']);
+
                         break;
 
                     case 'brand'        :
+
                         $brands = $productsInCategory->pluck('brands');
+
                         $filter['values']       = $brands->flatten()->pluck('name', 'id');
+
                         $filter['old_values']   = $this->addOldValues($old_values, $filter['alias']);
+
                         break;
 
                     case 'price'        :
                         $prices = $productsInCategory->pluck('price');
+
                         $values = [
                             $prices->min('value'),
                             $prices->max('value'),
                         ];
-                        $filter['values']       = $values;
+
+                        if($values[0] !== null || $values[1] !== null ){
+                            $filter['values'] = $values;
+                        }else{
+                            $filter['values'] = [];
+                        }
+
                         $filter['old_values']   = $this->addOldValues($old_values, $filter['alias']);
+
                         break;
 
                     case 'phrase'       :
+
                         $filter['values']       = [];
+
                         $filter['old_values']   = $this->addOldValues($old_values, $filter['alias']);
+
                         break;
 
                     default             :
                         if($filter['filter_type'] === 'slider-range'){
 
                             //todo должно отдавать только минимальное и максимальное значение, как в price
+                            //todo проверка значений на null
                             $filter['values']       = [$filter['value']];
                             $filter['old_values']   = $this->addOldValues($old_values, $filter['alias']);
                             break;
@@ -77,13 +116,14 @@ class Filter extends Model{
                         }
                 }
 
+
                 if( count( $filter['values'] ) > 0){
-                    $temporary[$filter['alias']] = $filter->toArray();
+                    $temporary[] = $filter;
                 }
 
             }
-        }
 
+        }
         return $temporary;
     }
 

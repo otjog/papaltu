@@ -13,7 +13,7 @@ class ProductFilterComposer{
     protected $route_value;
 
     public function __construct(Request $request, Filter $filters, Product $products){
-        $this->filters = $filters->getActiveFilters($request, $products);
+        $this->filters = $filters->getActiveFiltersWithParameters($request, $products);
         $this->route_value = $request->route()->parameters;
     }
 

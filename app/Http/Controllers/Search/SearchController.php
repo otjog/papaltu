@@ -63,6 +63,8 @@ class SearchController extends Controller{
             $this->data['data'] ['products'] = $this->products->getProductsById( array_keys( $searchIdResult[ 'matches' ] ) );
         }
 
+
+
         return view( 'templates.default', $this->data);
     }
 
