@@ -131,6 +131,22 @@
             @if(isset( $product->description ))
                 <p>{{ $product->description }}</p>
             @endif
+
+            @if( isset($product->parameters) && count($product->parameters) > 0)
+                <ul class="list-unstyled">
+                    @foreach($product->parameters as $key => $parameter)
+
+                        <li>
+                            @if($key === 0 || $product->parameters[$key -1 ]->name !== $parameter->name)
+                                <strong>{{$parameter->name}}: </strong>
+                            @endif
+
+                            <span class="text-muted">{{$parameter->pivot->value}}</span>
+                        </li>
+                    @endforeach
+                </ul>
+
+            @endif
         </div>
 
         {{-- Delivery Tab --}}
