@@ -107,12 +107,40 @@ class Filter extends Model{
                             //todo должно отдавать только минимальное и максимальное значение, как в price
                             //todo проверка значений на null
                             $filter['values']       = [$filter['value']];
+
                             $filter['old_values']   = $this->addOldValues($old_values, $filter['alias']);
+
                             break;
+
                         }else{
-                            $filter['values']       = [$filter['value_id'] => $filter['value']];
+
+                            $parameters = $productsInCategory->pluck('parameters');
+
+                            $values = [];
+
+                            foreach($parameters as $productParameters){
+
+                                foreach($productParameters as $parameter){
+
+                                    if( $parameter->alias === $filter['alias']){
+
+                                        if( !isset($values[ $parameter->pivot->value ])){
+                                            $values[ $parameter->pivot->value ] = $parameter->pivot->value;
+                                        }
+
+                                    }
+
+                                }
+                            }
+
+                            $filter['alias'] = 'p_' . $filter['alias'];
+
+                            $filter['values']       = array_flip($values);
+
                             $filter['old_values']   = $this->addOldValues($old_values, $filter['alias']);
+
                             break;
+
                         }
                 }
 

@@ -47,6 +47,10 @@ class Product extends Model{
         return $this->belongsToMany('App\Models\Shop\Price\Discount', 'product_has_discount')->withPivot('value')->withTimestamps();
     }
 
+    public function parameters(){
+        return $this->belongsToMany('App\Models\Shop\Parameter\Parameter', 'product_has_parameter', 'product_id', 'parameter_id')->withPivot('value')->withTimestamps();
+}
+
     /*******************************/
 
     public function getAllProducts(){
@@ -121,7 +125,8 @@ class Product extends Model{
             /************PRICE*******************/
             ->leftJoin('product_has_price', function ($join) {
                 $join->on('products.id', '=', 'product_has_price.product_id')
-                    ->where('product_has_price.active', '=', '1');
+                    ->where('product_has_price.active', '=', '1')
+                    ->where('product_has_price.price_id', '=', '1');
             })
             ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
@@ -138,6 +143,9 @@ class Product extends Model{
 
             /************BRAND******************/
             ->with('brands')
+
+            /************PARAMETERS*************/
+            ->with('parameters')
 
             /************MANUFACTURER***********/
             ->leftJoin('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
@@ -207,7 +215,8 @@ class Product extends Model{
             /************PRICE*******************/
             ->leftJoin('product_has_price', function ($join) {
                 $join->on('products.id', '=', 'product_has_price.product_id')
-                    ->where('product_has_price.active', '=', '1');
+                    ->where('product_has_price.active', '=', '1')
+                    ->where('product_has_price.price_id', '=', '1');
             })
             ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
@@ -225,6 +234,9 @@ class Product extends Model{
             /************BRAND******************/
             ->with('brands')
 
+            /************PARAMETER***************/
+            ->with('parameters')
+
             /************MANUFACTURER***********/
             ->leftJoin('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
 
@@ -239,6 +251,7 @@ class Product extends Model{
     public function getActiveProductsFromCategoryWithFilterParameters($category_id){
 
         $products =  self::select(
+            'products.id',
             'product_has_price.value        as price_pivot_value',
             'manufacturers.id               as manufacturer_id',
             'manufacturers.name             as manufacturer_name',
@@ -269,7 +282,8 @@ class Product extends Model{
             /************PRICE*******************/
             ->leftJoin('product_has_price', function ($join) {
                 $join->on('products.id', '=', 'product_has_price.product_id')
-                    ->where('product_has_price.active', '=', '1');
+                    ->where('product_has_price.active', '=', '1')
+                    ->where('product_has_price.price_id', '=', '1');
             })
             ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
@@ -286,6 +300,9 @@ class Product extends Model{
 
             /************BRAND******************/
             ->with('brands')
+
+            /************PARAMETER***************/
+            ->with('parameters')
 
             /************MANUFACTURER***********/
             ->leftJoin('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
@@ -320,7 +337,6 @@ class Product extends Model{
             'product_has_discount.value     as discounts_pivot_value',
             'manufacturers.id               as manufacturer_id',
             'manufacturers.name             as manufacturer_name',
-
             DB::raw(
                 'CASE discounts.type
                            WHEN "percent"
@@ -346,7 +362,8 @@ class Product extends Model{
             /************PRICE*******************/
             ->leftJoin('product_has_price', function ($join) {
                 $join->on('products.id', '=', 'product_has_price.product_id')
-                    ->where('product_has_price.active', '=', '1');
+                    ->where('product_has_price.active', '=', '1')
+                    ->where('product_has_price.price_id', '=', '1');
             })
             ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
@@ -388,7 +405,24 @@ class Product extends Model{
             /************CATEGORY***************/
             ->when(isset($parameters['category']), function ($query) use ($parameters) {
                 return $query->whereIn('products.category_id', explode('|', $parameters['category']));
-            })
+            });
+
+            /************PARAMETERS*************/
+            foreach($parameters as $key => $parameter){
+
+                if(strpos($key, 'p_') === 0){
+                    $key = str_replace('p_', '', $key);
+
+                    $products = $products->whereHas('parameters', function($query) use ($parameter, $key) {
+                        $query->where('product_parameters.alias', '=', $key)
+                            ->whereIn('product_has_parameter.value', explode('|', $parameter));
+                    });
+                }
+
+            }
+
+
+            $products = $products->with('parameters')
 
             ->orderBy('products.name')
 
@@ -446,7 +480,8 @@ class Product extends Model{
             /************PRICE*******************/
             ->leftJoin('product_has_price', function ($join) {
                 $join->on('products.id', '=', 'product_has_price.product_id')
-                    ->where('product_has_price.active', '=', '1');
+                    ->where('product_has_price.active', '=', '1')
+                    ->where('product_has_price.price_id', '=', '1');
             })
             ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
@@ -531,7 +566,8 @@ class Product extends Model{
             /************PRICE*******************/
             ->leftJoin('product_has_price', function ($join) {
                 $join->on('products.id', '=', 'product_has_price.product_id')
-                    ->where('product_has_price.active', '=', '1');
+                    ->where('product_has_price.active', '=', '1')
+                    ->where('product_has_price.price_id', '=', '1');
             })
             ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
