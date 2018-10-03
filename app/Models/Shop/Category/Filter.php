@@ -2,12 +2,25 @@
 
 namespace App\Models\Shop\Category;
 
+use http\Env\Request;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Shop\Product\Product;
+use App\Models\Settings;
 
 class Filter extends Model{
 
-    public function getActiveFiltersWithParameters($request, Product $products){
+    protected $prefix;
+
+    public function __construct(array $attributes = []){
+        parent::__construct($attributes);
+
+        $settings = Settings::getInstance();
+
+        $this->prefix = $settings->getParameter('components.shop.filter_prefix');
+
+    }
+
+    public function getActiveFiltersWithParameters( $request, Product $products){
 
         $filters =  self::select(
             'filters.id',
@@ -19,7 +32,7 @@ class Filter extends Model{
             ->orderBy('filters.sort')
             ->get();
 
-        return $this->getParametersForFilters( $request, $products, $filters);
+        return $this->getParametersForFilters($request, $products, $filters);
 
     }
 
@@ -133,7 +146,7 @@ class Filter extends Model{
                                 }
                             }
 
-                            $filter['alias'] = 'p_' . $filter['alias'];
+                            $filter['alias']        = $this->prefix . $filter['alias'];
 
                             $filter['values']       = array_flip($values);
 

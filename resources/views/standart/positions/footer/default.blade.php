@@ -4,11 +4,9 @@
         <div class="col-lg-3 footer_col">
             <div class="footer_column footer_contact">
                 <div class="footer_title">Остались вопросы? Звоните нам!</div>
-                <div class="footer_phone">+7 4722 41-40-44</div>
-                <div class="footer_contact_text">
-                    <p><small>г.Белгород ТРК МЕГА Гринн</small></p>
-                    <p><small>пр.Б.Хмельницкого 137Т</small></p>
-                    <p>этаж 2А, офис 116</p>
+                <div class="footer_phone">{{$info['phone']}}</div>
+                <div class="footer_contact_text pr-5">
+                    <small class="text-muted">{{$info['address']}}</small>
                 </div>
                 <!--div class="footer_social">
                     <ul>

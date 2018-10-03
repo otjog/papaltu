@@ -7,15 +7,20 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Shop\Services\Delivery;
 use App\Models\Geo\GeoData;
+use App\Models\Settings;
 
 class AjaxController extends Controller{
 
+    protected $data;
+
+    public function __construct(){
+
+        $settings = Settings::getInstance();
+
+        $this->data = $settings->getParameters();
+    }
+
     public function index(Request $request){
-
-        $template_name = env('SITE_TEMPLATE');
-
-        //Return
-        $data = ['template_name' => $template_name];
 
         //Component-Header
         $component_template = $request->header('X-Component');
@@ -24,7 +29,7 @@ class AjaxController extends Controller{
 
             list($section, $component)  = explode('|', $component_template );
 
-            $data['template']['com'] = [
+            $this->data['template']['com'] = [
                 'section' => $section,
                 'component' => $component,
             ];
@@ -38,7 +43,7 @@ class AjaxController extends Controller{
             //todo вернуть $next если нет заголовка X-Module
             list($module, $viewReload)     = explode('|', $module_template );
 
-            $data['template']['mod'] = [
+            $this->data['template']['mod'] = [
                 'module' => $module,
                 'viewReload' => $viewReload,
             ];
@@ -66,17 +71,17 @@ class AjaxController extends Controller{
                     }
 
                     switch($viewReload){
-                        case 'best-offer'   : $data[ $module ] =  $ds->getBestPrice( $parcels ); break;
-                        case 'offers'       : $data[ $module ] =  $ds->getPrices( $parcels ); break;
+                        case 'best-offer'   : $this->data[ $module ] =  $ds->getBestPrice( $parcels ); break;
+                        case 'offers'       : $this->data[ $module ] =  $ds->getPrices( $parcels ); break;
                         case 'offers-points':
                             $prices = $ds->getPrices( $parcels );
                             $points = $ds->getPoints();
-                            $data[ $module ] = array_merge($prices, $points);
+                            $this->data[ $module ] = array_merge($prices, $points);
                             break;
-                        case 'map'          : return response( $data[ $module ] = $ds->getPoints() );
+                        case 'map'          : return response( $this->data[ $module ] = $ds->getPoints() );
                     }
 
-                    return response()->view($template_name . '.modules.' . $module . '.reload.' . $viewReload, $data);
+                    return response()->view($this->data['template_name'] . '.modules.' . $module . '.reload.' . $viewReload, $this->data);
 
                 case 'product_filter' :
 
@@ -92,14 +97,12 @@ class AjaxController extends Controller{
 
                     $result->setPath($path);
 
+                    $this->data['filtered_products'] = $result;
+
+                    $this->data['data'] = ['parameters' => $request->toArray()];
+
                     return response()
-                        ->view( $template_name . '.modules.' . $module . '.reload.' . $viewReload,
-                            [
-                                'filtered_products' => $result,
-                                'template_name' => $template_name,
-                                'data' => ['parameters' => $request->toArray()]
-                                ]
-                        )
+                        ->view( $this->data['template_name'] . '.modules.' . $module . '.reload.' . $viewReload, $this->data)
                         ->header('Cache-Control', 'no-store');
 
                 case 'geo'  :

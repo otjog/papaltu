@@ -5,6 +5,7 @@ namespace App\Models\Shop\Product;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use JustBetter\PaginationWithHavings\PaginationWithHavings;
+use App\Models\Settings;
 
 class Product extends Model{
 
@@ -12,14 +13,24 @@ class Product extends Model{
 
     protected $fillable = ['brand_id', 'category_id', 'manufacturer_id', 'active', 'name', 'scu'];
 
-    private $date;
+    protected $settings;
 
-    private $pagination = 15;
+    protected $price_id;
+
+    protected $pagination;
+
+    protected $today;
 
     public function __construct(array $attributes = []){
         parent::__construct($attributes);
 
-        $this->date = date('Y-m-d');
+        $settings = Settings::getInstance();
+
+        $this->price_id = $settings->getParameter('components.shop.price.id');
+
+        $this->pagination = $settings->getParameter('components.shop.pagination');
+
+        $this->today = $settings->getParameter('today');
 
     }
 
@@ -126,7 +137,7 @@ class Product extends Model{
             ->leftJoin('product_has_price', function ($join) {
                 $join->on('products.id', '=', 'product_has_price.product_id')
                     ->where('product_has_price.active', '=', '1')
-                    ->where('product_has_price.price_id', '=', '1');
+                    ->where('product_has_price.price_id', '=', $this->price_id);
             })
             ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
@@ -138,7 +149,7 @@ class Product extends Model{
             ->leftJoin('discounts', function ($join) {
                 $join->on('discounts.id', '=', 'product_has_discount.discount_id')
                     ->where('discounts.active', '=', '1')
-                    ->whereDate('to_date', '>=', $this->date);
+                    ->whereDate('to_date', '>=', $this->today);
             })
 
             /************BRAND******************/
@@ -157,7 +168,7 @@ class Product extends Model{
 
             if( isset($products[0])){
                 $products = $this->addRelationCollections($products);
-                //dd($products[0]->name);
+
                 return $products[0];
             }else{
                 return null;
@@ -216,7 +227,7 @@ class Product extends Model{
             ->leftJoin('product_has_price', function ($join) {
                 $join->on('products.id', '=', 'product_has_price.product_id')
                     ->where('product_has_price.active', '=', '1')
-                    ->where('product_has_price.price_id', '=', '1');
+                    ->where('product_has_price.price_id', '=', $this->price_id);
             })
             ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
@@ -228,7 +239,7 @@ class Product extends Model{
             ->leftJoin('discounts', function ($join) {
                 $join->on('discounts.id', '=', 'product_has_discount.discount_id')
                     ->where('discounts.active', '=', '1')
-                    ->whereDate('to_date', '>=', $this->date);
+                    ->whereDate('to_date', '>=', $this->today);
             })
 
             /************BRAND******************/
@@ -283,7 +294,7 @@ class Product extends Model{
             ->leftJoin('product_has_price', function ($join) {
                 $join->on('products.id', '=', 'product_has_price.product_id')
                     ->where('product_has_price.active', '=', '1')
-                    ->where('product_has_price.price_id', '=', '1');
+                    ->where('product_has_price.price_id', '=', $this->price_id);
             })
             ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
@@ -295,7 +306,7 @@ class Product extends Model{
             ->leftJoin('discounts', function ($join) {
                 $join->on('discounts.id', '=', 'product_has_discount.discount_id')
                     ->where('discounts.active', '=', '1')
-                    ->whereDate('to_date', '>=', $this->date);
+                    ->whereDate('to_date', '>=', $this->today);
             })
 
             /************BRAND******************/
@@ -363,7 +374,7 @@ class Product extends Model{
             ->leftJoin('product_has_price', function ($join) {
                 $join->on('products.id', '=', 'product_has_price.product_id')
                     ->where('product_has_price.active', '=', '1')
-                    ->where('product_has_price.price_id', '=', '1');
+                    ->where('product_has_price.price_id', '=', $this->price_id);
             })
             ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
@@ -384,7 +395,7 @@ class Product extends Model{
             ->leftJoin('discounts', function ($join) {
                 $join->on('discounts.id', '=', 'product_has_discount.discount_id')
                     ->where('discounts.active', '=', '1')
-                    ->whereDate('to_date', '>=', $this->date);
+                    ->whereDate('to_date', '>=', $this->today);
             })
 
 
@@ -481,7 +492,7 @@ class Product extends Model{
             ->leftJoin('product_has_price', function ($join) {
                 $join->on('products.id', '=', 'product_has_price.product_id')
                     ->where('product_has_price.active', '=', '1')
-                    ->where('product_has_price.price_id', '=', '1');
+                    ->where('product_has_price.price_id', '=', $this->price_id);
             })
             ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
@@ -493,7 +504,7 @@ class Product extends Model{
             ->leftJoin('discounts', function ($join) {
                 $join->on('discounts.id', '=', 'product_has_discount.discount_id')
                     ->where('discounts.active', '=', '1')
-                    ->whereDate('to_date', '>=', $this->date);
+                    ->whereDate('to_date', '>=', $this->today);
             })
 
             /************BRAND******************/
@@ -567,7 +578,7 @@ class Product extends Model{
             ->leftJoin('product_has_price', function ($join) {
                 $join->on('products.id', '=', 'product_has_price.product_id')
                     ->where('product_has_price.active', '=', '1')
-                    ->where('product_has_price.price_id', '=', '1');
+                    ->where('product_has_price.price_id', '=', $this->price_id);
             })
             ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
@@ -579,7 +590,7 @@ class Product extends Model{
             ->leftJoin('discounts', function ($join) {
                 $join->on('discounts.id', '=', 'product_has_discount.discount_id')
                     ->where('discounts.active', '=', '1')
-                    ->whereDate('to_date', '>=', $this->date);
+                    ->whereDate('to_date', '>=', $this->today);
             })
 
             /************BRAND******************/

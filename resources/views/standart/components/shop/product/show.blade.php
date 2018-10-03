@@ -42,7 +42,7 @@
 
                 <div class="product_price text-muted mr-3 clearfix">
                     <s>
-                        <small>{{$product->price['value'] + $product->price['sale']}}</small><small>руб</small>
+                        <small>{{$product->price['value'] + $product->price['sale']}}</small><small>{{$components['shop']['currency']['symbol']}}</small>
                     </s>
                 </div>
 
@@ -50,7 +50,7 @@
 
             <div class="product_price clearfix">
                 {{ $product->price['value'] }}
-                <small>руб</small>
+                <small>{{$components['shop']['currency']['symbol']}}</small>
             </div>
 
             <div class="my-2 d-flex flex-row">

@@ -10,7 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Shop\Order\Basket;
 use App\Models\Shop\Order\Order;
 use App\Models\Shop\Product\Product;
-
+use App\Models\Settings;
 class OrderController extends Controller{
 
     protected $orders;
@@ -19,25 +19,19 @@ class OrderController extends Controller{
 
     protected $data;
 
-    protected $template_name;
-
     public function __construct(Order $orders, Basket $baskets){
 
-        $this->template_name = env('SITE_TEMPLATE');
+        $settings = Settings::getInstance();
+
+        $this->data = $settings->getParameters();
 
         $this->orders   = $orders;
 
         $this->baskets  = $baskets;
 
-        $this->data = [
-            'template'  =>  [
-                'component' => 'shop',
-                'resource'  => 'order',
-            ],
-            'data'      => [
-                'chunk' => 3
-            ],
-            'template_name' => $this->template_name
+        $this->data['template'] = [
+            'component' => 'shop',
+            'resource'  => 'order',
         ];
     }
 

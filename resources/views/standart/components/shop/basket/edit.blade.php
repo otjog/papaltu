@@ -33,7 +33,7 @@
                             {{ $product->name }}
                         </a>
                         <span class="text-muted">{{ $product->price['value'] }}</span>
-                        <span class="text-muted small"><small>руб</small></span>
+                        <span class="text-muted small"><small>{{$components['shop']['currency']['symbol']}}</small></span>
                     </div>
                     <div class="order-2 col-6   order-lg-3 col-lg-6">
                         <div class="row">
@@ -63,7 +63,7 @@
                             </div>
                             <div class="col-10 col-lg-4 py-3 text-center">
                                 <span>{{ $product->price['value'] * $product->quantity }}</span>
-                                <small>руб</small>
+                                <small>{{$components['shop']['currency']['symbol']}}</small>
                             </div>
                             <div class="col-12 col-lg-2 py-3 d-none d-lg-block text-center text-muted">
                                 <span class="icon quantity_del"><i class="fas fa-trash-alt"></i></span>
@@ -105,7 +105,7 @@
     <div class="col-12 col-lg-3 border-left rounded ">
         <h4 class="mb-lg-3">Итого</h4>
         <div class="row px-2">
-            <div class="col-10 offset-2 mb-3">Сумма товаров: {{ $basket->total }}<small>руб</small></div>
+            <div class="col-10 offset-2 mb-3">Сумма товаров: {{ $basket->total }}<small>{{$components['shop']['currency']['symbol']}}</small></div>
             @if( $basket->total > 0)
                 <span class="small">Стоимость доставки не учитывается в заказе.</span>
                 <a href="{{route('orders.create')}}" class="btn btn-warning btn-lg btn-block my-3" type="submit">Оформить заказ</a>

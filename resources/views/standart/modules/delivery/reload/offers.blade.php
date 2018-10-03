@@ -19,7 +19,7 @@
                 @if( isset( $services['toTerminal']))
                     <div class="row pb-2 pt-2 border-top ">
                         <div class="col-4 text-center"><img src="{{ '/storage/img/elements/delivery/' . $company . '/' . $company .'_logo.jpg' }}" class="img-fluid"></div>
-                        <div class="col-4 text-center">{{$services['toTerminal']['price']}} руб</div>
+                        <div class="col-4 text-center">{{$services['toTerminal']['price']}} {{$components['shop']['currency']['symbol']}}</div>
                         <div class="col-4 text-center">{{$services['toTerminal']['days']}} дней</div>
                     </div>
                 @endif
@@ -33,7 +33,7 @@
                 @if( isset( $services['toDoor']))
                     <div class="row pb-2 pt-2 border-top ">
                         <div class="col-4 text-center"><img src="{{ '/storage/img/elements/delivery/' . $company . '/' . $company .'_logo.jpg' }}" class="img-fluid"></div>
-                        <div class="col-4 text-center">{{$services['toDoor']['price']}} руб</div>
+                        <div class="col-4 text-center">{{$services['toDoor']['price']}} {{$components['shop']['currency']['symbol']}}</div>
                         <div class="col-4 text-center">{{$services['toDoor']['days']}} дней</div>
                     </div>
                 @endif

@@ -6,6 +6,7 @@ use App\Models\Shop\Product\Product;
 use App\Models\Shop\Order\Basket;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Settings;
 
 class BasketController extends Controller{
 
@@ -13,20 +14,17 @@ class BasketController extends Controller{
 
     protected $data;
 
-    protected $template_name;
-
     public function __construct(Basket $baskets){
 
-        $this->template_name = env('SITE_TEMPLATE');
+        $settings = Settings::getInstance();
+
+        $this->data = $settings->getParameters();
 
         $this->baskets = $baskets;
 
-        $this->data = [
-            'template'  =>  [
-                'component' => 'shop',
-                'resource'  => 'basket'
-            ],
-            'template_name' => $this->template_name
+        $this->data['template'] = [
+            'component' => 'shop',
+            'resource'  => 'basket'
         ];
     }
 
