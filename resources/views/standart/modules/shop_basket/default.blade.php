@@ -17,7 +17,7 @@
             <div class="cart_content">
                 <div class="cart_text">Корзина</div>
                 <div class="cart_price">
-                    {{ $basket->total  or 0}}<small>руб</small>
+                    {{ $basket->total  or 0}}<small>{{$components['shop']['currency']['symbol']}}</small>
                 </div>
             </div>
         </div>

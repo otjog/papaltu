@@ -3,13 +3,7 @@
 
         @if(isset($products) && count($products) > 0)
 
-            @php
-                if(isset($product_chunk) === false || is_nan($product_chunk) || $product_chunk > 5){
-                    $product_chunk = 3;
-                }
-            @endphp
-
-            @foreach($products->chunk($product_chunk) as $products_row)
+            @foreach($products->chunk($components['shop']['chunk_products']) as $products_row)
 
                 <div class="card-group">
 
@@ -41,7 +35,7 @@
                                                     @if( isset($product->price['sale']) && $product->price['sale'] > 0)
                                                         <span class="small text-danger">
                                                             <s>
-                                                                {{$product->price['value'] + $product->price['sale']}}<small>руб</small>
+                                                                {{$product->price['value'] + $product->price['sale']}}<small>{{$components['shop']['currency']['symbol']}}</small>
                                                             </s>
                                                         </span>
                                                     @endif
@@ -49,7 +43,7 @@
                                                 </div>
 
                                                 <div class="col-12 pt-3">
-                                                    <span>{{ $product->price['value']}}</span><small>руб</small>
+                                                    <span>{{ $product->price['value']}}</span><small>{{$components['shop']['currency']['symbol']}}</small>
                                                 </div>
                                             </div>
 

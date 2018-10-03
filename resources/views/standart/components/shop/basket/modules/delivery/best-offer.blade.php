@@ -7,7 +7,7 @@
         {{ $delivery['_bestOffer']['days'] }} дней
     </div>
     <div class="col-4 col-lg-1 text-center">
-        {{ $delivery['_bestOffer']['price'] }}руб
+        {{ $delivery['_bestOffer']['price'] }}{{$components['shop']['currency']['symbol']}}
     </div>
     <div class="col-4 col-lg-2 text-center text-muted align-items-center">
         <a href="#" class="badge badge-info py-2" data-toggle="modal" data-target="#change-city-form">Изменить город</a>

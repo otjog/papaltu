@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Shop\Product\Product;
 use App\Models\Shop\Order\Basket;
 use sngrl\SphinxSearch\SphinxSearch;
+use App\Models\Settings;
 
 class SearchController extends Controller{
 
@@ -18,8 +19,6 @@ class SearchController extends Controller{
 
     protected $baskets;
 
-    protected $template_name;
-
     /**
      * Создание нового экземпляра контроллера.
      *
@@ -27,7 +26,9 @@ class SearchController extends Controller{
      */
     public function __construct(Request $request, Product $products, Basket $baskets){
 
-        $this->template_name = env('SITE_TEMPLATE');
+        $settings = Settings::getInstance();
+
+        $this->data = $settings->getParameters();
 
         $this->products = $products;
 
@@ -35,15 +36,9 @@ class SearchController extends Controller{
 
         $this->query    = $request->search;
 
-        $this->data     = [
-            'template'  => [
-                'component'     => 'shop',
-                'resource'      => 'search',
-            ],
-            'data'      => [
-                'product_chunk' => 4
-            ],
-            'template_name' => $this->template_name
+        $this->data['template']     = [
+            'component'     => 'shop',
+            'resource'      => 'search',
         ];
 
     }
