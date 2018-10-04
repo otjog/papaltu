@@ -60,12 +60,20 @@ class BasketController extends Controller{
 
         $basket = $this->baskets->getActiveBasket( $token );
 
+        $parameters = $request->all();
+
+        unset($parameters['_token']);
+
         if($basket === null){
+
+            dd($parameters);
+
             $this->baskets->token     = $token;
 
-            $this->baskets->products_json  = json_encode(array( ['id' => $request->id, 'quantity' => $request->quantity] ) );
+            $this->baskets->products_json  = json_encode( [ $request->all() ] );
 
             $this->baskets->save();
+
         }else{
             $products = $this->addProductToArray( $basket, $request->all() );
 
@@ -171,20 +179,42 @@ class BasketController extends Controller{
     }
 
     private function addProductToArray($basket, $newProduct){
+
         $products = json_decode($basket->products_json, true);
 
-        foreach($products as $key => $product){
+        $is_new = false;
 
-            if(isset($newProduct) && $product['id'] === $newProduct['id']){
-                $quantity = $product['quantity']*1 + $newProduct['quantity']*1;
-                $products[$key]['quantity'] = (string) $quantity;
-                unset($newProduct);
+        foreach($products as $index => $product){
+
+            if( isset($newProduct) ){
+
+                foreach ($product as $key => $value){
+
+                    if( $key !== 'quantity' ){
+
+                        if( $product[ $key ] !== $newProduct[ $key ] ){
+
+                            $is_new = true;
+
+                        }
+
+                    }
+
+                }
+
             }
 
         }
 
-        if(isset($newProduct)){
+        if($is_new){
+
             $products[] = $newProduct;
+
+        }else{
+
+            $quantity = $product['quantity']*1 + $newProduct['quantity']*1;
+
+            $products[$index]['quantity'] = (string) $quantity;
         }
 
         return $products;

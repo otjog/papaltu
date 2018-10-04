@@ -16,6 +16,7 @@
 
 @endif
 
+<?php dump($product->parameters)?>
 @isset($product->images[0]->src)
     <!-- Main Image -->
     <div class="col-lg-5 order-lg-2 order-1">
@@ -61,6 +62,7 @@
                         <input type="text"      name="quantity" value="1" size="5" pattern="[0-9]*" class="quantity_input">
                         <input type="hidden"    name="id"       value="{{$product->id}}">
                         <input type="hidden"    name="_token"   value="{{csrf_token()}}">
+
                         <div class="quantity_buttons">
                             <div
                                     class="quantity_inc quantity_control"
@@ -75,9 +77,34 @@
                             </div>
                         </div>
                     </div>
+
                     <div class="button_container">
                         <button type="submit" class="button cart_button">Купить</button>
                     </div>
+
+                    @if( isset($product->parameters) && count($product->parameters) > 0)
+                        <div class="order_parameters my-3 float-left">
+                            @foreach($product->parameters as $key => $parameter)
+                                @if($parameter->order_attr === 1)
+
+                                    @if($key === 0 || $product->parameters[$key -1 ]->name !== $parameter->name)
+                                        <strong>{{$parameter->name}}: </strong>
+                                    @endif
+
+                                    <div class="form-check form-check-inline">
+                                        <input
+                                                class="form-check-input"
+                                                type="radio"
+                                                name="order_attr"
+                                                id="{{ $parameter->pivot->id }}"
+                                                value="{{ $parameter->pivot->id }}"
+                                        >
+                                        <label class="form-check-label" for="{{ $parameter->alias }}_{{ $parameter->pivot->value }}">{{$parameter->pivot->value }}</label>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    @endif
 
                 </form>
             </div>
@@ -136,13 +163,16 @@
                 <ul class="list-unstyled">
                     @foreach($product->parameters as $key => $parameter)
 
-                        <li>
-                            @if($key === 0 || $product->parameters[$key -1 ]->name !== $parameter->name)
-                                <strong>{{$parameter->name}}: </strong>
-                            @endif
+                        @if($parameter->order_attr !== 1)
+                            <li>
+                                @if($key === 0 || $product->parameters[$key -1 ]->name !== $parameter->name)
+                                    <strong>{{$parameter->name}}: </strong>
+                                @endif
 
-                            <span class="text-muted">{{$parameter->pivot->value}}</span>
-                        </li>
+                                <span class="text-muted">{{$parameter->pivot->value}}</span>
+                            </li>
+                        @endif
+
                     @endforeach
                 </ul>
 
