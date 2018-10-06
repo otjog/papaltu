@@ -48,14 +48,18 @@
                                             </div>
 
                                         </div>
-                                        <div class="col-6">
-                                            <form method="post" role="form" action="{{route('baskets.store')}}">
-                                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                                <input type="hidden" name="id"       value="{{ $product->id}}">
-                                                <input type="hidden" name="quantity" value="1" >
-                                                <input class="btn btn-danger" type="submit" value="В корзину" />
-                                            </form>
-                                        </div>
+
+                                        @if( !isset($product->basket_parameters) || count($product->basket_parameters) === 0)
+                                            <div class="col-6">
+                                                <form method="post" role="form" action="{{route('baskets.store')}}">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                                    <input type="hidden" name="product_id"       value="{{ $product->id}}">
+                                                    <input type="hidden" name="quantity" value="1" >
+                                                    <input class="btn btn-danger" type="submit" value="В корзину" />
+                                                </form>
+                                            </div>
+                                        @endif
+
                                     </div>
                                 </div>
                             @endif

@@ -62,6 +62,14 @@ class Product extends Model{
         return $this->belongsToMany('App\Models\Shop\Parameter\Parameter', 'product_has_parameter', 'product_id', 'parameter_id')->withPivot('id', 'value')->withTimestamps();
 }
 
+    public function basket_parameters(){
+        return $this->belongsToMany('App\Models\Shop\Parameter\Parameter', 'product_has_parameter', 'product_id', 'parameter_id')->withPivot('id', 'value')->withTimestamps();
+    }
+
+    public function baskets(){
+        return $this->belongsToMany('App\Models\Shop\Order\Basket', 'shop_basket_has_product', 'product_id', 'basket_id')->withPivot('quantity', 'order_attributes')->withTimestamps();
+    }
+
     /*******************************/
 
     public function getAllProducts(){
@@ -156,7 +164,12 @@ class Product extends Model{
             ->with('brands')
 
             /************PARAMETERS*************/
-            ->with('parameters')
+            ->with(['parameters' => function ($query) {
+                $query->where('product_parameters.order_attr', '=', 0);
+            }])
+            ->with(['basket_parameters' => function ($query) {
+                $query->where('product_parameters.order_attr', '=', 1);
+            }])
 
             /************MANUFACTURER***********/
             ->leftJoin('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
@@ -245,8 +258,13 @@ class Product extends Model{
             /************BRAND******************/
             ->with('brands')
 
-            /************PARAMETER***************/
-            ->with('parameters')
+            /************PARAMETERS*************/
+            ->with(['parameters' => function ($query) {
+                $query->where('product_parameters.order_attr', '=', 0);
+            }])
+            ->with(['basket_parameters' => function ($query) {
+                $query->where('product_parameters.order_attr', '=', 1);
+            }])
 
             /************MANUFACTURER***********/
             ->leftJoin('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
@@ -398,7 +416,6 @@ class Product extends Model{
                     ->whereDate('to_date', '>=', $this->today);
             })
 
-
             /************BRAND*******************/
             ->when(isset($parameters['brand']), function ($query) use ($parameters) {
                 return $query->whereHas('brands', function($query) use ($parameters) {
@@ -406,6 +423,14 @@ class Product extends Model{
                 });
             })
             ->with('brands')
+
+            /************PARAMETERS*************/
+            ->with(['parameters' => function ($query) {
+                $query->where('product_parameters.order_attr', '=', 0);
+            }])
+            ->with(['basket_parameters' => function ($query) {
+                $query->where('product_parameters.order_attr', '=', 1);
+            }])
 
             /************MANUFACTURER***********/
             ->when(isset($parameters['manufacturer']), function ($query) use ($parameters) {
@@ -513,6 +538,14 @@ class Product extends Model{
                     ->where('brand_id', '=', $brand_id);
             }])
 
+            /************PARAMETERS*************/
+            ->with(['parameters' => function ($query) {
+                $query->where('product_parameters.order_attr', '=', 0);
+            }])
+            ->with(['basket_parameters' => function ($query) {
+                $query->where('product_parameters.order_attr', '=', 1);
+            }])
+
             /************MANUFACTURER***********/
             ->leftJoin('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
 
@@ -595,6 +628,14 @@ class Product extends Model{
 
             /************BRAND******************/
             ->with('brands')
+
+            /************PARAMETERS*************/
+            ->with(['parameters' => function ($query) {
+                $query->where('product_parameters.order_attr', '=', 0);
+            }])
+            ->with(['basket_parameters' => function ($query) {
+                $query->where('product_parameters.order_attr', '=', 1);
+            }])
 
             /************MANUFACTURER***********/
             ->leftJoin('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
@@ -705,6 +746,109 @@ class Product extends Model{
 
     }
 
+    public function getProductsFromBasket($basket_id){
+
+        $products =  self::select(
+            'products.id',
+            'products.manufacturer_id',
+            'products.category_id',
+            'products.name',
+            'products.original_name',
+            'products.scu',
+            'products.thumbnail',
+            'products.weight',
+            'products.length',
+            'products.width',
+            'products.height',
+            'prices.id                      as price_id',
+            'prices.name                    as price_name',
+            'product_has_price.value        as price_pivot_value',
+            'currency.value                 as price_pivot_currencyValue',
+            'currency.char_code             as price_pivot_currencyCode',
+            'currency.id                    as price_pivot_currencyId',
+            'discounts.id                   as discounts_id',
+            'discounts.name                 as discounts_name',
+            'discounts.type                 as discounts_type',
+            'product_has_discount.value     as discounts_pivot_value',
+            'manufacturers.id               as manufacturer_id',
+            'manufacturers.name             as manufacturer_name',
+            'shop_baskets.id                            as baskets_id',
+            'shop_baskets.token                         as baskets_token',
+            'shop_basket_has_product.id                 as baskets_id',
+            'shop_basket_has_product.basket_id          as baskets_pivot_basketId',
+            'shop_basket_has_product.product_id         as baskets_pivot_productId',
+            'shop_basket_has_product.quantity           as baskets_pivot_quantity',
+            'shop_basket_has_product.order_attributes   as baskets_pivot_order_attributes',
+
+
+            DB::raw(
+                'CASE discounts.type
+                           WHEN "percent"
+                                    THEN ROUND( ( product_has_price.value - (product_has_price.value / 100 * product_has_discount.value) ) * currency.value )
+                           WHEN "value"
+                                    THEN ROUND( (product_has_price.value * currency.value) - product_has_discount.value )
+                           ELSE ROUND( product_has_price.value * currency.value )
+                        END AS price_value'
+            ),
+            DB::raw(
+                'CASE discounts.type
+                           WHEN "percent"
+                                    THEN ROUND( product_has_price.value / 100 * product_has_discount.value * currency.value )
+                           WHEN "value"
+                                    THEN ROUND( product_has_discount.value * currency.value )
+                           ELSE 0
+                        END AS price_sale'
+            )
+        )
+
+            ->where('products.active', 1)
+
+            /************PRICE*******************/
+            ->leftJoin('product_has_price', function ($join) {
+                $join->on('products.id', '=', 'product_has_price.product_id')
+                    ->where('product_has_price.active', '=', '1')
+                    ->where('product_has_price.price_id', '=', $this->price_id);
+            })
+            ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
+
+            /************CURRENCY****************/
+            ->leftJoin('currency', 'currency.id', '=', 'product_has_price.currency_id')
+
+            /************DISCOUNT****************/
+            ->leftJoin('product_has_discount', 'products.id', '=', 'product_has_discount.product_id')
+            ->leftJoin('discounts', function ($join) {
+                $join->on('discounts.id', '=', 'product_has_discount.discount_id')
+                    ->where('discounts.active', '=', '1')
+                    ->whereDate('to_date', '>=', $this->today);
+            })
+
+            /************BRAND******************/
+            ->with('brands')
+
+            /************MANUFACTURER***********/
+            ->leftJoin('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
+
+            /************IN_BASKET**************/
+            ->join('shop_basket_has_product', function ($join) use ($basket_id) {
+                $join->on('products.id', '=', 'shop_basket_has_product.product_id')
+                    ->where('shop_basket_has_product.basket_id', $basket_id);
+            })
+            ->join('shop_baskets', 'shop_baskets.id', '=', 'shop_basket_has_product.basket_id')
+
+
+            /************PARAMETERS*************/
+            ->with(['basket_parameters' => function ($query) {
+                $query->where('product_parameters.order_attr', '=', 1);
+            }])
+
+            ->orderBy('shop_basket_has_product.id')
+
+            ->get();
+
+        return $this->addRelationCollections($products);
+
+    }
+
     public function getProductsFromJson($json_string){
 
         $jsonArray = json_decode($json_string, true);
@@ -755,7 +899,7 @@ class Product extends Model{
 
         foreach($products as $product){
 
-            $total += $product->quantity * $product->price[ $columnName ];
+            $total += $product->baskets['pivot']['quantity'] * $product->price[ $columnName ];
 
         }
 
@@ -778,8 +922,8 @@ class Product extends Model{
 
     private function getParametersForParcel($product, $quantity = 1){
 
-        if( isset($product['quantity']) ){
-            $quantity = $product['quantity'];
+        if( isset($product->baskets['pivot']['quantity']) ){
+            $quantity = $product->baskets['pivot']['quantity'];
         }
 
         return [
@@ -798,7 +942,7 @@ class Product extends Model{
 
             foreach ($product->original as $key => $value){
 
-                $match = explode('_', $key);
+                $match = explode('_', $key, 3);
 
                 switch($match[0]){
 
@@ -806,6 +950,8 @@ class Product extends Model{
                     case 'category'    :
                     case 'discounts'   :
                     case 'manufacturer':
+                    case 'parameters':
+                    case 'baskets':
 
                         if( !isset($data[ $match[0] ]) ){
                             $data[ $match[0] ] = [] ;

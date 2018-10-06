@@ -58,29 +58,7 @@ class BasketController extends Controller{
 
         $token = $request->session()->get('_token');
 
-        $basket = $this->baskets->getActiveBasket( $token );
-
-        $parameters = $request->all();
-
-        unset($parameters['_token']);
-
-        if($basket === null){
-
-            dd($parameters);
-
-            $this->baskets->token     = $token;
-
-            $this->baskets->products_json  = json_encode( [ $request->all() ] );
-
-            $this->baskets->save();
-
-        }else{
-            $products = $this->addProductToArray( $basket, $request->all() );
-
-            $basket->products_json = json_encode($products);
-
-            $basket->save();
-        }
+        $this->baskets->addProductToBasket( $request, $token );
 
         return back();
     }
@@ -104,7 +82,7 @@ class BasketController extends Controller{
      */
     public function edit(Product $products, $token){
 
-        $basket = $this->baskets->getActiveBasketWithProducts( $products, $token );
+        $basket = $this->baskets->getActiveBasketWithProductsAndRelations( $products, $token );
 
         if($basket->order_id === null){
 
@@ -133,13 +111,7 @@ class BasketController extends Controller{
      */
     public function update(Request $request, $token){
 
-        $basket = $this->baskets->getActiveBasket( $token ) ;
-
-        $products = $this->changeQuantityInArray( $request->all() );
-
-        $basket->products_json = json_encode($products);
-
-        $basket->save();
+        $this->baskets->updateBasket( $request );
 
         return back();
     }
@@ -178,45 +150,4 @@ class BasketController extends Controller{
         return $newProducts;
     }
 
-    private function addProductToArray($basket, $newProduct){
-
-        $products = json_decode($basket->products_json, true);
-
-        $is_new = false;
-
-        foreach($products as $index => $product){
-
-            if( isset($newProduct) ){
-
-                foreach ($product as $key => $value){
-
-                    if( $key !== 'quantity' ){
-
-                        if( $product[ $key ] !== $newProduct[ $key ] ){
-
-                            $is_new = true;
-
-                        }
-
-                    }
-
-                }
-
-            }
-
-        }
-
-        if($is_new){
-
-            $products[] = $newProduct;
-
-        }else{
-
-            $quantity = $product['quantity']*1 + $newProduct['quantity']*1;
-
-            $products[$index]['quantity'] = (string) $quantity;
-        }
-
-        return $products;
-    }
 }

@@ -16,7 +16,6 @@
 
 @endif
 
-<?php dump($product->parameters)?>
 @isset($product->images[0]->src)
     <!-- Main Image -->
     <div class="col-lg-5 order-lg-2 order-1">
@@ -59,9 +58,9 @@
 
                     <div class="product_quantity">
                         <span>Кол-во: </span>
-                        <input type="text"      name="quantity" value="1" size="5" pattern="[0-9]*" class="quantity_input">
-                        <input type="hidden"    name="id"       value="{{$product->id}}">
-                        <input type="hidden"    name="_token"   value="{{csrf_token()}}">
+                        <input type="text"      name="quantity"     value="1" size="5" pattern="[0-9]*" class="quantity_input">
+                        <input type="hidden"    name="product_id"   value="{{$product->id}}">
+                        <input type="hidden"    name="_token"       value="{{csrf_token()}}">
 
                         <div class="quantity_buttons">
                             <div
@@ -82,26 +81,27 @@
                         <button type="submit" class="button cart_button">Купить</button>
                     </div>
 
-                    @if( isset($product->parameters) && count($product->parameters) > 0)
+                    @if( isset($product->basket_parameters) && count($product->basket_parameters) > 0)
                         <div class="order_parameters my-3 float-left">
-                            @foreach($product->parameters as $key => $parameter)
-                                @if($parameter->order_attr === 1)
+                            @foreach($product->basket_parameters as $key => $parameter)
+                                @if($key === 0 || $product->basket_parameters[$key -1 ]->name !== $parameter->name)
+                                    <strong>{{$parameter->name}}: </strong>
+                                @endif
 
-                                    @if($key === 0 || $product->parameters[$key -1 ]->name !== $parameter->name)
-                                        <strong>{{$parameter->name}}: </strong>
-                                    @endif
-
-                                    <div class="form-check form-check-inline">
+                                <div class="form-check form-check-inline">
+                                    <div class="custom-control custom-radio">
                                         <input
-                                                class="form-check-input"
+                                                class="custom-control-input"
                                                 type="radio"
-                                                name="order_attr"
+                                                required=""
+                                                name="order_attributes[]"
                                                 id="{{ $parameter->pivot->id }}"
                                                 value="{{ $parameter->pivot->id }}"
                                         >
-                                        <label class="form-check-label" for="{{ $parameter->alias }}_{{ $parameter->pivot->value }}">{{$parameter->pivot->value }}</label>
+                                        <label class="custom-control-label" for="{{ $parameter->pivot->id }}">{{$parameter->pivot->value }}</label>
                                     </div>
-                                @endif
+
+                                </div>
                             @endforeach
                         </div>
                     @endif
@@ -163,15 +163,13 @@
                 <ul class="list-unstyled">
                     @foreach($product->parameters as $key => $parameter)
 
-                        @if($parameter->order_attr !== 1)
-                            <li>
-                                @if($key === 0 || $product->parameters[$key -1 ]->name !== $parameter->name)
-                                    <strong>{{$parameter->name}}: </strong>
-                                @endif
+                        <li>
+                            @if($key === 0 || $product->parameters[$key -1 ]->name !== $parameter->name)
+                                <strong>{{$parameter->name}}: </strong>
+                            @endif
 
-                                <span class="text-muted">{{$parameter->pivot->value}}</span>
-                            </li>
-                        @endif
+                            <span class="text-muted">{{$parameter->pivot->value}}</span>
+                        </li>
 
                     @endforeach
                 </ul>

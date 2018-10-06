@@ -58,7 +58,7 @@ class OrderController extends Controller{
 
         if($payment[0]->alias === 'online'){
 
-            $basket = $this->baskets->getActiveBasketWithProducts($products, $token );
+            $basket = $this->baskets->getActiveBasketWithProductsAndRelations($products, $token );
 
             return $paymentService->send($request, $basket);
 
@@ -86,7 +86,7 @@ class OrderController extends Controller{
 
         $this->data['template']['view'] = 'create';
 
-        $this->data['data']['basket']   = $this->baskets->getActiveBasketWithProducts( $products, $token );
+        $this->data['data']['basket']   = $this->baskets->getActiveBasketWithProductsAndRelations( $products, $token );
 
         $this->data['data']['payments'] = $payments->getActiveMethods();
 

@@ -4,7 +4,7 @@
     <div class="cart">
         <div class="cart_container d-flex flex-row align-items-center justify-content-end">
             <div class="cart_icon">
-                @if($basket !== null)
+                @if( isset($basket) && $basket !== null)
                     <a href="{{route('baskets.edit', csrf_token())}}">
                         <img src="{{ URL::asset('storage/img/elements/cart.png') }}" alt="">
                         <div class="cart_count"><span>{{ $basket->count_scu or 0}}</span></div>

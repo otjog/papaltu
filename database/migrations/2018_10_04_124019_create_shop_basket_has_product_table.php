@@ -17,8 +17,8 @@ class CreateShopBasketHasProductTable extends Migration
             $table->increments('id');
             $table->integer('basket_id');
             $table->integer('product_id');
-            $table->integer('quantity');
-            $table->string('attributes', 20)->nullable();
+            $table->integer('quantity')->unsigned();
+            $table->string('order_attributes', 20)->nullable();
             $table->timestamps();
         });
     }
