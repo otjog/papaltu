@@ -25,9 +25,9 @@ class MetaTagsCreater extends Model{
 
         $resourceName = mb_strtolower($data[$resource][0]->name);
 
-        $title = $data[$resource][0]->name . ' для дома, коттеджа и дачи, купить ' .  $resourceName . ' в Белгороде, Москве, СПб и РФ - цены, отзывы, видео, фото и характеристики в интернет-магазине ' . $this->siteName;
+        $title = $data[$resource][0]->name . ' для женщин, девушек и детей, купить ' .  $resourceName . ' в Белгороде, Москве, СПб и РФ - цены, отзывы, видео, фото и характеристики в интернет-магазине ' . $this->siteName;
 
-        $description = 'Купить ' . $resourceName . ' для коттеджа, дома и дачи в Белгороде, Москве и РФ - цены, отзывы, видео, фото и характеристики в интернет-магазине ' . $this->siteName . '. В продаже имеются ' . $resourceName . ' всех типов по лучшей цене. Гарантия, доставка во все регионы.';
+        $description = 'Купить ' . $resourceName . ' для женщин, девушек и детей в Белгороде, Москве и РФ - цены, отзывы, видео, фото и характеристики в интернет-магазине ' . $this->siteName . '. В продаже имеются ' . $resourceName . ' всех видов по лучшей цене. Гарантия, доставка во все регионы.';
 
         $keywords = $resourceName .' ' . $resourceName . ' цены характеристики, ' . $resourceName . ' отзывы, ' . $resourceName . ' купить, ' . $resourceName . ' цена, ' . $resourceName . ' цены характеристики отзывы';
 
@@ -42,9 +42,9 @@ class MetaTagsCreater extends Model{
 
         $categoryName = mb_strtolower($data['product']['category']['name']);
 
-        $title = $data['product']->name . ' ' . $manufacturerName . ' - купить, цена, инструкция и фото в интернет-магазине ' . $this->siteName;
+        $title = $data['product']->name . ' ' . $manufacturerName . ' - купить, цена, размеры и фото в интернет-магазине ' . $this->siteName;
 
-        $description = $data['product']->name . ' ' . $manufacturerName . ' - купить в Москве, Белгороде и России: цена, инструкция по эксплуатации и характеристики в интернет-магазине ' . $this->siteName . '. Доставка в любой регион России, гарантия - 12 мес.';
+        $description = $data['product']->name . ' ' . $manufacturerName . ' - купить в Москве, Белгороде и России: цена, размеры и характеристики в интернет-магазине ' . $this->siteName . '. Доставка в любой регион России, гарантия - 12 мес.';
 
         $keywords = $data['product']->name . ' ' . $manufacturerName . ', ' . $categoryName . ', ' . $productName . ' купить, ' . $productName . ' характеристики, ' . $productName . ' отзывы, ' . $manufacturerName . ' купить, ' . $categoryName . ' купить, ';
 
