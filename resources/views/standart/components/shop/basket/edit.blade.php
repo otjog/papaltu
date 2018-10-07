@@ -37,9 +37,9 @@
 
                         <!-- Атрибуты -->
 
-                        @if( isset($product->baskets['order_attributes']) && count( $product->baskets['order_attributes'] ) > 0)
+                        @if( isset($product['pivot']['order_attributes_collection']) && count( $product['pivot']['order_attributes_collection'] ) > 0)
                             <br>
-                            @foreach($product->baskets['order_attributes'] as $attribute)
+                            @foreach($product['pivot']['order_attributes_collection'] as $attribute)
 
                                 <span class="text-muted small">
 
@@ -72,11 +72,11 @@
                                         <input
                                                 type="hidden"
                                                 name="{{ $key }}[order_attributes]"
-                                                value="{{ $product->baskets['pivot']['order_attributes'] }}">
+                                                value="{{ $product['pivot']['order_attributes'] }}">
                                         <input
                                                 type="text"
                                                 name="{{ $key }}[quantity]"
-                                                value="{{ $product->baskets['pivot']['quantity'] }}"
+                                                value="{{ $product['pivot']['quantity'] }}"
                                                 class="form-control quantity_input"
                                                 size="5" >
 
@@ -93,7 +93,7 @@
                                 </div>
                             </div>
                             <div class="col-10 col-lg-4 py-3 text-center">
-                                <span>{{ $product->price['value'] * $product->baskets['pivot']['quantity'] }}</span>
+                                <span>{{ $product->price['value'] * $product['pivot']['quantity'] }}</span>
                                 <small>{{$components['shop']['currency']['symbol']}}</small>
                             </div>
                             <div class="col-12 col-lg-2 py-3 d-none d-lg-block text-center text-muted">

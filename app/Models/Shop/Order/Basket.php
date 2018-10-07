@@ -49,17 +49,17 @@ class Basket extends Model{
 
     public function getActiveBasketWithProductsAndRelations(Product $products, $token){
 
-        $basket = $this->getActiveBasket($token);
+        $basket = $this->getActiveBasket( $token );
 
-        if( $basket !== null){
+        if( $basket !== null ){
 
-            $basket->products   = $products->getProductsFromBasket($basket->id);
+            $basket->relations['products'] = $products->getProductsFromBasket( $basket->id );
 
             foreach($basket->products as $key => $product){
 
-                $attributes = explode(',', $product->baskets['pivot']['order_attributes']);
+                $attributes = explode(',', $product['pivot']['order_attributes']);
 
-                $parameters = $product->parameters;
+                $parameters = $product->basket_parameters;
 
                 $temporary = [];
 
@@ -73,17 +73,15 @@ class Basket extends Model{
 
                 }
 
-                $product->relations['baskets']['order_attributes'] = $temporary;
+                $product['pivot']['order_attributes_collection'] = $temporary;
 
-                $product->quantity = $product->baskets['pivot']['quantity'];
+                $product->quantity = $product['pivot']['quantity'];
 
             }
 
-            $basket->total      = $products->getTotal($basket->products);
+            $basket->total      = $this->getTotal($basket->products);
 
             $basket->count_scu  = count($basket->products);
-
-            return $basket;
 
         }
 
@@ -199,8 +197,22 @@ class Basket extends Model{
 
     }
 
+    private function getTotal($products){
+
+        $total = 0;
+
+        foreach($products as $product){
+
+            $total += $product['pivot']['quantity'] * $product->price['value'];
+
+        }
+
+        return $total;
+
+    }
+
     //todo вынести в общую библиотеку
-    public function updateExistingPivot( string $tableName, array $relationColumns, array $updateColumns){
+    private function updateExistingPivot( string $tableName, array $relationColumns, array $updateColumns){
         $table = DB::table($tableName);
 
         foreach($relationColumns as $columnName => $columnValue){
@@ -210,7 +222,7 @@ class Basket extends Model{
         $table->update($updateColumns);
     }
 
-    public function deleteExistingPivot( string $tableName, array $relationColumns){
+    private function deleteExistingPivot( string $tableName, array $relationColumns){
         $table = DB::table($tableName);
 
         foreach($relationColumns as $columnName => $columnValue){

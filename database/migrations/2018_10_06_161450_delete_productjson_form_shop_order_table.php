@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class DeleteProductjsonFormShopBasketTable extends Migration
+class DeleteProductjsonFormShopOrderTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,7 +12,7 @@ class DeleteProductjsonFormShopBasketTable extends Migration
      * @return void
      */
     public function up(){
-        Schema::table('shop_baskets', function (Blueprint $table) {
+        Schema::table('shop_orders', function (Blueprint $table) {
             $table->dropColumn('products_json');
         });
     }
@@ -24,8 +24,8 @@ class DeleteProductjsonFormShopBasketTable extends Migration
      */
     public function down()
     {
-        Schema::table('shop_baskets', function (Blueprint $table) {
-            $table->json('products_json')->after('token');
+        Schema::table('shop_orders', function (Blueprint $table) {
+            $table->json('products_json')->after('pay_id');
         });
     }
 }
