@@ -1,8 +1,8 @@
 (function() {
 
-    var filters = document.getElementsByClassName( 'filter-action' );
+    let filters = document.getElementsByClassName( 'filter-action' );
 
-    for( var i = 0; i < filters.length; i++ ) {
+    for( let i = 0; i < filters.length; i++ ) {
         if(filters[i].className.indexOf('filter-action-select') >= 0){
             filters[ i ].addEventListener('change', function(e){
                 prepareRequest(e);
@@ -17,11 +17,11 @@
 
 function prepareRequest(e){
     e = e || event;
-    var target = getTarget(e.target);
-    var oldValues = getOldValuesFromQueryString();
-    var values = getValuesForQueryString(target, oldValues);
-    var queryString = getNewQueryString(oldValues, values);
-console.log(e);
+    let target = getTarget(e.target);
+    let oldValues = getOldValuesFromQueryString();
+    let values = getValuesForQueryString(target, oldValues);
+    let queryString = getNewQueryString(oldValues, values);
+
     if(queryString === false){
         showErrorMsg(target);
     }else{
@@ -52,15 +52,20 @@ function getOldValuesFromQueryString(){
 }
 
 function getValuesForQueryString(target, oldValues){
-    var values = {};
+    let values = {};
 
-    for(var i = 0; i < target.length ;i++){
+    for(let i = 0; i < target.length ;i++){
         if(target[i].tagName !== 'BUTTON'){
 
-            var filterName = target[i].dataset.filterName;
-            var filterValue = target[i].dataset.filterValue || target[i].value;
-            var filterType = target[i].dataset.filterType;
-            var defaultValue = target[i].dataset.filterDefaultValue || '';
+            let filterName = target[i].dataset.filterName;
+            let filterType = target[i].dataset.filterType;
+
+            let filterValue = '';
+
+            if(filterType !== 'multiselect'){
+                filterValue = target[i].dataset.filterValue || target[i].value;
+            }
+            let defaultValue = target[i].dataset.filterDefaultValue || '';
 
             if (!(filterName in values))
                 values[filterName] = [];
@@ -74,9 +79,18 @@ function getValuesForQueryString(target, oldValues){
                 case 'hidden':
                 case 'switch':  values[filterName].push(filterValue);
                     break;
-                case 'delete':  for(var y = 0; y < oldValues[filterName].length; y++){
+                case 'multiselect':
+                    let options = target[i];
+
+                    for (let i = 0; i<options.length; i++) {
+                        if (options[i].selected) {
+                            values[filterName].push(options[i].value);
+                        }
+                    }
+                    break;
+                case 'delete':  for(let y = 0; y < oldValues[filterName].length; y++){
+
                     if(oldValues[filterName][y] === filterValue){
-                        console.log(target[i].dataset.filterParentType);
                         if(target[i].dataset.filterParentType === 'slider-range'){
                             oldValues[filterName][y] = target[i].dataset.filterDefaultValue
                         }else{
@@ -327,24 +341,39 @@ function changeSliderValue(values, slider){
 
 /*Очистка фильтра. Для каждого типа фильтра */
 $('.filter-clear').on('click', function(e){
-    var filter = e.target.closest('.filter');
-    var inputs = $(filter).find('input[data-filter-type]');
-    console.log(filter);
-    for(var i = 0; i < inputs.length; i++){
-        if(inputs[i].type === 'checkbox'){
-            if(inputs[i].checked === true){
-                inputs[i].checked = false;
-            }
-        }else if(inputs[i].type === 'text'){
-            if(inputs[i].dataset.filterType === 'slider'){
-                var values = [];
-                values[0] = inputs[i].min;
-                values[1] = inputs[i].max;
-                changeInputValue([0, 1], values, filter);
-                changeSliderValue(values, filter);
-            }else{
-                inputs[i].value = '';
-            }
+    let filter = e.target.closest('.filter');
+    let inputs = $(filter).find('[data-filter-type]');
+
+    for(let i = 0; i < inputs.length; i++){
+
+        switch(inputs[i].type){
+            case 'checkbox' :
+                if(inputs[i].checked === true){
+                    inputs[i].checked = false;
+                }
+                break;
+
+            case 'text' :
+                if(inputs[i].dataset.filterType === 'slider'){
+                    let values = [];
+                    values[0] = inputs[i].min;
+                    values[1] = inputs[i].max;
+                    changeInputValue([0, 1], values, filter);
+                    changeSliderValue(values, filter);
+                }else{
+                    inputs[i].value = '';
+                }
+                break;
+            case 'select':
+            case 'select-multiple':
+                let options = inputs[i];
+                for(let i = 0; i < options.length; i++){
+                    if(options[i].selected === true){
+                        options[i].selected = false;
+                    }
+                }
+                break;
         }
+
     }
-})
+});

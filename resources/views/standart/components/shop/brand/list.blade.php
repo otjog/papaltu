@@ -5,7 +5,7 @@
 
         @if(isset($brands) && count($brands) > 0)
 
-            @foreach($brands->chunk(4) as $brands_row)
+            @foreach($brands->chunk($components['shop']['chunk_category']) as $brands_row)
 
                 <div class="card-group">
 

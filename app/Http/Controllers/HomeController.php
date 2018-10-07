@@ -2,22 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Settings;
+
 class HomeController extends Controller{
 
     protected $categories;
 
     protected $data;
 
-    protected $template_name;
-
     public function __construct(){
 
-        $this->template_name = env('SITE_TEMPLATE');
+        $settings = Settings::getInstance();
 
-        $this->data = [
-            'template' => [],
-            'template_name' => $this->template_name
-        ];
+        $this->data = $settings->getParameters();
+
+        $this->data['template'] = [];
     }
 
     public function index(){

@@ -1,4 +1,4 @@
-@foreach($filter['values'] as $id => $value)
+@foreach($filter['values'] as $id =>$value)
     @if($loop->index%2 == 0 || $loop->index == 0)
         <div class="row">
             @endif

@@ -4,7 +4,7 @@
 
         <div class="card-columns">
 
-            @foreach($categories->chunk(3) as $categories_row)
+            @foreach($categories->chunk($components['shop']['chunk_categories']) as $categories_row)
 
                 @foreach($categories_row as $key => $category)
 
