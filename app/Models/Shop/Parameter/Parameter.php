@@ -10,7 +10,7 @@ class Parameter extends Model{
 
     public function products(){
         return $this->belongsToMany('App\Models\Shop\Product\Product', 'product_has_parameter', 'parameter_id', 'product_id')
-            ->withPivot('value')
+            ->withPivot('id', 'value')
             ->withTimestamps();
     }
 

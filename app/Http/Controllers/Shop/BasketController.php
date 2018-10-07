@@ -58,21 +58,7 @@ class BasketController extends Controller{
 
         $token = $request->session()->get('_token');
 
-        $basket = $this->baskets->getActiveBasket( $token );
-
-        if($basket === null){
-            $this->baskets->token     = $token;
-
-            $this->baskets->products_json  = json_encode(array( ['id' => $request->id, 'quantity' => $request->quantity] ) );
-
-            $this->baskets->save();
-        }else{
-            $products = $this->addProductToArray( $basket, $request->all() );
-
-            $basket->products_json = json_encode($products);
-
-            $basket->save();
-        }
+        $this->baskets->addProductToBasket( $request, $token );
 
         return back();
     }
@@ -96,7 +82,7 @@ class BasketController extends Controller{
      */
     public function edit(Product $products, $token){
 
-        $basket = $this->baskets->getActiveBasketWithProducts( $products, $token );
+        $basket = $this->baskets->getActiveBasketWithProductsAndRelations( $products, $token );
 
         if($basket->order_id === null){
 
@@ -125,13 +111,7 @@ class BasketController extends Controller{
      */
     public function update(Request $request, $token){
 
-        $basket = $this->baskets->getActiveBasket( $token ) ;
-
-        $products = $this->changeQuantityInArray( $request->all() );
-
-        $basket->products_json = json_encode($products);
-
-        $basket->save();
+        $this->baskets->updateBasket( $request );
 
         return back();
     }
@@ -170,23 +150,4 @@ class BasketController extends Controller{
         return $newProducts;
     }
 
-    private function addProductToArray($basket, $newProduct){
-        $products = json_decode($basket->products_json, true);
-
-        foreach($products as $key => $product){
-
-            if(isset($newProduct) && $product['id'] === $newProduct['id']){
-                $quantity = $product['quantity']*1 + $newProduct['quantity']*1;
-                $products[$key]['quantity'] = (string) $quantity;
-                unset($newProduct);
-            }
-
-        }
-
-        if(isset($newProduct)){
-            $products[] = $newProduct;
-        }
-
-        return $products;
-    }
 }

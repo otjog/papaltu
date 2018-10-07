@@ -63,27 +63,40 @@
 
                 <div class="row no-gutters align-items-center my-2 border-bottom py-2 ">
 
-                    <div class="col-lg-2 py-1 px-2">
+                    <div class="col-lg-1 py-1 px-2">
                         <img class="img-fluid mx-auto my-auto d-block" src="{{ URL::asset('storage/img/shop/product/thumbnail/'.$product->thumbnail) }}">
                     </div>
 
-                    <div class="col-lg-4">
+                    <div class="col-lg-5">
                         <a href="{{ route('products.show', $product->id) }}">
                             {{ $product->name }}
                         </a>
+                        @if( isset($product->pivot['order_attributes_collection']) && count( $product->pivot['order_attributes_collection'] ) > 0)
+                            <br>
+                            @foreach($product->pivot['order_attributes_collection'] as $attribute)
+
+                                <span class="text-muted small">
+
+                                        {{$attribute->name}} : {{$attribute->pivot->value}}
+
+                                </span>
+
+                            @endforeach
+
+                        @endif
                     </div>
 
                     <div class="col-lg-2 text-center">
-                        <span class="text-muted">{{ $product->price['order_value'] }}</span>
-                        <span class="text-muted small"><i class="fas fa-ruble-sign"></i></span>
+                        <span class="text-muted">{{ $product->price['value'] }}</span>
+                        <span class="text-muted small"><small>{{$components['shop']['currency']['symbol']}}</small></span>
                     </div>
 
                     <div class="col-lg-2 text-center">
-                        <span class="text-muted">{{ $product->quantity }} шт.</span>
+                        <span class="text-muted">{{ $product->pivot['quantity'] }} шт.</span>
                     </div>
 
                     <div class="col-lg-2 text-center">
-                        <span>{{ $product->price['order_value'] * $product->quantity }}</span>
+                        <span>{{ $product->price['value'] * $product->pivot['quantity'] }}</span>
                         <span class="small"><i class="fas fa-ruble-sign"></i></span>
                     </div>
 
