@@ -173,21 +173,15 @@
 
                     @if( isset( $payments ) && count( $payments ) > 0 )
 
-                        @php
-                            if(isset($chunk) === false || is_nan($chunk) || $chunk > 4){
-                                $chunk = 3;
-                            }
-                        @endphp
-
                         <div class="col-lg-12">
 
                             <h4 class="mb-3">Способ оплаты</h4>
 
-                            @foreach( $payments->chunk($chunk) as $payments_row )
+                            @foreach( $payments->chunk(3) as $payments_row )
 
                                 <div class="row">
                                     @foreach( $payments_row as $payment)
-                                        <div class="col-lg-{{12/$chunk}} form-check form-check-inline mb-3 mr-0">
+                                        <div class="col-lg-{{12 / 3}} form-check form-check-inline mb-3 mr-0">
                                             <div class="custom-control custom-radio mx-3">
                                                 <input id="payment_{{ $payment->id }}" name="payment_id" value="{{ $payment->id }}" type="radio" class="custom-control-input" required="">
                                                 <label class="custom-control-label" for="payment_{{ $payment->id }}">{{ $payment->name }}</label>

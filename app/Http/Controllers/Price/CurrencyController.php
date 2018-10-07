@@ -23,10 +23,6 @@ class CurrencyController extends Controller{
             }
         }
 
-        $pricesWithNotMainCurrency = $products->getProductsWithAnotherCurrencyPrice();
-
-        dump($pricesWithNotMainCurrency[57]);
-
     }
 
     private function connectToSite(){

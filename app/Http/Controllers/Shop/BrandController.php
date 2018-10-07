@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Shop\Product\Product;
 use App\Models\Shop\Order\Basket;
-
+use App\Models\Settings;
 class BrandController extends Controller{
 
     protected $brands;
@@ -19,7 +19,6 @@ class BrandController extends Controller{
 
     protected $metaTagsCreater;
 
-    protected $template_name;
     /**
      * Создание нового экземпляра контроллера.
      *
@@ -27,7 +26,9 @@ class BrandController extends Controller{
      */
     public function __construct(Brand $brands, Basket $baskets, MetaTagsCreater $metaTagsCreater){
 
-        $this->template_name = env('SITE_TEMPLATE');
+        $settings = Settings::getInstance();
+
+        $this->data = $settings->getParameters();
 
         $this->brands   = $brands;
 
@@ -35,15 +36,9 @@ class BrandController extends Controller{
 
         $this->metaTagsCreater = $metaTagsCreater;
 
-        $this->data     = [
-            'template'  => [
-                'component'     => 'shop',
-                'resource'      => 'brand',
-            ],
-            'data'      => [
-                'product_chunk' => 4
-            ],
-            'template_name' => $this->template_name
+        $this->data['template'] = [
+            'component'     => 'shop',
+            'resource'      => 'brand',
         ];
 
     }

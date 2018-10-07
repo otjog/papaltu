@@ -102,14 +102,7 @@ p a:hover::after
 {
     opacity: 0.2;
 }
-::selection
-{
 
-}
-p::selection
-{
-
-}
 h1{font-size: 48px;}
 h2{font-size: 36px;}
 h3{font-size: 24px;}
@@ -123,19 +116,10 @@ h1, h2, h3, h4, h5, h6
     -webkit-text-shadow: rgba(0,0,0,.01) 0 0 1px;
     text-shadow: rgba(0,0,0,.01) 0 0 1px;
 }
-h1::selection,
-h2::selection,
-h3::selection,
-h4::selection,
-h5::selection,
-h6::selection
 {
 
 }
-.form-control
-{
-    color: #db5246;
-}
+
 section
 {
     display: block;
@@ -225,7 +209,7 @@ section
     display: inline-block;
     background: #0e8ce4;
     border-radius: 5px;
-    height: 48px;
+    height: 50px;
     -webkit-transition: all 200ms ease;
     -moz-transition: all 200ms ease;
     -ms-transition: all 200ms ease;
@@ -721,32 +705,6 @@ section
 .custom_list li a:hover
 {
     color: #0e8ce4;
-}
-select
-{
-    display: inline;
-    border: 0;
-    width: auto;
-    margin-left: 10px;
-    outline: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    border-bottom: 2px solid #555;
-    color: #7b00ff;
-    -webkit-transition: all .4s ease-in-out;
-    transition: all .4s ease-in-out;
-}
-select:hover
-{
-    cursor: pointer;
-}
-select option
-{
-    border: 0;
-    border-bottom: 1px solid #555;
-    padding: 10px;
-    -webkit-appearance: none;
-    -moz-appearance: none;
 }
 .header_search_button
 {

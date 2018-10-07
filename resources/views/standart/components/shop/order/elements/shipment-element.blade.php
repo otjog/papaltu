@@ -14,7 +14,7 @@
                 class="custom-control-label">
 
             @if( isset( $service ))
-                {{ $shipment->name }} - {{$service['price']}} руб - {{$service['days']}} дней.
+                {{ $shipment->name }} - {{$service['price']}} {{$components['shop']['currency']['symbol']}} - {{$service['days']}} дней.
             @else
                 {{ $shipment->name }}
             @endif
