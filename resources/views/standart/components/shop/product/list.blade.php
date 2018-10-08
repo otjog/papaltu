@@ -22,7 +22,24 @@
                                         <div class="text-center text-light"><i class="fas fa-shopping-basket fa-7x"></i></div>
                                     @endempty
 
-                                    <span class="card-title text-dark"><u>{{ $product->manufacturer['name'] . ' ' . $product->name }}</u></span>
+                                    <span class="card-title text-dark">
+                                        <u>
+                                            @isset($product->manufacturer['name'])
+                                                {{ $product->manufacturer['name'] . ' ' }}
+                                            @endisset
+
+                                            {{ $product->name }}
+
+                                            @if( isset($product->brands) && count($product->brands) > 0 && $product->brands !== null)
+
+                                                @foreach($product->brands as $brand)
+                                                    {{ ' | ' . $brand->name}}
+                                                @endforeach
+
+                                            @endif
+
+                                        </u>
+                                    </span>
                                 </a>
                             </div>
 

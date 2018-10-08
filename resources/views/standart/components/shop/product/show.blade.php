@@ -34,7 +34,21 @@
     <div class="product_description">
         <div class="product_category">{{$product->category['name']}}</div>
         <div class="product_scu">Артикул: {{$product->scu}}</div>
-        <h1 class="product_name">{{$product->name}}</h1>
+        <h1 class="product_name">
+            @isset($product->manufacturer['name'])
+                {{ $product->manufacturer['name'] . ' ' }}
+            @endisset
+
+            {{ $product->name }}
+
+            @if( isset($product->brands) && count($product->brands) > 0 && $product->brands !== null)
+
+                @foreach($product->brands as $brand)
+                    {{ ' | ' . $brand->name}}
+                @endforeach
+
+            @endif
+        </h1>
 
         @if( isset($product->price['value']) && $product->price['value'] !== null)
 
