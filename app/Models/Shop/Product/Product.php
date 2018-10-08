@@ -650,6 +650,7 @@ class Product extends Model{
 
             ->paginate($this->pagination);
 
+
         return $this->addRelationCollections($products);
 
     }
