@@ -145,6 +145,12 @@ for(let f = 0; f < forms.length; f++){
 }
 //END DaData
 
+/* Accordion Filter Param */
+$( "#accordion" ).accordion({
+    collapsible: true,
+    heightStyle: "content"
+});
+//END Accordion
 
 /* Maps Google ******/
 
@@ -201,3 +207,5 @@ let delivery = new Delivery();
 delivery.calculate();
 delivery.points();
 //END Delivery
+
+
