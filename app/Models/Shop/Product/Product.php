@@ -11,6 +11,8 @@ class Product extends Model{
 
     use PaginationWithHavings;
 
+    /******/
+
     protected $fillable = ['brand_id', 'category_id', 'manufacturer_id', 'active', 'name', 'scu'];
 
     protected $settings;
@@ -20,6 +22,8 @@ class Product extends Model{
     protected $pagination;
 
     protected $today;
+
+    /***Relations***/
 
     public function __construct(array $attributes = []){
         parent::__construct($attributes);
@@ -76,7 +80,7 @@ class Product extends Model{
             ->withTimestamps();
     }
 
-    /*******************************/
+    /***Function***/
 
     public function getAllProducts(){
         return self::select(
@@ -275,9 +279,9 @@ class Product extends Model{
             /************MANUFACTURER***********/
             ->leftJoin('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
 
-            ->orderBy('products.name');
+            ->orderBy('products.name')
 
-            $products = $products->paginate($this->pagination);
+            ->paginate($this->pagination);
 
         return $this->addRelationCollections($products);
 
@@ -649,7 +653,6 @@ class Product extends Model{
             ->orderBy('products.name')
 
             ->paginate($this->pagination);
-
 
         return $this->addRelationCollections($products);
 
