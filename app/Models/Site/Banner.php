@@ -12,7 +12,8 @@ class Banner extends Model{
             'id',
             'source',
             'img',
-            'title'
+            'title',
+            'template'
         )
             ->where('active', 1)
             ->get();
@@ -24,15 +25,21 @@ class Banner extends Model{
     private function composeSourceBanners($banners){
 
         foreach($banners as $banner){
-            list( $banner->component, $banner->resource, $banner->resource_id) = explode('|', $banner->source);
+            //list( $banner->component, $banner->resource, $banner->resource_id) = explode('|', $banner->source);
 
-            switch($banner->resource){
-                case 'product' :
-                    $products = new Product();
+            $matches = explode('|', $banner->source);
 
-                    $banner->data = $products->getActiveProduct($banner->resource_id);
+            if( count($matches) === 1 ){
+                $banner->type = 'static';
+            }else{
+                $banner->type = 'dinamic';
+                switch($banner->resource){
+                    case 'product' :
+                        $products = new Product();
+
+                        $banner->data = $products->getActiveProduct($banner->resource_id);
+                }
             }
-
         }
         return $banners;
     }

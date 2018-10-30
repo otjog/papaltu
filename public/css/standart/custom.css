@@ -98,3 +98,15 @@ ul.child {
     border-bottom: 1px dotted;
     cursor: pointer;
 }
+
+.product-filter .filter-header a {
+    cursor: pointer;
+}
+
+.product-filter a[aria-expanded=true] i.collapse-arrow-down {
+    display: none;
+}
+
+.product-filter a[aria-expanded=false] i.collapse-arrow-up {
+    display: none;
+}

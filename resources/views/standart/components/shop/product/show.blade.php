@@ -19,7 +19,11 @@
 @isset($product->images[0]->src)
     <!-- Main Image -->
     <div class="col-lg-5 order-lg-2 order-1">
-        <div class="image_selected"><img src="{{ URL::asset('storage/img/shop/product/'.$product->images[0]->src) }}" alt=""></div>
+        <div class="image_selected">
+            <a href="#">
+                <img src="{{ URL::asset('storage/img/shop/product/'.$product->images[0]->src) }}" alt="">
+            </a>
+        </div>
     </div>
 @endisset
 
