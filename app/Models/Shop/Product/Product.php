@@ -169,6 +169,9 @@ class Product extends Model{
             /************BRAND******************/
             ->with('brands')
 
+            /************IMAGES*****************/
+            ->with('images')
+
             /************PARAMETERS*************/
             ->with(['parameters' => function ($query) {
                 $query->where('product_parameters.order_attr', '=', 0);
@@ -747,6 +750,98 @@ class Product extends Model{
             }])
 
             ->orderBy('shop_basket_has_product.id')
+
+            ->get();
+
+        return $this->addRelationCollections($products);
+
+    }
+
+    public function getProductsOfWeek(){
+        $products = self::select(
+            'products.id',
+            'products.manufacturer_id',
+            'products.category_id',
+            'products.name',
+            'products.original_name',
+            'products.scu',
+            'products.thumbnail',
+            'prices.id                      as price|id',
+            'prices.name                    as price|name',
+            'product_has_price.value        as price|pivot|value',
+            'currency.value                 as price|pivot|currency_value',
+            'currency.char_code             as price|pivot|currency_code',
+            'currency.id                    as price|pivot|currency_id',
+            'discounts.id                   as discounts|id',
+            'discounts.name                 as discounts|name',
+            'discounts.type                 as discounts|type',
+            'product_has_discount.value     as discounts|pivot|value',
+            'manufacturers.id               as manufacturer|id',
+            'manufacturers.name             as manufacturer|name',
+            'categories.id                  as category|id',
+            'categories.name                as category|name',
+
+            DB::raw(
+                'CASE discounts.type
+                           WHEN "percent"
+                                    THEN ROUND( ( product_has_price.value - (product_has_price.value / 100 * product_has_discount.value) ) * currency.value )
+                           WHEN "value"
+                                    THEN ROUND( (product_has_price.value * currency.value) - product_has_discount.value )
+                           ELSE ROUND( product_has_price.value * currency.value )
+                        END AS "price|value"'
+            ),
+            DB::raw(
+                'CASE discounts.type
+                           WHEN "percent"
+                                    THEN ROUND( product_has_price.value / 100 * product_has_discount.value * currency.value )
+                           WHEN "value"
+                                    THEN ROUND( product_has_discount.value * currency.value )
+                           ELSE 0
+                        END AS "price|sale"'
+            )
+        )
+            ->whereIn('products.id', ['409', '410', '411', '412'])
+
+            ->where('products.active', '=', 1)
+
+            /************PRICE*******************/
+            ->leftJoin('product_has_price', function ($join) {
+                $join->on('products.id', '=', 'product_has_price.product_id')
+                    ->where('product_has_price.active', '=', '1')
+                    ->where('product_has_price.price_id', '=', $this->price_id);
+            })
+            ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
+
+            /************CURRENCY****************/
+            ->leftJoin('currency', 'currency.id', '=', 'product_has_price.currency_id')
+
+            /************DISCOUNT****************/
+            ->leftJoin('product_has_discount', 'products.id', '=', 'product_has_discount.product_id')
+            ->leftJoin('discounts', function ($join) {
+                $join->on('discounts.id', '=', 'product_has_discount.discount_id')
+                    ->where('discounts.active', '=', '1')
+                    ->whereDate('to_date', '>=', $this->today);
+            })
+
+            /************BRAND******************/
+            ->with('brands')
+
+            /************IMAGES*****************/
+            ->with('images')
+
+            /************PARAMETERS*************/
+            ->with(['parameters' => function ($query) {
+                $query->where('product_parameters.order_attr', '=', 0);
+            }])
+            ->with(['basket_parameters' => function ($query) {
+                $query->where('product_parameters.order_attr', '=', 1);
+            }])
+
+            /************MANUFACTURER***********/
+            ->leftJoin('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
+
+            /************CATEGORY***************/
+            ->leftJoin('categories', 'categories.id', '=', 'products.category_id')
 
             ->get();
 

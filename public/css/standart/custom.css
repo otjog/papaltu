@@ -17,6 +17,9 @@ footer{
     cursor: pointer;
 }
 
+.bg-orange{
+    background-color: orange;
+}
 .dropdown-menu{
     font-size: 0.80rem;
 }
@@ -109,4 +112,40 @@ ul.child {
 
 .product-filter a[aria-expanded=false] i.collapse-arrow-up {
     display: none;
+}
+
+.popular-products span.nav-link.active {
+    border-bottom: 3px solid dodgerblue;
+    cursor: default;
+}
+
+.popular-products span.nav-link {
+    cursor: pointer;
+}
+
+.popular-products .product-item-wrap:hover .product-item{
+    position: absolute;
+    width: 104%;
+    left: -2%;
+    z-index: 1;
+    background: white;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    border-bottom: 3px solid dodgerblue !important;;
+}
+
+.popular-products .product-item-wrap:hover .product-item .product-name{
+    display: block !important;
+}
+
+.popular-products .product-item-wrap:hover  .product-item .product-action{
+    display: block !important;
+}
+
+.popular-products .product-item-wrap:hover  .product-item .product-action .btn-link{
+    font-size: 0.90rem;
+    text-decoration: none!important;
+}
+.popular-products .product-item-wrap:hover  .product-item .product-action a{
+    font-size: 0.90rem;
 }
