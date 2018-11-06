@@ -78,16 +78,6 @@ class Filter extends Model{
 
                         break;
 
-                    case 'brand'        :
-
-                        $brands = $productsInCategory->pluck('brands');
-
-                        $filter['values']       = $brands->flatten()->pluck('name', 'id');
-
-                        $filter['old_values']   = $this->addOldValues($old_values, $filter['alias']);
-
-                        break;
-
                     case 'price'        :
                         $prices = $productsInCategory->pluck('price');
 
