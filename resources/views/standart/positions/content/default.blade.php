@@ -23,10 +23,10 @@
         </div>
     @endif
 
-    @if(isset( $template['custom'] ) && count( $template['custom'] ) > 0)
-        @foreach($template['custom'] as $module)
+    @if(isset( $template['modules'] ) && count( $template['modules'] ) > 0)
+        @foreach($template['modules'] as $folder => $file)
 
-            @include( $template_name .'.modules.custom.'.$module)
+            @include( $template_name .'.modules.' . $folder . '.' . $file)
 
         @endforeach
     @endif

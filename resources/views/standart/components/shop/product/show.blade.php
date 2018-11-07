@@ -19,7 +19,11 @@
 @isset($product->images[0]->src)
     <!-- Main Image -->
     <div class="col-lg-5 order-lg-2 order-1">
-        <div class="image_selected"><img src="{{ URL::asset('storage/img/shop/product/'.$product->images[0]->src) }}" alt=""></div>
+        <div class="image_selected">
+            <a href="#">
+                <img src="{{ URL::asset('storage/img/shop/product/'.$product->images[0]->src) }}" alt="">
+            </a>
+        </div>
     </div>
 @endisset
 
@@ -34,7 +38,21 @@
     <div class="product_description">
         <div class="product_category">{{$product->category['name']}}</div>
         <div class="product_scu">Артикул: {{$product->scu}}</div>
-        <h1 class="product_name">{{$product->name}}</h1>
+        <h1 class="product_name">
+            @isset($product->manufacturer['name'])
+                {{ $product->manufacturer['name'] . ' ' }}
+            @endisset
+
+            {{ $product->name }}
+
+            @if( isset($product->brands) && count($product->brands) > 0 && $product->brands !== null)
+
+                @foreach($product->brands as $brand)
+                    {{ ' | ' . $brand->name}}
+                @endforeach
+
+            @endif
+        </h1>
 
         @if( isset($product->price['value']) && $product->price['value'] !== null)
 

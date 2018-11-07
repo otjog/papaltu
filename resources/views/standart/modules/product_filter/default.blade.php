@@ -15,14 +15,30 @@
 
                 <strong>Фильтр</strong>
                 @foreach($filters as $filter)
-                    <div class="mb-3 pb-3  mt-1 pt-1 border-bottom filter filter-{{$filter['alias']}} filter-{{$filter['type']}} @if($filter['type'] === 'slider-range')filter-slider @endif">
+                    <div class="mx-1 pt-1 border-bottom filter filter-{{$filter['alias']}} filter-{{$filter['type']}} @if($filter['type'] === 'slider-range')filter-slider @endif">
 
                         <div class="filter-header my-2">
-                            <span>{{$filter['name']}}</span>
+                            <span>
+                                <a
+                                        class="collapsed"
+                                        data-toggle="collapse"
+                                        data-target="#collapse-{{$filter['alias']}}"
+                                        aria-expanded="{{$filter['expanded']}}"
+                                        aria-controls="collapse-{{$filter['alias']}}">
+
+                                    {{$filter['name']}}
+
+                                    <span class="pl-1">
+                                        <i class="fas fa-angle-down collapse-arrow-down"></i>
+                                        <i class="fas fa-angle-up collapse-arrow-up"></i>
+                                    </span>
+                            </a>
+                            </span>
                             <small class="filter-clear float-right">Очистить</small>
                         </div>
-
-                        @include( $template_name .'.modules.product_filter.elements.'.$filter['type'], [$filter])
+                        <div class="collapse pb-3 @if($filter['expanded'] === 'true') show @endif"  id="collapse-{{$filter['alias']}}">
+                            @include( $template_name .'.modules.product_filter.elements.'.$filter['type'], [$filter])
+                        </div>
 
                     </div>
                 @endforeach

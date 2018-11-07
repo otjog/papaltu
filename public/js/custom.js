@@ -1,5 +1,4 @@
-/* Quantity Button ****/
-
+//Quantity Button
 let quantity = {
     'buttons': {
         'increment' : document.getElementsByClassName('quantity_inc'),
@@ -58,16 +57,50 @@ function changeQuantity(e, buttonIndex){
 }
 //END Quantity Button
 
-/* FancyBox************/
-
+//FancyBox
 $(".fancybox").fancybox({
     openEffect	: 'none',
-    closeEffect	: 'none'
+    closeEffect	: 'none',
+    padding : 0
 });
+//создает галерею по клику на главном изображении
+$(".image_selected a").click(function() {
+
+    let images = $("div.product ul.image_list a.fancybox img");
+
+    if(images.length === 0){
+        images = $("div.product div.image_selected a img");
+    }
+
+    let arrImgHref = [];
+
+    for(let i = 0; i < images.length; i++){
+        arrImgHref[i] = { 'href' : $(images[i]).attr('src') }
+    }
+
+    $.fancybox.open(arrImgHref, {
+        padding : 0
+    });
+
+    return false;
+
+});
+
+//обрежем высоту галереи по высоте основного изображения. !!!Временное решение
+let mainImg     = $("div.product div.image_selected");
+let listThumb   = $("div.product ul.image_list");
+let mainImgOutHeight    = mainImg.outerHeight();
+let listThumbOutHeight  = listThumb.outerHeight();
+
+if(listThumbOutHeight > mainImgOutHeight){
+    let listThumbHeight = listThumb.height();
+    let diff = listThumbOutHeight - mainImgOutHeight;
+    listThumb.height(listThumbHeight - diff).css('overflow', 'hidden');
+}
 //END FancyBox
 
 
-/* Tabs **************/
+//Tabs
 let tabs = document.getElementById('tabs');
 
 if(tabs !== null && tabs !== undefined){
@@ -145,7 +178,6 @@ for(let f = 0; f < forms.length; f++){
 }
 //END DaData
 
-
 /* Maps Google ******/
 
 function initMap( json ) {
@@ -201,3 +233,5 @@ let delivery = new Delivery();
 delivery.calculate();
 delivery.points();
 //END Delivery
+
+

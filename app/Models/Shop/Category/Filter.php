@@ -26,7 +26,8 @@ class Filter extends Model{
             'filters.id',
             'filters.alias',
             'filters.name',
-            'filters.type'
+            'filters.type',
+            'filters.expanded'
         )
             ->where('filters.active', 1)
             ->orderBy('filters.sort')
@@ -49,6 +50,12 @@ class Filter extends Model{
         if( count($productsInCategory) > 0){
 
             foreach($filters as $key => $filter){
+
+                if($filter['expanded']){
+                    $filter['expanded'] = 'true';
+                }else{
+                    $filter['expanded'] = 'false';
+                }
 
                 switch($filter['alias']){
 
@@ -73,16 +80,6 @@ class Filter extends Model{
                         $filter['values']   = $distinctManfs->filter(function ($value, $key) {
                             return $key !== '' && $value !== null;
                         });
-
-                        $filter['old_values']   = $this->addOldValues($old_values, $filter['alias']);
-
-                        break;
-
-                    case 'brand'        :
-
-                        $brands = $productsInCategory->pluck('brands');
-
-                        $filter['values']       = $brands->flatten()->pluck('name', 'id');
 
                         $filter['old_values']   = $this->addOldValues($old_values, $filter['alias']);
 
