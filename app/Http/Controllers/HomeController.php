@@ -23,9 +23,9 @@ class HomeController extends Controller{
 
         $this->data['template'] ['banner']  = 'default';
 
-        $this->data['template'] ['custom'][]  = 'shop-icons';
+        //  $this->data['template'] ['modules']['custom']  = 'shop-icons';
 
-        $this->data['template'] ['custom'][]  = 'popular-products';
+        $this->data['template'] ['modules']['offers']  = 'default';
 
         return view( 'templates.default', $this->data);
     }

@@ -20,7 +20,7 @@ class ViewComposerServiceProvider extends ServiceProvider{
             'App\Http\ViewComposers\ProductFilterComposer'  => $template . '.modules.product_filter.default',
             'App\Http\ViewComposers\BannerComposer'         => $template . '.modules.banner.default',
 
-            'App\Http\ViewComposers\Shop\Product\DealWeekComposer'  => $template . '.modules.custom.popular-products',
+            'App\Http\ViewComposers\Shop\Product\ShopOffersComposer' => $template . '.modules.offers.default',
         ]);
     }
 

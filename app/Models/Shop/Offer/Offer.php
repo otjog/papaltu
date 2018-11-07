@@ -16,7 +16,6 @@ class Offer extends Model{
 
     public function getProductsOffer($take = 100){
         $offers = $this->getActiveOffers();
-
         $products = new Product();
 
         foreach($offers as $offer){
@@ -34,6 +33,21 @@ class Offer extends Model{
         }
 
         return $offers;
+    }
+
+    public function getSliceProductOffer($take = 6, $mainOfferName = 'deal-week'){
+
+        $offers = $this->getProductsOffer($take);
+
+        $mainOffer = $offers->first(function ($value, $key) use ($mainOfferName, $offers) {
+            if($value->name === $mainOfferName){
+                $offers->forget($key);
+            }
+            return $value->name === $mainOfferName;
+        });
+
+        return ['mainOffer' => $mainOffer, 'offers' => $offers];
+
     }
 
     //TODO поле name сделать уникальным

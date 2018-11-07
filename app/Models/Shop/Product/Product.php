@@ -574,7 +574,7 @@ class Product extends Model{
             case 'sale' :
                 $productQuery = $this->getProductsQuery();
 
-                return $productQuery
+                $products = $productQuery
                     ->where('products.active', 1)
 
                     ->where('discounts.id', '<>', NULL)
@@ -585,10 +585,12 @@ class Product extends Model{
 
                     ->get();
 
+                return $this->addRelationCollections($products);
+
             case 'newest' :
                 $productQuery = $this->getProductsQuery();
 
-                return $productQuery
+                $products = $productQuery
                     ->where('products.active', 1)
 
                     ->where('products.created_at', '>=', date('Y-m-d', strtotime('-1 week')))
@@ -598,6 +600,8 @@ class Product extends Model{
                     ->take($take)
 
                     ->get();
+
+                return $this->addRelationCollections($products);
         }
 
     }
