@@ -29,6 +29,7 @@ class Settings {
         $this->data = [
 
             'template_name' => env('SITE_TEMPLATE'),
+            'site_url' => env('APP_URL'),
             'info' => [
                 'email' => env('SITE_EMAIL'),
                 'phone' => env('SITE_PHONE'),

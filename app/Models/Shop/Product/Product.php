@@ -104,7 +104,9 @@ class Product extends Model{
 
         $products = $productsQuery
             ->where('products.id', '=', $id)
+
             ->where('products.active', '=', 1)
+
             ->get();
 
             if( isset($products[0])){
