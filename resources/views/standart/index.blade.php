@@ -46,21 +46,20 @@
 </head>
 <body style="margin-bottom: 0">
 
-<div class="container-fluid px-0">
-
     <!-- Header -->
     <header class="header">
         @include( $template_name .'.positions.header.default')
     </header>
 
-    @include( $template_name .'.positions.content.default')
+    <!-- Content -->
+    <main role="main">
+        @include( $template_name .'.positions.content.default')
+    </main>
 
     <!-- Footer -->
     <footer class="footer" style="position: relative">
         @include( $template_name .'.positions.footer.default')
     </footer>
-
-</div>
 
 
 
