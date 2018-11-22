@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Parse;
 
 use App\Models\Shop\Category\Category;
 use App\Http\Controllers\Controller;
-use App\Models\Shop\Product\Image;
+use App\Models\Site\Image;
 use App\Models\Shop\Price\Currency;
 use App\Models\Shop\Price\Price;
 use Illuminate\Http\Request;

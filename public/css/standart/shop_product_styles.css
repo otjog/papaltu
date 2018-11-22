@@ -73,9 +73,8 @@
 	height: 130px;
 	border: solid 1px #e8e8e8;
 	box-shadow: 0px 1px 5px rgba(0,0,0,0.1);
-	margin-bottom: 15px;
+	margin-bottom: 30px;
 	cursor: pointer;
-	padding: 15px;
 	-webkit-transition: all 200ms ease;
 	-moz-transition: all 200ms ease;
 	-ms-transition: all 200ms ease;
@@ -106,7 +105,7 @@
 	justify-content: center;
 	align-items: center;
 	width: calc(100% + 15px);
-	height: 420px;
+	height: 450px;
 	-webkit-transform: translateX(-15px);
 	-moz-transform: translateX(-15px);
 	-ms-transform: translateX(-15px);
@@ -115,7 +114,6 @@
 	border: solid 1px #e8e8e8;
 	box-shadow: 0px 1px 5px rgba(0,0,0,0.1);
 	overflow: hidden;
-	padding: 15px;
 }
 .image_selected img
 {

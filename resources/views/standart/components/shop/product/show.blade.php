@@ -1,37 +1,9 @@
-@if( isset( $product->images ) && count( $product->images ) > 1)
-    <!-- Images -->
-    <div class="col-lg-2 order-lg-1 order-2">
-        <ul class="image_list">
-            @foreach( $product->images as $image)
-
-                <li>
-                    <a class="fancybox" rel="product_images" href="{{ URL::asset('storage/img/shop/product/'.$image->src) }}" title="">
-                        <img src="{{ URL::asset('storage/img/shop/product/'.$image->src) }}" alt="" />
-                    </a>
-                </li>
-
-            @endforeach
-        </ul>
+<!-- Images -->
+<div class="col-lg-7">
+    <div class="row">
+        @include( $template_name. '.components.shop.product.elements.images.gallery')
     </div>
-
-@endif
-
-@isset($product->images[0]->src)
-    <!-- Main Image -->
-    <div class="col-lg-5 order-lg-2 order-1">
-        <div class="image_selected">
-            <a href="#">
-                <img src="{{ URL::asset('storage/img/shop/product/'.$product->images[0]->src) }}" alt="">
-            </a>
-        </div>
-    </div>
-@endisset
-
-@empty($product->images[0]->src)
-    <div class="col-lg-5 order-lg-2 order-1">
-        <div class="image_selected text-light"><i class="fas fa-shopping-basket fa-7x"></i></div>
-    </div>
-@endempty
+</div>
 
 <!-- Right Column -->
 <div class="col-lg-5 order-3">

@@ -64,7 +64,19 @@
                 <div class="row no-gutters align-items-center my-2 border-bottom py-2 ">
 
                     <div class="col-lg-1 py-1 px-2">
-                        <img class="img-fluid mx-auto my-auto d-block" src="{{ URL::asset('storage/img/shop/product/thumbnail/'.$product->thumbnail) }}">
+                        @if( isset($product->images[0]->src) && $product->images[0]->src !== null )
+                            <img
+                                    class="img-fluid mx-auto my-auto d-block"
+                                    src="{{ URL::asset('storage/img/shop/product/s/' . $product->images[0]->src) }}"
+                                    alt=""
+                            />
+                        @else
+                            <img
+                                    class="img-fluid mx-auto my-auto d-block"
+                                    src="{{ URL::asset('storage/img/shop/default/s/' . $components[$template['component']]['images']['default_name']) }}"
+                                    alt=""
+                            />
+                        @endif
                     </div>
 
                     <div class="col-lg-5">

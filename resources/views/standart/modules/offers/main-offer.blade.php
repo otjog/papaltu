@@ -16,14 +16,19 @@
             @foreach($offer->products as $product)
                 <div class="carousel-item pb-4 @if ($loop->first) active @endif" style="padding: 0 15px">
                     <a class="d-block" href="{{ route( 'products.show', $product->id ) }}">
-
-                        @isset( $product->images[0] )
-                            <img class="img-fluid mx-auto d-block" src="{{ URL::asset('storage/img/shop/product/'.$product->images[0]->src) }}">
-                        @endisset
-
-                        @empty( $product->images[0] )
-                            <div class="text-center text-light"><i class="fas fa-shopping-basket fa-7x"></i></div>
-                        @endempty
+                        @if( isset($product->images[0]->src) && $product->images[0]->src !== null )
+                            <img
+                                    class='img-fluid mx-auto d-block'
+                                    src="{{ URL::asset('storage/img/shop/product/m-13/' . $product->images[0]->src) }}"
+                                    alt=""
+                            />
+                        @else
+                            <img
+                                    class='img-fluid mx-auto d-block'
+                                    src="{{ URL::asset('storage/img/shop/default/xs/' . $components[$template['component']]['images']['default_name']) }}"
+                                    alt=""
+                            />
+                        @endif
                     </a>
 
                     <div class="row">
