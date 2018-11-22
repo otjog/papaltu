@@ -39,7 +39,7 @@ class Product extends Model{
     }
 
     public function images(){
-        return $this->belongsToMany('App\Models\Shop\Product\Image', 'product_has_image')->withTimestamps();
+        return $this->belongsToMany('App\Models\Site\Image', 'product_has_image')->withTimestamps();
     }
 
     public function category(){
@@ -121,7 +121,7 @@ class Product extends Model{
 
     public function getActiveProductsFromCategory($category_id){
 
-        $productsQuery = $this->getProductsQuery();
+        $productsQuery = $this->getListProductQuery();
 
         $products = $productsQuery
 
@@ -203,7 +203,7 @@ class Product extends Model{
 
     public function getFilteredProducts($parameters){
 
-        $productsQuery = $this->getProductsQuery();
+        $productsQuery = $this->getListProductQuery();
 
         $products = $productsQuery
 
@@ -257,7 +257,7 @@ class Product extends Model{
 
     public function getActiveProductsOfBrand($brand_id){
 
-        $productsQuery = $this->getProductsQuery();
+        $productsQuery = $this->getListProductQuery();
 
         $products = $productsQuery
 
@@ -273,7 +273,7 @@ class Product extends Model{
 
     public function getProductsById($idProducts){
 
-        $productsQuery = $this->getProductsQuery();
+        $productsQuery = $this->getListProductQuery();
 
         $products = $productsQuery
 
@@ -291,7 +291,7 @@ class Product extends Model{
 
     public function getProductsFromBasket($basket_id){
 
-        $productsQuery = $this->getProductsQuery();
+        $productsQuery = $this->getListProductQuery();
 
         $products =  $productsQuery
 
@@ -449,7 +449,37 @@ class Product extends Model{
         return $products;
     }
 
-    private function getProductsQuery(){
+    private function getOneProductQuery(){
+
+        $productsQuery = $this->getDefaultProductQuery();
+
+        return $productsQuery
+            ->addSelect(
+                'products.description',
+                'products.weight',
+                'products.length',
+                'products.width',
+                'products.height'
+            )
+            /************IMAGES*****************/
+            ->with('images')
+
+            /************PARAMETERS*************/
+            ->with(['parameters' => function ($query) {
+                $query->where('product_parameters.order_attr', '=', 0);
+            }]);
+    }
+
+    private function getListProductQuery(){
+
+        $productsQuery = $this->getDefaultProductQuery();
+
+        return $productsQuery
+        /************IMAGES*****************/
+        ->with('images');
+    }
+
+    private function getDefaultProductQuery(){
 
         return self::select(
             'products.id',
@@ -458,7 +488,6 @@ class Product extends Model{
             'products.name',
             'products.original_name',
             'products.scu',
-            'products.thumbnail',
             'prices.id                      as price|id',
             'prices.name                    as price|name',
             'product_has_price.value        as price|pivot|value',
@@ -494,7 +523,7 @@ class Product extends Model{
             )
         )
 
-            /************PRICE*******************/
+            /************PRICE******************/
             ->leftJoin('product_has_price', function ($join) {
                 $join->on('products.id', '=', 'product_has_price.product_id')
                     ->where('product_has_price.active', '=', '1')
@@ -502,10 +531,10 @@ class Product extends Model{
             })
             ->leftJoin('prices','prices.id', '=', 'product_has_price.price_id')
 
-            /************CURRENCY****************/
+            /************CURRENCY***************/
             ->leftJoin('currency', 'currency.id', '=', 'product_has_price.currency_id')
 
-            /************DISCOUNT****************/
+            /************DISCOUNT***************/
             ->leftJoin('product_has_discount', 'products.id', '=', 'product_has_discount.product_id')
             ->leftJoin('discounts', function ($join) {
                 $join->on('discounts.id', '=', 'product_has_discount.discount_id')
@@ -521,33 +550,14 @@ class Product extends Model{
                 $query->where('product_parameters.order_attr', '=', 1);
             }])
 
-
             /************CATEGORY***************/
             ->leftJoin('categories', 'categories.id', '=', 'products.category_id');
 
     }
 
-    private function getOneProductQuery(){
-
-        $productsQuery = $this->getProductsQuery();
-
-        return $productsQuery
-            ->addSelect(
-                'products.description',
-                'products.weight',
-                'products.length',
-                'products.width',
-                'products.height'
-            )
-            /************PARAMETERS*************/
-            ->with(['parameters' => function ($query) {
-                $query->where('product_parameters.order_attr', '=', 0);
-            }]);
-    }
-
     public function getCustomProductsOffer($offer_id, $take){
 
-        $productsQuery = $this->getProductsQuery();
+        $productsQuery = $this->getListProductQuery();
 
         $products = $productsQuery
 
@@ -572,7 +582,7 @@ class Product extends Model{
 
         switch($offer_name){
             case 'sale' :
-                $productQuery = $this->getProductsQuery();
+                $productQuery = $this->getListProductQuery();
 
                 $products = $productQuery
                     ->where('products.active', 1)
@@ -588,7 +598,7 @@ class Product extends Model{
                 return $this->addRelationCollections($products);
 
             case 'newest' :
-                $productQuery = $this->getProductsQuery();
+                $productQuery = $this->getListProductQuery();
 
                 $products = $productQuery
                     ->where('products.active', 1)

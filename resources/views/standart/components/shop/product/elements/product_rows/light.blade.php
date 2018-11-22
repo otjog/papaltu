@@ -6,11 +6,21 @@
                 <!-- Image-->
                 <div class="product-image">
                     <a href="{{ route( 'products.show', $product->id ) }}">
-                        @if( isset($product->thumbnail) && file_exists( 'storage/img/shop/product/thumbnail/'.$product->thumbnail))
-                            <img class="img-fluid mx-auto d-block" src="{{ URL::asset('storage/img/shop/product/thumbnail/'.$product->thumbnail) }}">
+
+                        @if( isset($product->images[0]->src) && $product->images[0]->src !== null )
+                            <img
+                                    class="img-fluid"
+                                    src="{{ URL::asset('storage/img/shop/product/s/' . $product->images[0]->src) }}"
+                                    alt=""
+                            />
                         @else
-                            <div class="text-center text-light"><i class="fas fa-shopping-basket fa-7x"></i></div>
+                            <img
+                                    class="img-fluid"
+                                    src="{{ URL::asset('storage/img/shop/default/s/' . $components[$template['component']]['images']['default_name']) }}"
+                                    alt=""
+                            />
                         @endif
+
                     </a>
                 </div>
                 <!--Price-->
@@ -21,11 +31,11 @@
                                 <div class="row">
                                     @if( isset($product->price['sale']) && $product->price['sale'] > 0)
                                         <div class="col-6">
-                                                        <span class="small">
-                                                            <s>
-                                                                {{$product->price['value'] + $product->price['sale']}}<small>{{$components['shop']['currency']['symbol']}}</small>
-                                                            </s>
-                                                        </span>
+                                            <span class="small">
+                                                <s>
+                                                    {{$product->price['value'] + $product->price['sale']}}<small>{{$components['shop']['currency']['symbol']}}</small>
+                                                </s>
+                                            </span>
                                         </div>
                                     @endif
                                     <div class="col text-danger">

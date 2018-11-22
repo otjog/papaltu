@@ -66,16 +66,16 @@ $(".fancybox").fancybox({
 //создает галерею по клику на главном изображении
 $(".image_selected a").click(function() {
 
-    let images = $("div.product ul.image_list a.fancybox img");
+    let imageLinks = $("div.product ul.image_list a.fancybox");
 
-    if(images.length === 0){
-        images = $("div.product div.image_selected a img");
+    if(imageLinks.length === 0){
+        imageLinks = $("div.product div.image_selected a");
     }
 
     let arrImgHref = [];
 
-    for(let i = 0; i < images.length; i++){
-        arrImgHref[i] = { 'href' : $(images[i]).attr('src') }
+    for(let i = 0; i < imageLinks.length; i++){
+        arrImgHref[i] = { 'href' : $(imageLinks[i]).attr('href') }
     }
 
     $.fancybox.open(arrImgHref, {
