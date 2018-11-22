@@ -5,9 +5,9 @@
             @foreach( $product->images as $image)
 
                 <li>
-                    <a class="fancybox" rel="product_images" href="{{ URL::asset('storage/img/shop/product/l/' . $image->src) }}" title="">
+                    <a class="fancybox" rel="product_images" href="{{ URL::asset('storage/img/shop/product/l/' . $image->name) }}" title="">
                         <img
-                                src="{{ URL::asset('storage/img/shop/product/xs/' . $image->src) }}"
+                                src="{{ URL::asset('storage/img/shop/product/xs/' . $image->name) }}"
                                 alt=""
                         />
                     </a>
@@ -22,10 +22,10 @@
 <!-- Main Image -->
 <div class="col-lg-9 order-lg-2 order-1">
     <div class="image_selected">
-        @if( isset($product->images[0]->src) && $product->images[0]->src !== null)
-            <a class="fancybox" rel="product_images" href="{{ URL::asset('storage/img/shop/product/l/' . $product->images[0]->src) }}" title="">
+        @if( isset($product->images[0]->name) && $product->images[0]->name !== null)
+            <a class="fancybox" rel="product_images" href="{{ URL::asset('storage/img/shop/product/l/' . $product->images[0]->name) }}" title="">
                 <img
-                        src="{{ URL::asset('storage/img/shop/product/m/' . $product->images[0]->src) }}"
+                        src="{{ URL::asset('storage/img/shop/product/m/' . $product->images[0]->name) }}"
                         alt=""
                 />
             </a>
