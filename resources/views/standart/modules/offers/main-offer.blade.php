@@ -16,10 +16,10 @@
             @foreach($offer->products as $product)
                 <div class="carousel-item pb-4 @if ($loop->first) active @endif" style="padding: 0 15px">
                     <a class="d-block" href="{{ route( 'products.show', $product->id ) }}">
-                        @if( isset($product->images[0]->src) && $product->images[0]->src !== null )
+                        @if( isset($product->images[0]->name) && $product->images[0]->name !== null )
                             <img
                                     class='img-fluid mx-auto d-block'
-                                    src="{{ URL::asset('storage/img/shop/product/m-13/' . $product->images[0]->src) }}"
+                                    src="{{ URL::asset('storage/img/shop/product/m-13/' . $product->images[0]->name) }}"
                                     alt=""
                             />
                         @else

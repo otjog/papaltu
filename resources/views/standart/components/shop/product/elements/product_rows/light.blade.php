@@ -7,10 +7,10 @@
                 <div class="product-image">
                     <a href="{{ route( 'products.show', $product->id ) }}">
 
-                        @if( isset($product->images[0]->src) && $product->images[0]->src !== null )
+                        @if( isset($product->images[0]->name) && $product->images[0]->name !== null )
                             <img
                                     class="img-fluid"
-                                    src="{{ URL::asset('storage/img/shop/product/s/' . $product->images[0]->src) }}"
+                                    src="{{ URL::asset('storage/img/shop/product/s/' . $product->images[0]->name) }}"
                                     alt=""
                             />
                         @else
