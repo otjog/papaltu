@@ -16,7 +16,7 @@
                         @else
                             <img
                                     class="img-fluid"
-                                    src="{{ URL::asset('storage/img/shop/default/s/' . $components[$template['component']]['images']['default_name']) }}"
+                                    src="{{ URL::asset('storage/img/shop/default/s/' . $components['shop']['images']['default_name']) }}"
                                     alt=""
                             />
                         @endif

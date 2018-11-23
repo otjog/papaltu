@@ -103,13 +103,14 @@ class CategoryController extends Controller{
 
         if( count( $request->query ) > 0 ){
 
-            $parameters = $request->toArray();
+            $filterData = $request->toArray();
 
-            $parameters['category'] = $id;
+            $routeData = ['category' => $id];
 
-            $this->data['data'] ['products'] = $products->getFilteredProducts($parameters);
+            $this->data['data'] ['products'] = $products->getFilteredProducts($routeData, $filterData);
 
             $this->data['data'] ['parameters'] = $request->toArray();
+
 
         }else{
 

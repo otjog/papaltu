@@ -29,7 +29,7 @@ class AjaxController extends Controller{
 
             list($section, $component)  = explode('|', $component_template );
 
-            $this->data['template']['com'] = [
+            $this->data['inc_template']['com'] = [
                 'section' => $section,
                 'component' => $component,
             ];
@@ -43,7 +43,7 @@ class AjaxController extends Controller{
             //todo вернуть $next если нет заголовка X-Module
             list($module, $viewReload)     = explode('|', $module_template );
 
-            $this->data['template']['mod'] = [
+            $this->data['inc_template']['mod'] = [
                 'module' => $module,
                 'viewReload' => $viewReload,
             ];
@@ -87,7 +87,7 @@ class AjaxController extends Controller{
 
                     $products = new Product();
 
-                    $result = $products->getFilteredProducts($request->toArray());
+                    $result = $products->getFilteredProducts([], $request->toArray());
 
                     $path = stristr($request->session()->previousUrl(), '?', true);
 

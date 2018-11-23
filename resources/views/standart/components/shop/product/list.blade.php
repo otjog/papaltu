@@ -1,4 +1,4 @@
-<div class="product-list" id="product-list">
+<div class="product-list py-2" id="product-list">
     <div class="container">
 
         @if(isset($products) && count($products) > 0)

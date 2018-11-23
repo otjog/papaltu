@@ -2,15 +2,15 @@
 
     @if( isset( $delivery['costs'] ) && count( $delivery['costs'] ) > 0)
 
-        @if( isset($template['com']) )
+        @if( isset($inc_template['com']) )
 
             @include(
                 $template_name .'.components.' .
-                $template['com']['section'] . '.' .
-                $template['com']['component'] .
+                $inc_template['com']['section'] . '.' .
+                $inc_template['com']['component'] .
                 '.modules.' .
-                $template['mod']['module'] . '.' .
-                $template['mod']['viewReload'])
+                $inc_template['mod']['module'] . '.' .
+                $inc_template['mod']['viewReload'])
         @else
 
             <h4>Самовывоз из пунктов выдачи</h4>
@@ -44,15 +44,15 @@
     @else
         @include( $template_name .'.modules.delivery.elements.error')
 
-        @if( isset($template['com']) )
+        @if( isset($inc_template['com']) )
             @includeIf(
                 $template_name .'.components.' .
-                $template['com']['section'] . '.' .
-                $template['com']['component'] .
+                $inc_template['com']['section'] . '.' .
+                $inc_template['com']['component'] .
                 '.modules.' .
-                $template['mod']['module'] . '.' .
+                $inc_template['mod']['module'] . '.' .
                 '.errors.' .//!!!
-                $template['mod']['viewReload'], ['shipments' => $delivery['shipments']])
+                $inc_template['mod']['viewReload'], ['shipments' => $delivery['shipments']])
         @endif
     @endif
 </div>

@@ -73,7 +73,7 @@
                         @else
                             <img
                                     class="img-fluid mx-auto my-auto d-block"
-                                    src="{{ URL::asset('storage/img/shop/default/s/' . $components[$template['component']]['images']['default_name']) }}"
+                                    src="{{ URL::asset('storage/img/shop/default/s/' . $components['shop']['images']['default_name']) }}"
                                     alt=""
                             />
                         @endif

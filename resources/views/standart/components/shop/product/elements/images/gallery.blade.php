@@ -31,7 +31,7 @@
             </a>
         @else
             <img
-                    src="{{ URL::asset('storage/img/shop/default/m/' . $components[$template['component']]['images']['default_name']) }}"
+                    src="{{ URL::asset('storage/img/shop/default/m/' . $components['shop']['images']['default_name']) }}"
                     alt=""
             />
         @endif
