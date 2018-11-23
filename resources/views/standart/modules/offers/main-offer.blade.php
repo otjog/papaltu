@@ -25,7 +25,7 @@
                         @else
                             <img
                                     class='img-fluid mx-auto d-block'
-                                    src="{{ URL::asset('storage/img/shop/default/xs/' . $components[$template['component']]['images']['default_name']) }}"
+                                    src="{{ URL::asset('storage/img/shop/default/xs/' . $components['shop']['images']['default_name']) }}"
                                     alt=""
                             />
                         @endif

@@ -1,21 +1,37 @@
 <div class="col-lg-3">
 
-    @if( isset( $filters ) && count( $filters ) > 0 )
-        <div class="product-filter my-4 px-4 pt-2">
+    @if (isset($filters) && count($filters) > 0 )
+        <div class="product-filter px-4">
             <form name="product_filter" role="form" method="GET">
 
-                <input
+                @foreach ($filters as $filter)
 
-                        type="hidden"
-                        name="{{key( $route_value )}}"
-                        value="{{ $route_value[ key( $route_value ) ] }}"
-                        data-filter-name="{{key( $route_value )}}"
-                        data-filter-type="hidden"
-                        data-filter-value="{{ $route_value[ key( $route_value ) ] }}">
+                    @php
 
-                <strong>Фильтр</strong>
-                @foreach($filters as $filter)
-                    <div class="mx-1 pt-1 border-bottom filter filter-{{$filter['alias']}} filter-{{$filter['type']}} @if($filter['type'] === 'slider-range')filter-slider @endif">
+                        $routeAlias = key($routeData);
+                        $routeValue = $routeData[ key($routeData) ];
+                        $filterPrefix = $components['shop']['filter_prefix'];
+
+                    @endphp
+
+                    @if ($filter['alias'] === $routeAlias)
+                        <input
+                                type="hidden"
+                                name="{{ $routeAlias }}"
+                                value="{{ $routeValue }}"
+                                data-filter-name="{{ $routeAlias  }}"
+                                data-filter-type="hidden"
+                                data-filter-value="{{ $routeValue }}">
+                    @elseif($filter['alias'] === $filterPrefix . $routeAlias)
+                        <input
+                                type="hidden"
+                                name="{{ $filterPrefix . $routeAlias }}"
+                                value="{{ $routeValue }}"
+                                data-filter-name="{{ $filterPrefix . $routeAlias }}"
+                                data-filter-type="hidden"
+                                data-filter-value="{{ $routeValue }}">
+                    @else
+                        <div class="mx-1 pt-1 border-bottom filter filter-{{$filter['alias']}} filter-{{$filter['type']}} @if($filter['type'] === 'slider-range')filter-slider @endif">
 
                         <div class="filter-header my-2">
                             <span>
@@ -41,6 +57,8 @@
                         </div>
 
                     </div>
+                    @endif
+
                 @endforeach
 
             <!-- Filter's Button -->

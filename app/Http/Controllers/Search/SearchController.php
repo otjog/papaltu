@@ -55,6 +55,7 @@ class SearchController extends Controller{
 
         $this->data['data']     ['products']    = [];
         $this->data['data']     ['query']       = $this->queryString;
+        $this->data['data']     ['header_page'] = 'Результаты поиска по запросу: ' . $this->queryString;
 
         if( isset( $searchIdResult[ 'matches' ] ) && count( $searchIdResult[ 'matches' ] ) > 0 ){
             $this->data['data'] ['products'] = $this->products->getProductsById( array_keys( $searchIdResult[ 'matches' ] ) );

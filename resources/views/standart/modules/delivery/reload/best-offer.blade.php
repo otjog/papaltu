@@ -1,14 +1,14 @@
 <div class="blur">
     <h4>Доставка</h4>
     @if( isset($delivery['_bestOffer']) && $delivery['_bestOffer'] !== null )
-        @if( isset($template['com']) )
+        @if( isset($inc_template['com']) )
             @include(
                 $template_name .'.components.' .
-                $template['com']['section'] . '.' .
-                $template['com']['component'] .
+                $inc_template['com']['section'] . '.' .
+                $inc_template['com']['component'] .
                 '.modules.' .
-                $template['mod']['module'] . '.' .
-                $template['mod']['viewReload'])
+                $inc_template['mod']['module'] . '.' .
+                $inc_template['mod']['viewReload'])
         @else
 
             <div class="best-offer">

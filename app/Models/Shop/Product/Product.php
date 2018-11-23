@@ -81,7 +81,6 @@ class Product extends Model{
     }
 
     /***Function***/
-
     public function getAllProducts(){
         return self::select(
             'products.id',
@@ -91,7 +90,6 @@ class Product extends Model{
             'products.original_name',
             'products.scu',
             'products.description',
-            'products.thumbnail',
             'products.unique'
         )
             ->orderBy('name')
@@ -137,13 +135,15 @@ class Product extends Model{
 
     }
 
-    public function getActiveProductsFromCategoryWithFilterParameters($category_id){
+    public function getActiveProductsWithFilterParameters($routeData){
 
         $products =  self::select(
             'products.id',
             'product_has_price.value        as price|pivot|value',
             'manufacturers.id               as manufacturer|id',
             'manufacturers.name             as manufacturer|name',
+            'categories.id                  as category|id',
+            'categories.name                as category|name',
 
             DB::raw(
                 'CASE discounts.type
@@ -163,10 +163,24 @@ class Product extends Model{
                            ELSE 0
                         END AS "price|sale" '
             )
-        )
-            ->where('products.category_id', $category_id)
+        );
 
-            ->where('products.active', 1)
+        switch (key($routeData)) {
+            case 'category' :
+                $categoryId = (int)$routeData[ key($routeData) ];
+                $products = $products->where( 'products.category_id', $categoryId);
+                break;
+            case 'brand'    :
+                $brandName = $routeData[ key($routeData) ];
+                $products = $products
+                    ->rightJoin('product_has_parameter', function ($join) use ($brandName) {
+                    $join->on('products.id', '=', 'product_has_parameter.product_id')
+                        ->where('product_has_parameter.value', '=', $brandName);
+                })
+                    ->rightJoin('product_parameters','product_parameters.id', '=', 'product_has_parameter.parameter_id');
+        }
+
+        $products = $products->where('products.active', 1)
 
             /************PRICE*******************/
             ->leftJoin('product_has_price', function ($join) {
@@ -193,6 +207,9 @@ class Product extends Model{
             /************MANUFACTURER***********/
             ->leftJoin('manufacturers', 'manufacturers.id', '=', 'products.manufacturer_id')
 
+            /************CATEGORY***************/
+            ->leftJoin('categories', 'categories.id', '=', 'products.category_id')
+
             ->orderBy('products.name')
 
             ->get();
@@ -201,20 +218,35 @@ class Product extends Model{
 
     }
 
-    public function getFilteredProducts($parameters){
+    public function getFilteredProducts($routeData, $filterData){
 
         $productsQuery = $this->getListProductQuery();
 
         $products = $productsQuery
 
-            ->where('products.active', 1)
+            ->where('products.active', 1);
 
-            //WHEN's
+        switch (key($routeData)) {
+            case 'category' :
+                $categoryId = (int)$routeData[ key($routeData) ];
+                $products = $products->where( 'products.category_id', $categoryId);
+                break;
+            case 'brand'    :
+                $brandName = $routeData[ key($routeData) ];
+                $products = $products
+                    ->rightJoin('product_has_parameter', function ($join) use ($brandName) {
+                        $join->on('products.id', '=', 'product_has_parameter.product_id')
+                            ->where('product_has_parameter.value', '=', $brandName);
+                    })
+                    ->rightJoin('product_parameters','product_parameters.id', '=', 'product_has_parameter.parameter_id');
+        }
 
+        //WHEN's
+        $products = $products
             /************PRICE*******************/
-            ->when(isset($parameters['price']), function ($query) use ($parameters) {
+            ->when(isset($filterData['price']), function ($query) use ($filterData) {
 
-                list($min, $max) = (explode('|', $parameters['price']));
+                list($min, $max) = (explode('|', $filterData['price']));
 
                 return $query->having('price|value', '>=', ($min))
                     ->having('price|value', '<=', ($max));
@@ -222,17 +254,17 @@ class Product extends Model{
             })
 
             /************MANUFACTURER***********/
-            ->when(isset($parameters['manufacturer']), function ($query) use ($parameters) {
-                return $query->whereIn('products.manufacturer_id', explode('|', $parameters['manufacturer']));
+            ->when(isset($filterData['manufacturer']), function ($query) use ($filterData) {
+                return $query->whereIn('products.manufacturer_id', explode('|', $filterData['manufacturer']));
             })
 
             /************CATEGORY***************/
-            ->when(isset($parameters['category']), function ($query) use ($parameters) {
-                return $query->whereIn('products.category_id', explode('|', $parameters['category']));
+            ->when(isset($filterData['category']), function ($query) use ($filterData) {
+                return $query->whereIn('products.category_id', explode('|', $filterData['category']));
             });
 
             /************PARAMETERS*************/
-            foreach($parameters as $key => $parameter){
+            foreach($filterData as $key => $parameter){
 
                 if(strpos($key, 'p_') === 0){
                     $key = str_replace('p_', '', $key);
@@ -255,13 +287,24 @@ class Product extends Model{
 
     }
 
-    public function getActiveProductsOfBrand($brand_id){
+    public function getActiveProductsOfBrand($brandName){
 
         $productsQuery = $this->getListProductQuery();
 
         $products = $productsQuery
-
+            ->addSelect(
+                'product_parameters.name        as parameters|name',
+                'product_parameters.alias       as parameters|alias',
+                'product_has_parameter.value    as parameters|pivot|value'
+            )
             ->where('products.active', 1)
+
+            /************PARAMETERS*************/
+            ->rightJoin('product_has_parameter', function ($join) use ($brandName) {
+                $join->on('products.id', '=', 'product_has_parameter.product_id')
+                    ->where('product_has_parameter.value', '=', $brandName);
+            })
+            ->rightJoin('product_parameters','product_parameters.id', '=', 'product_has_parameter.parameter_id')
 
             ->orderBy('products.name')
 
@@ -332,7 +375,6 @@ class Product extends Model{
             'products.name',
             'products.original_name',
             'products.scu',
-            'products.thumbnail',
             'products.weight',
             'products.length',
             'products.width',

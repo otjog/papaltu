@@ -1,14 +1,10 @@
 
-    @if(isset( $data['header_page'] ))
-        @include( $template_name .'.modules.home.default', $data)
-    @endif
-
     @if(isset( $template['banner'] ))
         @include( $template_name .'.modules.banner.default')
     @endif
 
     @if(isset( $template['component'] ))
-        <div class="{{$template['resource']}}">
+        <div class="{{$template['resource']}} py-3">
             <div class="container">
                 <div class="row">
 
