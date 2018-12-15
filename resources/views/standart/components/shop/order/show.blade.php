@@ -104,12 +104,13 @@
                     </div>
 
                     <div class="col-lg-2 text-center">
-                        <span class="text-muted">{{ $product->pivot['quantity'] }} шт.</span>
+                        <span class="text-muted">{{ $product->pivot['quantity'] }}
+                            <span class="text-muted small"><small>шт.</small></span>
                     </div>
 
                     <div class="col-lg-2 text-center">
                         <span>{{ $product->price['value'] * $product->pivot['quantity'] }}</span>
-                        <span class="small"><i class="fas fa-ruble-sign"></i></span>
+                        <span class="text-muted small"><small>{{$components['shop']['currency']['symbol']}}</small></span>
                     </div>
 
                 </div>
@@ -124,7 +125,7 @@
 
                 <div class="col-lg-2 text-center">
                     <span>{{ $order->total }}</span>
-                    <span class="small"><i class="fas fa-ruble-sign"></i></span>
+                    <span class="text-muted small"><small>{{$components['shop']['currency']['symbol']}}</small></span>
                 </div>
 
             </div>

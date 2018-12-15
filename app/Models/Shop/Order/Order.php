@@ -147,7 +147,7 @@ class Order extends Model{
 
         $basket->save();
 
-        event(new NewOrder($order));
+        event(new NewOrder($order->id));
 
         return $order;
     }
