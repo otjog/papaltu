@@ -6,7 +6,7 @@
 
             <ul class="list-group list-group-flush">
 
-                @include( $template_name .'components.shop.order.elements.shipment-element',
+                @include( $template_name .'.components.shop.order.elements.shipment-element',
                         [
                             'shipment'      => $shipment,
                             'destination'   => 'default'
