@@ -1,4 +1,4 @@
-function Ajax(method, queryString, headers){
+function Ajax(method, queryString, headers, requestName){
 
     this.origin     = window.location.origin;
 
@@ -8,6 +8,8 @@ function Ajax(method, queryString, headers){
 
     this.headers    = headers;
 
+    this.requestName = requestName;
+
     this.timeout    = 30000;
 
     this.queryString = queryString;
@@ -15,6 +17,10 @@ function Ajax(method, queryString, headers){
     this.req        = getXmlHttpRequest();
 
     this.sendRequest = function(){
+
+        if(ajaxRequests[this.requestName] !== undefined){
+            ajaxRequests[this.requestName].abortRequest();
+        }
 
         this.req.timeout = this.timeout;
 
@@ -41,6 +47,8 @@ function Ajax(method, queryString, headers){
             this.req.send(this.queryString);
         }
 
+        this.addRequest()
+
     };
 
     this.setHeaders = function(){
@@ -52,6 +60,20 @@ function Ajax(method, queryString, headers){
                 this.req.setRequestHeader(header, this.headers[header]);
             }
         }
-    }
+    };
 
+    this.addRequest = function () {
+        ajaxRequests[this.requestName] = this;
+    };
+
+    this.abortRequest = function () {
+        this.req.abort();
+    }
+    
 }
+
+/**
+ * Здесь храним созданный объекты ajax-запросов
+ * @type {{}}
+ */
+let ajaxRequests = {};

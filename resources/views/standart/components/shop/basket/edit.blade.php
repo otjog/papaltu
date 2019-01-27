@@ -1,20 +1,5 @@
 @if( isset($basket->products) )
 
-    @php
-
-        $parcels = [
-            'weight'    => '',
-            'length'    => '',
-            'width'     => '',
-            'height'    => '',
-            'quantity'  => ''
-        ];
-    @endphp
-
-    {{-- MODALS --}}
-    @include( $template_name .'.modules.modals.forms.change-city')
-    {{--   END  --}}
-
     <div class="col-12 col-lg-9">
         <h4 class="mb-3">Корзина</h4>
         <form method="POST" action="{{ route( 'baskets.update', csrf_token() ) }}" id="basket_form" role="form" accept-charset="UTF-8" >
@@ -116,32 +101,8 @@
                     </div>
                 </div>
 
-                @php
-
-                    foreach($parcels as $param => $value){
-                    //todo сделать дефолтные значения, для отсутствующих параметров
-
-                        if( $parcels[$param] !== ''){
-                             $parcels[$param] .= '|';
-                        }
-
-                        $parcels[$param] .= $product[$param];
-                    }
-
-                @endphp
-
             @endforeach
 
-            <div id="delivery-best-offer" data-component="shop|basket">
-                @include( $template_name .'.modules.delivery.reload.best-offer')
-            </div>
-
-        </form>
-
-        <form id="delivery-form">
-            @foreach($parcels as $param => $value)
-                <input type="hidden" name="{{$param}}" value="{{$value}}">
-            @endforeach
         </form>
 
     </div>

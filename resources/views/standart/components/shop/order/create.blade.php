@@ -1,6 +1,5 @@
 <div class="container">
 
-
     {{-- ALERT --}}
     @if (session('status'))
         <div class="alert alert-success">

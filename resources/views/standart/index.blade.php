@@ -73,7 +73,7 @@
 <script src="{{ asset('js/fancybox/jquery.fancybox.js') }}"></script>
 <script src="{{ asset('js/fancybox/jquery.fancybox.pack.js') }}"></script>
 <script src="{{ asset('js/bootstrap.min.js') }}"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/suggestions-jquery@18.6.0/dist/js/jquery.suggestions.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@18.6.0/dist/js/jquery.suggestions.min.js"></script>
 <script src="{{ asset('js/dadata/forms.js')}}"></script>
 <script src="{{ asset('js/ajax.js')}}"></script>
 <script src="{{ asset('js/modules/delivery.js')}}"></script>

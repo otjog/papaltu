@@ -54,31 +54,17 @@ class AjaxController extends Controller{
 
                     $ds = new Delivery();
 
-                    if( count($request->all()) > 0 ){
-                        $parcels = [];
-
-                        foreach($request->all() as $name => $params) {
-
-                            $arr = explode('|', $params);
-
-                            foreach ($arr as $key => $param) {
-
-                                $parcels[$key][$name] = $param;
-
-                            }
-
-                        }
-                    }
-
                     switch($viewReload){
-                        case 'best-offer'   : $this->data[ $module ] =  $ds->getBestPrice( $parcels ); break;
-                        case 'offers'       : $this->data[ $module ] =  $ds->getPrices( $parcels ); break;
-                        case 'offers-points':
-                            $prices = $ds->getPrices( $parcels );
-                            $points = $ds->getPoints();
-                            $this->data[ $module ] = array_merge($prices, $points);
+                        case 'offers'       :
+                            $this->data[$module] = $ds->getPrices($request->all());
                             break;
-                        case 'map'          : return response( $this->data[ $module ] = $ds->getPoints() );
+                        case 'offers-points':
+                            $prices = $ds->getPrices($request->all());
+                            $points = $ds->getPoints();
+                            $this->data[$module] = array_merge($prices, $points);
+                            break;
+                        case 'map'          :
+                            return response($data[$module] = $ds->getPoints());
                     }
 
                     return response()->view($this->data['template_name'] . '.modules.' . $module . '.reload.' . $viewReload, $this->data);
@@ -100,18 +86,18 @@ class AjaxController extends Controller{
                     $this->data['filtered_products'] = $result;
 
                     $this->data['data'] = ['parameters' => $request->toArray()];
-
+dd($this->data);
                     return response()
                         ->view( $this->data['template_name'] . '.modules.' . $module . '.reload.' . $viewReload, $this->data)
                         ->header('Cache-Control', 'no-store');
 
                 case 'geo'  :
 
-                    $geoData = new GeoData();
+                    $geoData = GeoData::getInstance();
 
                     $geoData->setGeoInput($request->address_json);
 
-                    break;
+                    return response()->view($this->data['template_name'] . '.modules.' . $module . '.reload.' . $viewReload, $this->data);
 
             }
 

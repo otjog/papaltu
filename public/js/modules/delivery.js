@@ -2,69 +2,79 @@ function Delivery(){
 
     this.calculate = function () {
 
-        let form = document.getElementById('delivery-form');
+        let listOfferWrap = document.getElementById('delivery-offers');
 
-        if(form !== null && form !== undefined){
+        if(listOfferWrap !== null && listOfferWrap !== undefined){
 
-            let queryString = getQueryString(form);
+            let headers = {
+                'X-Module'      : 'delivery|offers',
+            };
 
-            let listOfferWrap = document.getElementById( 'delivery-offers' );
+            let queryString = getQueryStringWithParcelData(listOfferWrap);
 
-            if( listOfferWrap !== null && listOfferWrap !== undefined){
+            let component = listOfferWrap.dataset.component;
 
-                let headers = {
-                    'X-Module'      : 'delivery|offers',
-                };
-
-                let component = listOfferWrap.dataset.component;
-
-                if(component !== null && component !== undefined){
-                    headers['X-Component'] = component;
-                }
-
-                sendRequestReturnView(listOfferWrap, queryString, headers);
-
+            if(component !== null && component !== undefined){
+                headers['X-Component'] = component;
             }
 
-            let bestOfferWrap = document.getElementById( 'delivery-best-offer' );
+            for(let i=0; i < listOfferWrap.children.length; i++){
 
-            if( bestOfferWrap !== null && bestOfferWrap !== undefined){
+                if(listOfferWrap.children[i].hasAttribute('data-delivery-service-alias')){
 
-                let headers = {
-                    'X-Module'      : 'delivery|best-offer'
-                };
+                    let deliveryServiceAlias = listOfferWrap.children[i].getAttribute('data-delivery-service-alias');
 
-                let component = bestOfferWrap.dataset.component;
+                    queryString += '&dsalias=' + deliveryServiceAlias;
 
-                if(component !== null && component !== undefined){
-                    headers['X-Component'] = component;
+                    /**
+                     * Задаем уникальное имя для нашего ajax-запроса.
+                     *
+                     * Это имя мы сохраняем в глобальный объект со всеми запросами,
+                     * чтобы в дальнейщем мы могли управлять ими (abort и тп.)
+                     *
+                     * @type {string}
+                     */
+                    let requestName = 'delivery_' + deliveryServiceAlias;
+
+                    sendRequestReturnView(listOfferWrap.children[i], queryString, headers, requestName);
+
                 }
-
-                sendRequestReturnView(bestOfferWrap, queryString, headers);
-            }
-
-            let listOfferAndPointsWrap = document.getElementById( 'delivery-offers-points' );
-
-            if( listOfferAndPointsWrap !== null && listOfferAndPointsWrap !== undefined){
-
-                let headers = {
-                    'X-Module'      : 'delivery|offers-points'
-                };
-
-                let component = listOfferAndPointsWrap.dataset.component;
-
-                if(component !== null && component !== undefined){
-                    headers['X-Component'] = component;
-                }
-
-                sendRequestReturnView(listOfferAndPointsWrap, queryString, headers);
 
             }
 
         }
+
+
+        let listOfferAndPointsWrap = document.getElementById( 'delivery-offers-points' );
+
+        if (listOfferAndPointsWrap !== null && listOfferAndPointsWrap !== undefined){
+
+            let headers = {
+                'X-Module'      : 'delivery|offers-points'
+            };
+
+            /**
+             * Задаем уникальное имя для нашего ajax-запроса.
+             *
+             * Это имя мы сохраняем в глобальный объект со всеми запросами,
+             * чтобы в дальнейшем мы могли управлять ими (abort и тп.)
+             *
+             * @type {string}
+             */
+            let requestName = 'delivery_points';
+
+            let component = listOfferAndPointsWrap.dataset.component;
+
+            if(component !== null && component !== undefined){
+                headers['X-Component'] = component;
+            }
+
+            sendRequestReturnView(listOfferAndPointsWrap, queryString, headers, requestName);
+
+        }
     };
 
-    this.points = function(){
+    this.points = function() {
 
         //MAP
         if(map !== null && map !== undefined){
@@ -103,17 +113,19 @@ function Delivery(){
     };
 
     //FUNCTIONS
-    function sendRequestReturnView(wrapBlock, queryString,  headers){
+    function sendRequestReturnView(wrapBlock, queryString,  headers, requestName){
 
-        let listOfferProgressBar    = wrapBlock.getElementsByClassName('progress');
+        let reloadBlock = wrapBlock.getElementsByClassName('reload');
 
-        let listOfferErrorBlock     = wrapBlock.getElementsByClassName('error');
+        let listOfferProgressBar    = reloadBlock[0].getElementsByClassName('progress');
 
-        let blurBlock               = wrapBlock.getElementsByClassName('blur');
+        let listOfferErrorBlock     = reloadBlock[0].getElementsByClassName('error');
 
-        let ajaxReq = new Ajax("GET", queryString, headers);
+        let blurBlock               = reloadBlock[0].getElementsByClassName('blur');
 
-        ajaxReq.req.onloadstart = function(){
+        let ajaxReq = new Ajax("GET", queryString, headers, requestName);
+
+        ajaxReq.req.onloadstart = function() {
 
             listOfferProgressBar[0].style.display   = 'block';
 
@@ -131,35 +143,35 @@ function Delivery(){
 
             if (ajaxReq.req.readyState !== 4) return;
 
-            wrapBlock.innerHTML = String(ajaxReq.req.responseText);
+            reloadBlock[0].innerHTML = String(ajaxReq.req.responseText);
 
             listOfferProgressBar[0].style.display   = 'none';
 
             blurBlock[0].style.opacity = 1;
-
-
 
         };
 
         ajaxReq.sendRequest();
     }
 
-    function getQueryString(form){
+    function getQueryStringWithParcelData(listOfferWrap){
 
-        let arrQS = [];
         let qs = '';
         let glue = '&';
 
-        for(let i = 0; i  < form.elements.length; i++){
-            if(i !== 0){
-                qs += glue
-            }
-
-            qs += form.elements[i].name + '=' + form.elements[i].value;
-
-        }
+        qs +=   'weight='     + listOfferWrap.getAttribute('data-product-weight');
+        qs += glue;
+        qs +=   'height='     + listOfferWrap.getAttribute('data-product-height');
+        qs += glue;
+        qs +=   'length='     + listOfferWrap.getAttribute('data-product-length');
+        qs += glue;
+        qs +=   'width='      + listOfferWrap.getAttribute('data-product-width');
+        qs += glue;
+        qs +=   'quantity='   + listOfferWrap.getAttribute('data-product-quantity');
 
         return qs;
+
+
     }
 
 }

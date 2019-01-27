@@ -11,33 +11,30 @@
                 '.modules.' .
                 $inc_template['mod']['module'] . '.' .
                 $inc_template['mod']['viewReload'])
+
         @else
 
-            <h4>Самовывоз из пунктов выдачи</h4>
+            <div class="row">
 
-            @foreach($delivery['costs'] as $company => $services)
-                @if( isset( $services['toTerminal']))
-                    <div class="row pb-2 pt-2 border-top ">
-                        <div class="col-4 text-center"><img src="{{ '/storage/img/elements/delivery/' . $company . '/' . $company .'_logo.jpg' }}" class="img-fluid"></div>
-                        <div class="col-4 text-center">{{$services['toTerminal']['price']}} {{$components['shop']['currency']['symbol']}}</div>
-                        <div class="col-4 text-center">{{$services['toTerminal']['days']}} дней</div>
-                    </div>
-                @endif
-            @endforeach
+                <div class="col-6 border-right">
+                    @if( isset($delivery['costs']['toTerminal']) )
+                        <div class="row">
+                            <div class="col text-center">{{$delivery['costs']['toTerminal']['price']}} {{$components['shop']['currency']['symbol']}}</div>
+                            <div class="col text-center">{{$delivery['costs']['toTerminal']['days']}} дней</div>
+                        </div>
+                    @endif
+                </div>
 
-        <hr>
+                <div class="col">
+                    @if( isset($delivery['costs']['toDoor']) )
+                        <div class="row">
+                            <div class="col text-center">{{$delivery['costs']['toDoor']['price']}} {{$components['shop']['currency']['symbol']}}</div>
+                            <div class="col text-center">{{$delivery['costs']['toDoor']['days']}} дней</div>
+                        </div>
+                    @endif
+                </div>
 
-            <h4>Доставка до адреса</h4>
-
-            @foreach($delivery['costs'] as $company => $services)
-                @if( isset( $services['toDoor']))
-                    <div class="row pb-2 pt-2 border-top ">
-                        <div class="col-4 text-center"><img src="{{ '/storage/img/elements/delivery/' . $company . '/' . $company .'_logo.jpg' }}" class="img-fluid"></div>
-                        <div class="col-4 text-center">{{$services['toDoor']['price']}} {{$components['shop']['currency']['symbol']}}</div>
-                        <div class="col-4 text-center">{{$services['toDoor']['days']}} дней</div>
-                    </div>
-                @endif
-            @endforeach
+            </div>
 
         @endif
 

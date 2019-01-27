@@ -182,56 +182,61 @@ for(let f = 0; f < forms.length; f++){
 
 function initMap( json ) {
 
-    let geo = json._geo;
+    let wrapMap = document.getElementById('map');
 
-    delete json._geo;
+    if(wrapMap !== undefined && wrapMap !== null){
 
-    let location = {lat: +geo.latitude, lng: +geo.longitude};
+        let geo = json._geo;
 
-    let map = new google.maps.Map(
-        document.getElementById('map'), {zoom: 12, center: location});
+        delete json._geo;
+console.log(json);
+        let location = {lat: +geo.latitude, lng: +geo.longitude};
 
-    for(let company in json.points){
+        let map = new google.maps.Map(
+            wrapMap, {zoom: 12, center: location});
 
-        if(json.points.hasOwnProperty(company)){
+        for(let company in json.points){
 
-            for(let terminalType in json.points[company]){
+            if(json.points.hasOwnProperty(company)){
 
-                if(json.points[company].hasOwnProperty(terminalType)){
+                for(let terminalType in json.points[company]){
 
-                    for( let terminal in json.points[company][terminalType] ){
+                    if(json.points[company].hasOwnProperty(terminalType)){
 
-                        if(json.points[company][terminalType].hasOwnProperty(terminal)){
+                        for( let terminal in json.points[company][terminalType] ){
 
-                            let geoShop = json.points[company][terminalType][terminal].geoCoordinates;
+                            if(json.points[company][terminalType].hasOwnProperty(terminal)){
 
-                            let locationShop = {lat: +geoShop.latitude, lng: +geoShop.longitude};
+                                let geoShop = json.points[company][terminalType][terminal].geoCoordinates;
 
-                            let image = 'https://myshop.loc/storage/img/elements/delivery/' + company + '/marker-' + terminalType + '.png';
+                                let locationShop = {lat: +geoShop.latitude, lng: +geoShop.longitude};
 
-                            let marker = new google.maps.Marker({position: locationShop, map: map, icon: image});
+                                let image = 'https://myshop.loc/storage/img/elements/delivery/' + company + '/marker-' + terminalType + '.png';
+
+                                let marker = new google.maps.Marker({position: locationShop, map: map, icon: image});
+
+                            }
 
                         }
 
-                    }
 
+                    }
 
                 }
 
             }
 
         }
-
     }
 
 }
 //END Maps Google
 
-/* Delivery Calc And Point */
+/**
+ * Получаем объект Доставки
+ * И сразу выполняем расчет доставки и получение пунктов выдачи
+ */
 let delivery = new Delivery();
-
 delivery.calculate();
 delivery.points();
-//END Delivery
-
-
+/*******/

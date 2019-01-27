@@ -41,17 +41,31 @@ function DaData(id, type){
 
     this.updateDelivery = function (suggestion) {
 
-        let queryString = 'address_json=' + JSON.stringify(suggestion);
+        let queryString = 'address_json=' + JSON.stringify(suggestion.data);
 
         let headers = {
-            'X-Module'      : 'geo|'
+            'X-Module'      : 'geo|location '
         };
 
-        let ajaxReq = new Ajax("POST", queryString, headers);
+        /**
+         * Задаем уникальное имя для нашего ajax-запроса.
+         *
+         * Это имя мы сохраняем в глобальный объект со всеми запросами,
+         * чтобы в дальнейшем мы могли управлять ими (abort и тп.)
+         *
+         * @type {string}
+         */
+        let requestName = 'geo';
+
+        let ajaxReq = new Ajax("POST", queryString, headers, requestName);
         //todo проверить, если объекта нет, делать submit формы
         ajaxReq.req.onreadystatechange = function() {
 
             if (ajaxReq.req.readyState !== 4) return;
+
+            let reloadBlock = document.getElementsByClassName('geo_change_location');
+
+            reloadBlock[0].innerHTML = String(ajaxReq.req.responseText);
 
             let delivery = new Delivery();
 

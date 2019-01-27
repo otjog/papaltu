@@ -13,6 +13,8 @@ class Settings {
 
     private $price;
 
+    public $data;
+
     public static function getInstance(){
         if (null === self::$instance) {
             self::$instance = new self();
@@ -74,11 +76,16 @@ class Settings {
                 ]
             ],
             'today' => date('Y-m-d')
+
         ];
 
     }
 
     private function __clone(){}
+
+    public function addParameter($name, $value){
+        $this->data[$name] = $value;
+    }
 
     public function getParameters(){
        return $this->data;

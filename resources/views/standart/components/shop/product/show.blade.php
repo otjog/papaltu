@@ -107,20 +107,9 @@
 
         <div class="my-4 py-3 border-top">
 
-            <form id="delivery-form">
-                <input type="hidden" name="weight"      value="{{$product->weight}}">
-                <input type="hidden" name="length"      value="{{$product->length}}">
-                <input type="hidden" name="width"       value="{{$product->width}}">
-                <input type="hidden" name="height"      value="{{$product->height}}">
-                <input type="hidden" name="quantity"    value="1">
-            </form>
-
-            <div id="delivery-best-offer">
-                @include( $template_name .'.modules.delivery.reload.best-offer')
-            </div>
+            {{-- Здесь лучшее предложение по доставке --}}
 
             @include( $template_name .'.modules.modals.forms.change-city')
-
         </div>
 
     </div>
@@ -154,7 +143,7 @@
                     @foreach($product->parameters as $key => $parameter)
 
                         <li>
-                            @if($key === 0 || $product->parameters[$key -1 ]->name !== $parameter->name)
+                            @if($key === 0 || $product->parameters[$key -1]->name !== $parameter->name)
                                 <strong>{{$parameter->name}}: </strong>
                             @endif
 
@@ -171,10 +160,8 @@
         <div class="tab-data data-delivery">
 
             <div class="row">
-                <div class="col-12 col-lg-4">
-                    <div id="delivery-offers">
-                        @include( $template_name .'.modules.delivery.reload.offers')
-                    </div>
+                <div class="col-12 col-lg-6">
+                    @include($template_name. '.modules.delivery.templates.offers.default', ['delivery_template' => 'show'])
                 </div>
                 <div id="map" style="height:500px;" class="col-12 col-lg-8"></div>
             </div>

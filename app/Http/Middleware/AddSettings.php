@@ -3,9 +3,10 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use App\Models\Settings;
 use App\Models\Geo\GeoData;
 
-class SetGeoIP{
+class AddSettings{
 
     /**
      * Handle an incoming request.
@@ -16,15 +17,11 @@ class SetGeoIP{
      */
     public function handle($request, Closure $next){
 
-        if($request->session()->has('geoIp')) {
-            //
-        }else{
+        $settings = Settings::getInstance();
 
-            $geoData = new GeoData();
+        $geoData = GeoData::getInstance();
 
-            $geoData->setGeoIp();
-
-        }
+        $settings->addParameter( 'geo', $geoData->getGeoData());
 
         return $next($request);
 

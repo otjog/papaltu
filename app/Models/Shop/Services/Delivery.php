@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Libraries\Delivery\Dpd;
 use App\Libraries\Delivery\Cdek;
 use App\Libraries\Delivery\Pochta;
-use App\Models\Geo\GeoData;
+use App\Models\Settings;
 
 class Delivery extends Model{
 
@@ -27,65 +27,51 @@ class Delivery extends Model{
 
         $this->services = $this->shipments->getDeliveryServices();
 
-        $geoData = new GeoData();
+        $settings = Settings::getInstance();
 
-        $this->geoData = $geoData->getGeoData();
+        $this->geoData = $settings->getParameter('geo');
+
     }
 
-    public function getPrices($parcelParameters){
+    public function getPrices($request){
 
-            $data = [
-                'costs' => [],
-            ];
+        list($parcelParameters, $deliveryServiceAlias) = $this->getDeliveryDataFromRequest($request);
 
-            foreach($this->services as $services){
+        $data = [
+            'costs' => [],
+        ];
 
-                switch($services->alias){
+        switch($deliveryServiceAlias){
 
-                    case 'dpd'      :
-                        $serviceObj = new Dpd( $this->geoData );
-                        $serviceTypes = $this->serviceTypes;
-                        break;
+            case 'dpd'      :
+                $serviceObj = new Dpd( $this->geoData );
+                $serviceTypes = $this->serviceTypes;
+                break;
 
-                    case 'cdek'     :
-                        $serviceObj = new Cdek( $this->geoData );
-                        $serviceTypes = $this->serviceTypes;
-                        break;
+            case 'cdek'     :
+                $serviceObj = new Cdek( $this->geoData );
+                $serviceTypes = $this->serviceTypes;
+                break;
 
-                    case 'pochta'   :
-                        $serviceObj = new Pochta( $this->geoData );
-                        $serviceTypes = ['toTerminal'];
-                        break;
+            case 'pochta'   :
+                $serviceObj = new Pochta( $this->geoData );
+                $serviceTypes = ['toTerminal'];
+                break;
 
-                    default : break; //todo сделать выход из foreach
+            default : break; //todo сделать выход из foreach
 
-                }
+        }
 
-                $costs = $serviceObj->getDeliveryCost($parcelParameters, $serviceTypes);
+        $costs = $serviceObj->getDeliveryCost($parcelParameters, $serviceTypes);
 
-                if( count($costs) > 0 ){
+        if( count($costs) > 0 ){
 
-                    $data['costs'][$services->alias]  = $costs;
+            $data['costs'] = $costs;
 
-                    $data['shipments'][$services->alias] = $services;
-                }
+        }
 
-            }
+        return $data;
 
-            if( count( $data['costs']) > 0 ){
-                $data['_bestOffer'] = $this->pullBestPrice($data);
-            }else{
-                $data['shipments'] = $this->shipments->getDefaultShipments();
-            }
-
-            $data['_geo'] = $this->geoData;
-
-            return $data;
-    }
-
-    public function getBestPrice($parcelParameters){
-
-        return $this->getPrices($parcelParameters);
     }
 
     public function getPoints(){
@@ -93,6 +79,8 @@ class Delivery extends Model{
         $data = [];
 
         foreach($this->services as ['alias' => $serviceAlias]){
+
+            $serviceObj = null;
 
             switch($serviceAlias){
 
@@ -102,44 +90,45 @@ class Delivery extends Model{
 
             }
 
-            $data['points'][$serviceAlias] = $serviceObj->getPointsInCity();
+            if($serviceObj !== null){
+                $data['points'][$serviceAlias] = $serviceObj->getPointsInCity();
+            }
+
 
         }
 
         $data['_geo'] = $this->geoData;
 
         return $data;
+
     }
 
-    private function pullBestPrice($data){
+    public function getDeliveryDataFromRequest($request){
 
-            $offers = [];
+        if( count($request) > 0 ){
+            $parcels = [];
 
-            foreach($data['costs'] as $company => $parameters){
+            foreach($request as $name => $params) {
 
-                foreach($parameters as $delTo => $cost){
+                if($name === 'dsalias'){
+                    $deliveryServiceAlias = $params;
+                }else{
 
-                    $cost['company']    = $company;
+                    $arr = explode('|', $params);
 
-                    $cost['deliveryTo'] = $delTo;
+                    foreach ($arr as $key => $param) {
 
-                    $offers[] = $cost;
+                        $parcels[$key][$name] = $param;
+
+                    }
 
                 }
 
             }
-
-            $cost = array_column($offers, 'price');
-
-            $days = array_column($offers, 'days');
-
-            array_multisort(
-                $cost, SORT_ASC, SORT_NUMERIC,
-                $days, SORT_ASC, SORT_NUMERIC,
-                $offers
-            );
-
-            return array_shift($offers);
         }
+
+        return [$parcels, $deliveryServiceAlias];
+
+    }
 
 }
