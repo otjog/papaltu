@@ -11,7 +11,9 @@ use App\Models\Settings;
 
 class SearchController extends Controller{
 
-    protected $data;
+    protected $data = [];
+
+    protected $settings;
 
     protected $products;
 
@@ -26,9 +28,7 @@ class SearchController extends Controller{
      */
     public function __construct(Request $request, Product $products, Basket $baskets){
 
-        $settings = Settings::getInstance();
-
-        $this->data = $settings->getParameters();
+        $this->settings = Settings::getInstance();
 
         $this->products = $products;
 
@@ -50,6 +50,8 @@ class SearchController extends Controller{
         $sphinx  = new SphinxSearch();
 
         $searchIdResult = $sphinx->search($this->queryString, env( 'SPHINXSEARCH_INDEX' ))->query();
+
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
 
         $this->data['template'] ['view']        = 'show';
 

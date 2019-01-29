@@ -11,13 +11,16 @@ use App\Models\Settings;
 
 class AjaxController extends Controller{
 
-    protected $data;
+    protected $settings;
+
+    protected $data = [];
 
     public function __construct(){
 
-        $settings = Settings::getInstance();
+        $this->settings = Settings::getInstance();
 
-        $this->data = $settings->getParameters();
+        //$this->data = $this->settings->getParameters();
+
     }
 
     public function index(Request $request){
@@ -54,6 +57,8 @@ class AjaxController extends Controller{
 
                     $ds = new Delivery();
 
+                    $this->data['global_data']['project_data'] = $this->settings->getParameters();
+
                     switch($viewReload){
                         case 'offers'       :
                             $this->data[$module] = $ds->getPrices($request->all());
@@ -67,9 +72,11 @@ class AjaxController extends Controller{
                             return response($data[$module] = $ds->getPoints());
                     }
 
-                    return response()->view($this->data['template_name'] . '.modules.' . $module . '.reload.' . $viewReload, $this->data);
+                    return response()->view($this->data['global_data']['project_data']['template_name'] . '.modules.' . $module . '.reload.' . $viewReload, $this->data);
 
                 case 'product_filter' :
+
+                    $this->data['global_data']['project_data'] = $this->settings->getParameters();
 
                     $products = new Product();
 
@@ -86,9 +93,9 @@ class AjaxController extends Controller{
                     $this->data['filtered_products'] = $result;
 
                     $this->data['data'] = ['parameters' => $request->toArray()];
-dd($this->data);
+
                     return response()
-                        ->view( $this->data['template_name'] . '.modules.' . $module . '.reload.' . $viewReload, $this->data)
+                        ->view( $this->data['global_data']['project_data']['template_name'] . '.modules.' . $module . '.reload.' . $viewReload, $this->data)
                         ->header('Cache-Control', 'no-store');
 
                 case 'geo'  :
@@ -97,7 +104,9 @@ dd($this->data);
 
                     $geoData->setGeoInput($request->address_json);
 
-                    return response()->view($this->data['template_name'] . '.modules.' . $module . '.reload.' . $viewReload, $this->data);
+                    $this->data['global_data']['project_data'] = $this->settings->getParameters();
+
+                    return response()->view($this->data['global_data']['project_data']['template_name'] . '.modules.' . $module . '.reload.' . $viewReload, $this->data);
 
             }
 

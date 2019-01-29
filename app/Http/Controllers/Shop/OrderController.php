@@ -17,13 +17,13 @@ class OrderController extends Controller{
 
     protected $baskets;
 
-    protected $data;
+    protected $settings;
+
+    protected $data = [];
 
     public function __construct(Order $orders, Basket $baskets){
 
-        $settings = Settings::getInstance();
-
-        $this->data = $settings->getParameters();
+        $this->settings = Settings::getInstance();
 
         $this->orders   = $orders;
 
@@ -84,6 +84,8 @@ class OrderController extends Controller{
 
         $token = $request->session()->get('_token');
 
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
+
         $this->data['template']['view'] = 'create';
 
         $this->data['data']['basket']   = $this->baskets->getActiveBasketWithProductsAndRelations( $products, $token );
@@ -100,6 +102,8 @@ class OrderController extends Controller{
      * @return \Illuminate\Http\Response
      */
     public function show(Product $products, $id){
+
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
 
         $this->data['template']['view'] = 'show';
 

@@ -15,11 +15,11 @@ class ProductController extends Controller{
 
     protected $baskets;
 
-    protected $data;
-
     protected $metaTagsCreater;
 
     protected $settings;
+
+    protected $data = [];
 
     /**
      * Создание нового экземпляра контроллера.
@@ -30,8 +30,6 @@ class ProductController extends Controller{
     public function __construct(Product $products, Basket $baskets, MetaTagsCreater $metaTagsCreater ){
 
         $this->settings = Settings::getInstance();
-
-        $this->data = $this->settings->getParameters();
 
         $this->products = $products;
 
@@ -80,6 +78,8 @@ class ProductController extends Controller{
      * @return \Illuminate\Http\Response
      */
     public function show($id){
+
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
 
         $this->data['template']['view'] = 'show';
 

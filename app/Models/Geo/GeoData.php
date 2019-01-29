@@ -4,6 +4,7 @@ namespace App\Models\Geo;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Libraries\Geo\GeoLite;
+use App\Models\Settings;
 
 class GeoData extends Model{
 
@@ -57,6 +58,10 @@ class GeoData extends Model{
             }
 
             session(['geoInput' => $geoData]);
+
+            $settings = Settings::getInstance();
+
+            $settings->addParameter('geo', $geoData);
 
         }
 
