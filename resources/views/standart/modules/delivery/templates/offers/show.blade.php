@@ -1,7 +1,7 @@
 @if(isset($deliveryServices) && count($deliveryServices) > 0 && $deliveryServices !== null)
 
     <div class="geo_change_location">
-        @include($template_name .'.modules.geo.reload.location')
+        @include($global_data['project_data']['template_name'] .'.modules.geo.reload.location')
     </div>
 
     <div class="row p-2 border-bottom">
@@ -29,7 +29,7 @@
                 <img src="{{ '/storage/img/elements/delivery/' . $service->alias . '/' . $service->alias .'_logo.jpg' }}" class="img-fluid">
             </div>
             <div class="reload col">
-                @include( $template_name .'.modules.delivery.reload.offers')
+                @include( $global_data['project_data']['template_name'] .'.modules.delivery.reload.offers')
             </div>
         </div>
     @endforeach

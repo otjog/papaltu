@@ -11,20 +11,30 @@ use App\Models\Settings;
 
 class AjaxController extends Controller{
 
-    protected $settings;
-
+    //Инициализируем массив для хранения заголовков данных
     protected $data = [];
 
-    public function __construct(){
+    //Инициализируем массив для хранения заголовков ответа
+    protected $headers = [];
 
-        $this->settings = Settings::getInstance();
+    //Инициализируем переменную Ответ Сервера
+    protected $response;
 
-        //$this->data = $this->settings->getParameters();
+    //Тип вответа. Возвращаем либо представление, либо данные.
+    protected $responseType = 'view'; // view or json
 
-    }
+    //Заголовок с данными ajax-запроса. Из него мы получаем имя Модуля и имя View для отправки ответа
+    protected $ajaxHeader;
+
+    //Имя модуля в который будет посылаться ajax-запрос
+    protected $module;
+
+    //Имя представления в которое будет посылаться ajax-запрос
+    protected $viewReload;
 
     public function index(Request $request){
 
+        /* Зачем это здесь???
         //Component-Header
         $component_template = $request->header('X-Component');
 
@@ -37,81 +47,114 @@ class AjaxController extends Controller{
                 'component' => $component,
             ];
         }
+        */
 
         //Module-Header
-        $module_template =  $request->header('X-Module');
+        $this->ajaxHeader =  $request->header('X-Module');
 
-        if( isset( $module_template ) && $module_template !== null ){
+        if($this->ajaxHeader !== null){
 
             //todo вернуть $next если нет заголовка X-Module
-            list($module, $viewReload)     = explode('|', $module_template );
+            list($this->module, $this->viewReload)     = explode('|', $this->ajaxHeader );
 
-            $this->data['inc_template']['mod'] = [
-                'module' => $module,
-                'viewReload' => $viewReload,
-            ];
-
-            switch($module){
+            switch($this->module){
 
                 case 'delivery' :
 
                     $ds = new Delivery();
 
-                    $this->data['global_data']['project_data'] = $this->settings->getParameters();
-
-                    switch($viewReload){
+                    switch($this->viewReload){
                         case 'offers'       :
-                            $this->data[$module] = $ds->getPrices($request->all());
-                            break;
-                        case 'offers-points':
-                            $prices = $ds->getPrices($request->all());
-                            $points = $ds->getPoints();
-                            $this->data[$module] = array_merge($prices, $points);
+                            $this->data[$this->module] = $ds->getPrices($request->all());
                             break;
                         case 'map'          :
-                            return response($data[$module] = $ds->getPoints());
+                            $this->responseType = 'json';
+                            $this->data = $ds->getPoints();
+                            break;
                     }
 
-                    return response()->view($this->data['global_data']['project_data']['template_name'] . '.modules.' . $module . '.reload.' . $viewReload, $this->data);
+                    break;
 
                 case 'product_filter' :
-
-                    $this->data['global_data']['project_data'] = $this->settings->getParameters();
 
                     $products = new Product();
 
                     $result = $products->getFilteredProducts([], $request->toArray());
 
-                    $path = stristr($request->session()->previousUrl(), '?', true);
+                    $url = stristr($request->session()->previousUrl(), '?', true);
 
-                    if($path === false){
-                        $path = $request->session()->previousUrl();
+                    if($url === false){
+                        $url = $request->session()->previousUrl();
                     }
 
-                    $result->setPath($path);
+                    //Настройка URI для вывода ссылок. Для работы постраничного вывода отфильтрованных товаров
+                    $result->setPath($url);
 
                     $this->data['filtered_products'] = $result;
 
                     $this->data['data'] = ['parameters' => $request->toArray()];
 
-                    return response()
-                        ->view( $this->data['global_data']['project_data']['template_name'] . '.modules.' . $module . '.reload.' . $viewReload, $this->data)
-                        ->header('Cache-Control', 'no-store');
+                    //Получаем обновленные данные из Глобального массива для передачи во фронт
+                    $settings = Settings::getInstance();
+                    $this->data['global_data']['project_data'] = $settings->getParameters();
+
+                    //Добавляем заголовки в массив
+                    $this->headers['Cache-Control'] = 'no-store';
+
+                    break;
 
                 case 'geo'  :
 
-                    $geoData = GeoData::getInstance();
+                    //Записываем введенную пользователем Геолокацию в Сессию
+                    $geoDataObj = GeoData::getInstance();
+                    $geoDataObj->setGeoInput($request->address_json);
 
-                    $geoData->setGeoInput($request->address_json);
+                    //Получаем обновленную геолокацию. ГЛУПО???
+                    $geoData = $geoDataObj->getGeoData();
 
-                    $this->data['global_data']['project_data'] = $this->settings->getParameters();
+                    //Записываем обновленные данные в Глобальный массив
+                    $settings = Settings::getInstance();
+                    $settings->addParameter('geo', $geoData);
 
-                    return response()->view($this->data['global_data']['project_data']['template_name'] . '.modules.' . $module . '.reload.' . $viewReload, $this->data);
+                    break;
 
             }
 
+            return $this->sendResponse();
+
         }
 
+    }
+
+    private function sendResponse(){
+
+        //Получаем обновленные данные из Глобального массива для передачи во фронт
+        $settings = Settings::getInstance();
+        $this->data['global_data']['project_data'] = $settings->getParameters();
+
+        //Присваиваем переменной экземпляр Ответа Сервера
+        $this->response = response();
+
+        if($this->responseType === 'json') {
+            $this->response = $this->response->json($this->data);
+        }
+
+        if($this->responseType === 'view'){
+            $this->data['inc_template']['mod'] = [
+                'module' => $this->module,
+                'viewReload' => $this->viewReload,
+            ];
+
+            $view = $this->data['global_data']['project_data']['template_name'] . '.modules.' . $this->module . '.reload.' . $this->viewReload;
+            //Добавляем к ответу Представление и обновленную переменную с данными
+            $this->response = $this->response->view( $view, $this->data);
+        }
+
+        if( count($this->headers) > 0){
+            $this->response = $this->response->withHeaders($this->headers);
+        }
+
+        return $this->response;
     }
 
 }

@@ -1,7 +1,7 @@
 <!-- Images -->
 <div class="col-lg-7">
     <div class="row">
-        @include( $template_name. '.components.shop.product.elements.images.gallery')
+        @include( $global_data['project_data']['template_name']. '.components.shop.product.elements.images.gallery')
     </div>
 </div>
 
@@ -32,7 +32,7 @@
 
                 <div class="product_price text-muted mr-3 clearfix">
                     <s>
-                        <small>{{$product->price['value'] + $product->price['sale']}}</small><small>{{$components['shop']['currency']['symbol']}}</small>
+                        <small>{{$product->price['value'] + $product->price['sale']}}</small><small>{{$global_data['project_data']['components']['shop']['currency']['symbol']}}</small>
                     </s>
                 </div>
 
@@ -40,7 +40,7 @@
 
             <div class="product_price clearfix">
                 {{ $product->price['value'] }}
-                <small>{{$components['shop']['currency']['symbol']}}</small>
+                <small>{{$global_data['project_data']['components']['shop']['currency']['symbol']}}</small>
             </div>
 
             <div class="my-2 d-flex flex-row">
@@ -109,7 +109,7 @@
 
             {{-- Здесь лучшее предложение по доставке --}}
 
-            @include( $template_name .'.modules.modals.forms.change-city')
+            @include( $global_data['project_data']['template_name'] .'.modules.modals.forms.change-city')
         </div>
 
     </div>
@@ -161,7 +161,7 @@
 
             <div class="row">
                 <div class="col-12 col-lg-6">
-                    @include($template_name. '.modules.delivery.templates.offers.default', ['delivery_template' => 'show'])
+                    @include($global_data['project_data']['template_name']. '.modules.delivery.templates.offers.default', ['delivery_template' => 'show'])
                 </div>
                 <div id="map" style="height:500px;" class="col-12 col-lg-8"></div>
             </div>

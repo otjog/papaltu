@@ -25,7 +25,7 @@
                         @else
                             <img
                                     class='img-fluid mx-auto d-block'
-                                    src="{{ URL::asset('storage/img/shop/default/xs/' . $components['shop']['images']['default_name']) }}"
+                                    src="{{ URL::asset('storage/img/shop/default/xs/' . $global_data['project_data']['components']['shop']['images']['default_name']) }}"
                                     alt=""
                             />
                         @endif
@@ -56,12 +56,12 @@
                                 @if( isset($product->price['sale']) && $product->price['sale'] > 0)
                                     <span class="text-muted">
                                             <s>
-                                                {{$product->price['value'] + $product->price['sale']}}<small>{{$components['shop']['currency']['symbol']}}</small>
+                                                {{$product->price['value'] + $product->price['sale']}}<small>{{$global_data['project_data']['components']['shop']['currency']['symbol']}}</small>
                                             </s>
                                         </span>
                                 @endif
 
-                                <span style="font-size: 1.4rem">{{ $product->price['value']}}</span><small>{{$components['shop']['currency']['symbol']}}</small>
+                                <span style="font-size: 1.4rem">{{ $product->price['value']}}</span><small>{{$global_data['project_data']['components']['shop']['currency']['symbol']}}</small>
 
                             </div>
                         @endif

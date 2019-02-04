@@ -16,7 +16,7 @@
                         @else
                             <img
                                     class="img-fluid"
-                                    src="{{ URL::asset('storage/img/shop/default/s/' . $components['shop']['images']['default_name']) }}"
+                                    src="{{ URL::asset('storage/img/shop/default/s/' . $global_data['project_data']['components']['shop']['images']['default_name']) }}"
                                     alt=""
                             />
                         @endif
@@ -33,13 +33,13 @@
                                         <div class="col-6">
                                             <span class="small">
                                                 <s>
-                                                    {{$product->price['value'] + $product->price['sale']}}<small>{{$components['shop']['currency']['symbol']}}</small>
+                                                    {{$product->price['value'] + $product->price['sale']}}<small>{{$global_data['project_data']['components']['shop']['currency']['symbol']}}</small>
                                                 </s>
                                             </span>
                                         </div>
                                     @endif
                                     <div class="col text-danger">
-                                        <span>{{ $product->price['value']}}</span><small>{{$components['shop']['currency']['symbol']}}</small>
+                                        <span>{{ $product->price['value']}}</span><small>{{$global_data['project_data']['components']['shop']['currency']['symbol']}}</small>
                                     </div>
                                 </div>
                             </div>

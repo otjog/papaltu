@@ -7,7 +7,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form method="post" role="form">
+            <form method="post" role="form" action="{{route('GetGeo')}}">
                 <div class="modal-body">
                     <p>Укажите населенный пункт, чтобы увидеть варианты доставки</p>
                     <div class="input-group">

@@ -16,7 +16,7 @@
                 @if(isset($offer->products) && count($offer->products) > 0)
                     @foreach($offer->products->chunk(3) as $products_row)
 
-                        @include($template_name .'.components.shop.product.elements.product_rows.light')
+                        @include($global_data['project_data']['template_name'] .'.components.shop.product.elements.product_rows.light')
 
                     @endforeach
                 @endif

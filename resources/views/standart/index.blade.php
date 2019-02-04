@@ -21,23 +21,23 @@
     <link rel="stylesheet" href="{{ asset('css/bootstrap/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/fancybox/jquery.fancybox.css') }}">
     <link rel="stylesheet" href="{{ asset('css/jquery/jquery-ui.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/' . $template_name .'/custom.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/' . $template_name .'/template.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/' . $global_data['project_data']['template_name'] .'/custom.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/' . $global_data['project_data']['template_name'] .'/template.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suggestions-jquery@18.6.0/dist/css/suggestions.min.css" type="text/css" />
 
     @if(isset($template['component']))
         @switch($template['component'])
             @case('shop')
             @case('info')
-            <link rel="stylesheet" href="{{ asset('css/' . $template_name .'/' . $template['component'] . '_' . $template['resource'] . '_styles.css') }}">
+            <link rel="stylesheet" href="{{ asset('css/' . $global_data['project_data']['template_name'] .'/' . $template['component'] . '_' . $template['resource'] . '_styles.css') }}">
             @break
             @case('search')
-            <link rel="stylesheet" href="{{ asset('css/' . $template_name .'/shop_category_styles.css') }}">
+            <link rel="stylesheet" href="{{ asset('css/' . $global_data['project_data']['template_name'] .'/shop_category_styles.css') }}">
             @break
         @endswitch
     @endif
 
-    <link rel="stylesheet" href="{{ asset('css/' . $template_name .'/responsive.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/' . $global_data['project_data']['template_name'] .'/responsive.css') }}">
 
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
 
@@ -48,17 +48,17 @@
 
     <!-- Header -->
     <header class="header">
-        @include( $template_name .'.positions.header.default')
+        @include( $global_data['project_data']['template_name'] .'.positions.header.default')
     </header>
 
     <!-- Content -->
     <main role="main">
-        @include( $template_name .'.positions.content.default')
+        @include( $global_data['project_data']['template_name'] .'.positions.content.default')
     </main>
 
     <!-- Footer -->
     <footer class="footer" style="position: relative">
-        @include( $template_name .'.positions.footer.default')
+        @include( $global_data['project_data']['template_name'] .'.positions.footer.default')
     </footer>
 
 

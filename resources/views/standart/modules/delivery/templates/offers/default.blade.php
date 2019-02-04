@@ -6,5 +6,5 @@
         data-product-weight="{{$product->weight}}"
         data-product-quantity="1"
 >
-    @include($template_name. '.modules.delivery.templates.offers.' . $delivery_template)
+    @include($global_data['project_data']['template_name']. '.modules.delivery.templates.offers.' . $delivery_template)
 </div>

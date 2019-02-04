@@ -5,7 +5,7 @@
         @if( isset($inc_template['com']) )
 
             @include(
-                $template_name .'.components.' .
+                $global_data['project_data']['template_name'] .'.components.' .
                 $inc_template['com']['section'] . '.' .
                 $inc_template['com']['component'] .
                 '.modules.' .
@@ -19,7 +19,7 @@
                 <div class="col-6 border-right">
                     @if( isset($delivery['costs']['toTerminal']) )
                         <div class="row">
-                            <div class="col text-center">{{$delivery['costs']['toTerminal']['price']}} {{$components['shop']['currency']['symbol']}}</div>
+                            <div class="col text-center">{{$delivery['costs']['toTerminal']['price']}} {{$global_data['project_data']['components']['shop']['currency']['symbol']}}</div>
                             <div class="col text-center">{{$delivery['costs']['toTerminal']['days']}} дней</div>
                         </div>
                     @endif
@@ -28,7 +28,7 @@
                 <div class="col">
                     @if( isset($delivery['costs']['toDoor']) )
                         <div class="row">
-                            <div class="col text-center">{{$delivery['costs']['toDoor']['price']}} {{$components['shop']['currency']['symbol']}}</div>
+                            <div class="col text-center">{{$delivery['costs']['toDoor']['price']}} {{$global_data['project_data']['components']['shop']['currency']['symbol']}}</div>
                             <div class="col text-center">{{$delivery['costs']['toDoor']['days']}} дней</div>
                         </div>
                     @endif
@@ -39,11 +39,11 @@
         @endif
 
     @else
-        @include( $template_name .'.modules.delivery.elements.error')
+        @include( $global_data['project_data']['template_name'] .'.modules.delivery.elements.error')
 
         @if( isset($inc_template['com']) )
             @includeIf(
-                $template_name .'.components.' .
+                $global_data['project_data']['template_name'] .'.components.' .
                 $inc_template['com']['section'] . '.' .
                 $inc_template['com']['component'] .
                 '.modules.' .
@@ -54,4 +54,4 @@
     @endif
 </div>
 
-@include( $template_name .'.modules.delivery.elements.progress')
+@include( $global_data['project_data']['template_name'] .'.modules.delivery.elements.progress')

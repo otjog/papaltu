@@ -10,7 +10,7 @@
 
                 @if( isset( $delivery['costs'][ $shipment->alias ]['toTerminal'] ))
 
-                    @include( $template_name .'.components.shop.order.elements.shipment-element',
+                    @include( $global_data['project_data']['template_name'] .'.components.shop.order.elements.shipment-element',
                         [
                             'shipment'      => $shipment,
                             'service'       => $delivery['costs'][ $shipment->alias ]['toTerminal'],
@@ -36,7 +36,7 @@
 
                 @if( isset( $delivery['costs'][ $shipment->alias ]['toDoor'] ))
 
-                    @include( $template_name .'.components.shop.order.elements.shipment-element',
+                    @include( $global_data['project_data']['template_name'] .'.components.shop.order.elements.shipment-element',
                         [
                             'shipment'      => $shipment,
                             'service'       => $delivery['costs'][ $shipment->alias ]['toDoor'],

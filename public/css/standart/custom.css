@@ -159,3 +159,7 @@ ul.child {
 .popular-products .product-item-wrap.product-item-light:hover  .product-item .product-action{
     display: block !important;
 }
+
+.geo_change_location a {
+    border-bottom: 1px dotted;
+}

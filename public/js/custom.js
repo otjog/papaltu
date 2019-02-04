@@ -189,7 +189,7 @@ function initMap( json ) {
         let geo = json._geo;
 
         delete json._geo;
-console.log(json);
+
         let location = {lat: +geo.latitude, lng: +geo.longitude};
 
         let map = new google.maps.Map(

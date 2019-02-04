@@ -44,39 +44,14 @@ function Delivery(){
 
         }
 
-
-        let listOfferAndPointsWrap = document.getElementById( 'delivery-offers-points' );
-
-        if (listOfferAndPointsWrap !== null && listOfferAndPointsWrap !== undefined){
-
-            let headers = {
-                'X-Module'      : 'delivery|offers-points'
-            };
-
-            /**
-             * Задаем уникальное имя для нашего ajax-запроса.
-             *
-             * Это имя мы сохраняем в глобальный объект со всеми запросами,
-             * чтобы в дальнейшем мы могли управлять ими (abort и тп.)
-             *
-             * @type {string}
-             */
-            let requestName = 'delivery_points';
-
-            let component = listOfferAndPointsWrap.dataset.component;
-
-            if(component !== null && component !== undefined){
-                headers['X-Component'] = component;
-            }
-
-            sendRequestReturnView(listOfferAndPointsWrap, queryString, headers, requestName);
-
-        }
     };
 
     this.points = function() {
 
         //MAP
+
+        let map = document.getElementById('map');
+
         if(map !== null && map !== undefined){
 
             let headers = {
@@ -117,9 +92,9 @@ function Delivery(){
 
         let reloadBlock = wrapBlock.getElementsByClassName('reload');
 
-        let listOfferProgressBar    = reloadBlock[0].getElementsByClassName('progress');
+        let progressBar    = reloadBlock[0].getElementsByClassName('progress');
 
-        let listOfferErrorBlock     = reloadBlock[0].getElementsByClassName('error');
+        let errorBlock     = reloadBlock[0].getElementsByClassName('error');
 
         let blurBlock               = reloadBlock[0].getElementsByClassName('blur');
 
@@ -127,7 +102,7 @@ function Delivery(){
 
         ajaxReq.req.onloadstart = function() {
 
-            listOfferProgressBar[0].style.display   = 'block';
+            progressBar[0].style.display   = 'block';
 
             blurBlock[0].style.opacity = 0.25;
 
@@ -135,7 +110,7 @@ function Delivery(){
 
         ajaxReq.req.ontimeout = function() {
 
-            listOfferProgressBar[0].style.display   = 'none';
+            progressBar[0].style.display   = 'none';
 
         };
 
@@ -143,9 +118,20 @@ function Delivery(){
 
             if (ajaxReq.req.readyState !== 4) return;
 
+            /*
+            * TODO
+            * После третьего обновления города через форму,
+            * сначала в responseText приходит пустая строка,
+            * а затем нормальный ответ с данными.
+            * Из-за этого не работает blur и progress.
+            * С чем это связано?
+            * Пока вопрос решили через проверку ответа на пустую строку.
+            * */
+            if(String(ajaxReq.req.responseText) === '') return;
+
             reloadBlock[0].innerHTML = String(ajaxReq.req.responseText);
 
-            listOfferProgressBar[0].style.display   = 'none';
+            progressBar[0].style.display   = 'none';
 
             blurBlock[0].style.opacity = 1;
 

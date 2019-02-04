@@ -21,9 +21,9 @@
             </div>
         </div-->
 
-        @include( $template_name .'.modules.product_filter.reload.list')
+        @include( $global_data['project_data']['template_name'] .'.modules.product_filter.reload.list')
 
-        @include( $template_name .'.components.shop.product.list')
+        @include( $global_data['project_data']['template_name'] .'.components.shop.product.list')
 
     </div>
 

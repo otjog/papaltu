@@ -3,9 +3,9 @@
 
         @if(isset($products) && count($products) > 0)
 
-            @foreach($products->chunk($components['shop']['chunk_products']) as $products_row)
+            @foreach($products->chunk($global_data['project_data']['components']['shop']['chunk_products']) as $products_row)
 
-                @include($template_name .'.components.shop.product.elements.product_rows.light')
+                @include($global_data['project_data']['template_name'] .'.components.shop.product.elements.product_rows.light')
 
             @endforeach
         @endif
@@ -13,7 +13,7 @@
 
 @if( isset($products) && count($products) > 0)
         <!-- Shop Page Navigation -->
-        @include($template_name .'.modules.pagination.default')
+        @include($global_data['project_data']['template_name'] .'.modules.pagination.default')
     @endif
 
 </div>

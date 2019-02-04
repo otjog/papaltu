@@ -10,7 +10,7 @@
 
                         $routeAlias = key($routeData);
                         $routeValue = $routeData[ key($routeData) ];
-                        $filterPrefix = $components['shop']['filter_prefix'];
+                        $filterPrefix = $global_data['project_data']['components']['shop']['filter_prefix'];
 
                     @endphp
 
@@ -53,7 +53,7 @@
                             <small class="filter-clear float-right">Очистить</small>
                         </div>
                         <div class="collapse pb-3 @if($filter['expanded'] === 'true') show @endif"  id="collapse-{{$filter['alias']}}">
-                            @include( $template_name .'.modules.product_filter.elements.'.$filter['type'], [$filter])
+                            @include( $global_data['project_data']['template_name'] .'.modules.product_filter.elements.'.$filter['type'], [$filter])
                         </div>
 
                     </div>
@@ -62,7 +62,7 @@
                 @endforeach
 
             <!-- Filter's Button -->
-                @include( $template_name .'.modules.product_filter.elements.button')
+                @include( $global_data['project_data']['template_name'] .'.modules.product_filter.elements.button')
 
             </form>
         </div>

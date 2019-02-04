@@ -200,7 +200,7 @@
 
                         <div id="delivery-offers" class="order-4 my-4" data-component="shop|order">
 
-                            @include( $template_name .'.modules.delivery.reload.offers')
+                            @include( $global_data['project_data']['template_name'] .'.modules.delivery.reload.offers')
 
                         </div>
 
