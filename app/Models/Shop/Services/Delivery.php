@@ -74,30 +74,25 @@ class Delivery extends Model{
 
     }
 
-    public function getPoints(){
+    public function getPoints($request){
+
+        list($parcelParameters, $deliveryServiceAlias) = $this->getDeliveryDataFromRequest($request);
 
         $data = [];
 
-        foreach($this->services as ['alias' => $serviceAlias]){
+        $serviceObj = null;
 
-            $serviceObj = null;
+        switch($deliveryServiceAlias){
 
-            switch($serviceAlias){
+            case 'dpd'  : $serviceObj = new Dpd( $this->geoData ); break;
 
-                case 'dpd'  : $serviceObj = new Dpd( $this->geoData ); break;
-
-                case 'cdek' : $serviceObj = new Cdek( $this->geoData ); break;
-
-            }
-
-            if($serviceObj !== null){
-                $data['points'][$serviceAlias] = $serviceObj->getPointsInCity();
-            }
-
+            case 'cdek' : $serviceObj = new Cdek( $this->geoData ); break;
 
         }
 
-        $data['_geo'] = $this->geoData;
+        if($serviceObj !== null){
+            $data['points'][$deliveryServiceAlias] = $serviceObj->getPointsInCity();
+        }
 
         return $data;
 
@@ -107,6 +102,7 @@ class Delivery extends Model{
 
         if( count($request) > 0 ){
             $parcels = [];
+            $deliveryServiceAlias = null;
 
             foreach($request as $name => $params) {
 

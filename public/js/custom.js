@@ -155,7 +155,7 @@ for(let f = 0; f < forms.length; f++){
 
         for(let i in forms[f].elements[inp].dataset){
 
-            if(i = 'suggestion'){
+            if(i === 'suggestion'){
 
                 let type = forms[f].elements[inp].dataset[i];
 
@@ -178,65 +178,11 @@ for(let f = 0; f < forms.length; f++){
 }
 //END DaData
 
-/* Maps Google ******/
-
-function initMap( json ) {
-
-    let wrapMap = document.getElementById('map');
-
-    if(wrapMap !== undefined && wrapMap !== null){
-
-        let geo = json._geo;
-
-        delete json._geo;
-
-        let location = {lat: +geo.latitude, lng: +geo.longitude};
-
-        let map = new google.maps.Map(
-            wrapMap, {zoom: 12, center: location});
-
-        for(let company in json.points){
-
-            if(json.points.hasOwnProperty(company)){
-
-                for(let terminalType in json.points[company]){
-
-                    if(json.points[company].hasOwnProperty(terminalType)){
-
-                        for( let terminal in json.points[company][terminalType] ){
-
-                            if(json.points[company][terminalType].hasOwnProperty(terminal)){
-
-                                let geoShop = json.points[company][terminalType][terminal].geoCoordinates;
-
-                                let locationShop = {lat: +geoShop.latitude, lng: +geoShop.longitude};
-
-                                let image = 'https://myshop.loc/storage/img/elements/delivery/' + company + '/marker-' + terminalType + '.png';
-
-                                let marker = new google.maps.Marker({position: locationShop, map: map, icon: image});
-
-                            }
-
-                        }
-
-
-                    }
-
-                }
-
-            }
-
-        }
-    }
-
-}
-//END Maps Google
-
 /**
  * Получаем объект Доставки
  * И сразу выполняем расчет доставки и получение пунктов выдачи
  */
 let delivery = new Delivery();
-delivery.calculate();
-delivery.points();
+delivery.getOffers();
+delivery.getPoints();
 /*******/

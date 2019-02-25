@@ -16,6 +16,7 @@ class GeoData extends Model{
         return self::$instance;
     }
 
+    /** @return array */
     public function getGeoData(){
 
         return session()->get('geoInput', function() {

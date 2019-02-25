@@ -160,6 +160,6 @@ ul.child {
     display: block !important;
 }
 
-.geo_change_location a {
+.border-bottom-dotted {
     border-bottom: 1px dotted;
 }

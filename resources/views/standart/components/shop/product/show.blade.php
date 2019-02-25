@@ -105,11 +105,12 @@
             </div>
         @endif
 
-        <div class="my-4 py-3 border-top">
+
+        {{-- Best Delivery Offer --}}
+        <div class="my-4 py-3 border-top" id="delivery-best-offer">
 
             {{-- Здесь лучшее предложение по доставке --}}
 
-            @include( $global_data['project_data']['template_name'] .'.modules.modals.forms.change-city')
         </div>
 
     </div>
@@ -159,12 +160,7 @@
         {{-- Delivery Tab --}}
         <div class="tab-data data-delivery">
 
-            <div class="row">
-                <div class="col-12 col-lg-6">
-                    @include($global_data['project_data']['template_name']. '.modules.delivery.templates.offers.default', ['delivery_template' => 'show'])
-                </div>
-                <div id="map" style="height:500px;" class="col-12 col-lg-8"></div>
-            </div>
+            @include($global_data['project_data']['template_name']. '.modules.delivery.templates.offers.default', ['delivery_template' => 'show-and-map'])
 
         </div>
 

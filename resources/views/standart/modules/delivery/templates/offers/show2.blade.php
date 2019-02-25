@@ -28,8 +28,24 @@
             <div class="col-3 border-right">
                 <img src="{{ '/storage/img/elements/delivery/' . $service->alias . '/' . $service->alias .'_logo.jpg' }}" class="img-fluid">
             </div>
-            <div class="reload col">
-                @include( $global_data['project_data']['template_name'] .'.modules.delivery.reload.offers')
+
+            <div class="row">
+                <div class="col-6 border-right">
+                    <div
+                            class="reload col"
+                            data-delivery-service-alias="{{$service->alias}}"
+                            data-delivery-service-destination="toTerminal">
+                        @include( $global_data['project_data']['template_name'] .'.modules.delivery.reload.offer')
+                    </div>
+                </div>
+                <div class="col-6 border-right">
+                    <div
+                            class="reload col"
+                            data-delivery-service-alias="{{$service->alias}}"
+                            data-delivery-service-destination="toDoor">
+                        @include( $global_data['project_data']['template_name'] .'.modules.delivery.reload.offer')
+                    </div>
+                </div>
             </div>
         </div>
     @endforeach

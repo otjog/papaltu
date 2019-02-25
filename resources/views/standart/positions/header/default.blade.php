@@ -4,8 +4,25 @@
         <div class="container">
             <div class="row">
                 <div class="col d-flex flex-row">
-                    <div class="top_bar_contact_item"><div class="top_bar_icon"><img src="{{ URL::asset('storage/img/elements/phone.png') }}" alt=""></div>{{$global_data['project_data']['info']['phone']}}</div>
-                    <div class="top_bar_contact_item"><div class="top_bar_icon"><img src="{{ URL::asset('storage/img/elements/mail.png') }}" alt=""></div>{{$global_data['project_data']['info']['email']}}</div>
+                    <div class="top_bar_contact_item">
+                        <div class="top_bar_icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>{{$global_data['project_data']['info']['phone']}}
+                    </div>
+                    <div class="top_bar_contact_item">
+                        <div class="top_bar_icon">
+                            <i class="far fa-envelope"></i>
+                        </div>
+                        {{$global_data['project_data']['info']['email']}}
+                    </div>
+                </div>
+                <div class="col d-flex flex-row">
+                    <div class="top_bar_contact_item">
+                        <div class="top_bar_icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        @include($global_data['project_data']['template_name'] .'.modules.geo.header')
+                    </div>
                 </div>
             </div>
         </div>

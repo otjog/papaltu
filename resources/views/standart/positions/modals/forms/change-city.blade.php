@@ -20,7 +20,6 @@
                                 id="address"
                                 name="address"
                                 data-suggestion="ADDRESS"
-                                data-event-update-delivery="click"
                                 placeholder="308011 г.Белгород ул.Садовая д.118"
                                 required="">
 
@@ -33,7 +32,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
-                    <button type="button" class="btn btn-primary update-delivery" data-dismiss="modal">Изменить</button>
+                    <button type="button" class="btn btn-primary update-geo" data-dismiss="modal">Изменить</button>
                 </div>
             </form>
         </div>

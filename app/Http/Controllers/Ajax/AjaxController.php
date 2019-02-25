@@ -11,7 +11,7 @@ use App\Models\Settings;
 
 class AjaxController extends Controller{
 
-    //Инициализируем массив для хранения заголовков данных
+    /**Инициализируем массив для хранения заголовков данных*/
     protected $data = [];
 
     //Инициализируем массив для хранения заголовков ответа
@@ -67,9 +67,9 @@ class AjaxController extends Controller{
                         case 'offers'       :
                             $this->data[$this->module] = $ds->getPrices($request->all());
                             break;
-                        case 'map'          :
+                        case 'points'          :
                             $this->responseType = 'json';
-                            $this->data = $ds->getPoints();
+                            $this->data = $ds->getPoints($request->all());
                             break;
                     }
 
@@ -105,19 +105,35 @@ class AjaxController extends Controller{
 
                 case 'geo'  :
 
-                    //Записываем введенную пользователем Геолокацию в Сессию
+                    $this->responseType = 'json';
+
+                    /** Записываем введенную пользователем Геолокацию в Сессию */
                     $geoDataObj = GeoData::getInstance();
                     $geoDataObj->setGeoInput($request->address_json);
 
-                    //Получаем обновленную геолокацию. ГЛУПО???
-                    $geoData = $geoDataObj->getGeoData();
+                    /**
+                     * Получаем гео-данные
+                     *
+                     * После мы их отправим в виде json
+                     *
+                     * @var array data
+                     */
+                    $this->data = $geoDataObj->getGeoData();
 
-                    //Записываем обновленные данные в Глобальный массив
+                    /** Записываем обновленные данные в Глобальный массив */
                     $settings = Settings::getInstance();
-                    $settings->addParameter('geo', $geoData);
+                    $settings->addParameter('geo', $this->data);
 
                     break;
 
+                case 'map'  :
+
+                    $this->responseType = 'json';
+
+                    $geoDataObj = GeoData::getInstance();
+                    $this->data = $geoDataObj->getGeoData();
+
+                    break;
             }
 
             return $this->sendResponse();
@@ -128,10 +144,6 @@ class AjaxController extends Controller{
 
     private function sendResponse(){
 
-        //Получаем обновленные данные из Глобального массива для передачи во фронт
-        $settings = Settings::getInstance();
-        $this->data['global_data']['project_data'] = $settings->getParameters();
-
         //Присваиваем переменной экземпляр Ответа Сервера
         $this->response = response();
 
@@ -140,6 +152,11 @@ class AjaxController extends Controller{
         }
 
         if($this->responseType === 'view'){
+
+            //Получаем обновленные данные из Глобального массива для передачи во фронт
+            $settings = Settings::getInstance();
+            $this->data['global_data']['project_data'] = $settings->getParameters();
+
             $this->data['inc_template']['mod'] = [
                 'module' => $this->module,
                 'viewReload' => $this->viewReload,

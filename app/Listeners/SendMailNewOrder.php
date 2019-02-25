@@ -42,7 +42,6 @@ class SendMailNewOrder{
         $this->data['order'] = $orders->getOrderById($products, $event->orderId);
 
         Mail::to(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'))
-            ->send(new OrderShipped($this->data)
-            );
+            ->send(new OrderShipped($this->data));
     }
 }

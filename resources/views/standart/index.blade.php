@@ -46,6 +46,9 @@
 </head>
 <body style="margin-bottom: 0">
 
+    <!-- Modals -->
+    @include($global_data['project_data']['template_name'] .'.positions.modals.default')
+
     <!-- Header -->
     <header class="header">
         @include( $global_data['project_data']['template_name'] .'.positions.header.default')
@@ -62,10 +65,7 @@
     </footer>
 
 
-
-<script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDzy4Bx5gHQSf4kHFQMo_mFhKlfeL_3lU8">
-</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDzy4Bx5gHQSf4kHFQMo_mFhKlfeL_3lU8"></script>
 
 <script src="{{ asset('js/xmlhttprequest.js') }}"></script>
 <script src="{{ asset('js/jquery-3.3.1.min.js') }}"></script>
@@ -76,10 +76,11 @@
 <script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@18.6.0/dist/js/jquery.suggestions.min.js"></script>
 <script src="{{ asset('js/dadata/forms.js')}}"></script>
 <script src="{{ asset('js/ajax.js')}}"></script>
+<script src="{{ asset('js/modules/googlemap.js')}}"></script>
 <script src="{{ asset('js/modules/delivery.js')}}"></script>
 <script src="{{ asset('js/custom.js') }}"></script>
 
-<script src="{{ asset('js/modules/product-filter.js') }}"></script>
+<script src="{{ asset('js/modules/product-filter.js')}}"></script>
 
 
 </body>

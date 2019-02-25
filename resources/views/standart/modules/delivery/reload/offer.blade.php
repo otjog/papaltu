@@ -14,27 +14,12 @@
 
         @else
 
-            <div class="row">
-
-                <div class="col-6 border-right">
-                    @if( isset($delivery['costs']['toTerminal']) )
-                        <div class="row">
-                            <div class="col text-center">{{$delivery['costs']['toTerminal']['price']}} {{$global_data['project_data']['components']['shop']['currency']['symbol']}}</div>
-                            <div class="col text-center">{{$delivery['costs']['toTerminal']['days']}} дней</div>
-                        </div>
-                    @endif
+            @if( isset($delivery['costs']) )
+                <div class="row">
+                    <div class="col text-center">{{$delivery['costs']['price']}} {{$global_data['project_data']['components']['shop']['currency']['symbol']}}</div>
+                    <div class="col text-center">{{$delivery['costs']['days']}} дней</div>
                 </div>
-
-                <div class="col">
-                    @if( isset($delivery['costs']['toDoor']) )
-                        <div class="row">
-                            <div class="col text-center">{{$delivery['costs']['toDoor']['price']}} {{$global_data['project_data']['components']['shop']['currency']['symbol']}}</div>
-                            <div class="col text-center">{{$delivery['costs']['toDoor']['days']}} дней</div>
-                        </div>
-                    @endif
-                </div>
-
-            </div>
+            @endif
 
         @endif
 

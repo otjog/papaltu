@@ -1,36 +1,18 @@
 function DaData(id, type){
-    this.token = "23933ff36c0c7e63248d1782df14d07badb394a0";
-    this.type = type;
-    this.id = id;
-    let self = this;
+    let token = "23933ff36c0c7e63248d1782df14d07badb394a0";
+    let button = document.getElementsByClassName('update-geo');
+    let geoData = {};
     this.suggestions = function(){
-        $("#"+ this.id).suggestions({
-            token: this.token,
-            type: this.type,
+        $("#"+ id).suggestions({
+            token: token,
+            type: type,
             count: 5,
             onSelect: function(suggestion) {
-                $("#" + self.id + "_json").val(JSON.stringify(suggestion.data));
+                $("#" + id + "_json").val(JSON.stringify(suggestion.data));
 
-                if(self.type === 'ADDRESS'){
-
-                    let input = document.getElementById(self.id);
-
-                    let eventUpdateDelivery = input.dataset.eventUpdateDelivery;
-
-                    switch(eventUpdateDelivery){
-
-                        case 'click' :
-
-                            let button = document.getElementsByClassName('update-delivery');
-
-                            button[0].addEventListener(eventUpdateDelivery, function (e) {
-                                self.updateDelivery(suggestion);
-                            });
-
-                            break;
-
-                        default : self.updateDelivery(suggestion);
-                    }
+                if(type === 'ADDRESS'){
+                    geoData = suggestion.data;
+                    button[0].addEventListener('click', sendRequest, false);
 
                 }
 
@@ -39,22 +21,14 @@ function DaData(id, type){
         });
     };
 
-    this.updateDelivery = function (suggestion) {
+    function sendRequest () {
 
-        let queryString = 'address_json=' + JSON.stringify(suggestion.data);
+        let queryString = 'address_json=' + JSON.stringify(geoData);
 
         let headers = {
             'X-Module'      : 'geo|location '
         };
 
-        /**
-         * Задаем уникальное имя для нашего ajax-запроса.
-         *
-         * Это имя мы сохраняем в глобальный объект со всеми запросами,
-         * чтобы в дальнейшем мы могли управлять ими (abort и тп.)
-         *
-         * @type {string}
-         */
         let requestName = 'geo';
 
         let ajaxReq = new Ajax("POST", queryString, headers, requestName);
@@ -63,18 +37,39 @@ function DaData(id, type){
 
             if (ajaxReq.req.readyState !== 4) return;
 
-            let reloadBlock = document.getElementsByClassName('geo_change_location');
+            let json = JSON.parse(ajaxReq.req.responseText);
 
-            reloadBlock[0].innerHTML = String(ajaxReq.req.responseText);
+            changeHtml(json);
 
-            let delivery = new Delivery();
-
-            delivery.calculate();
-
-            delivery.points();
+            updateDeliveryInfo();
 
         };
 
         ajaxReq.sendRequest();
+    }
+
+    function changeHtml(json){
+        let geoLocationLinks = document.getElementsByClassName('geo-location-link');
+
+        for(let i = 0; i < geoLocationLinks.length; i++){
+
+            let linkElements = geoLocationLinks[i].getElementsByTagName('span');
+
+            for(let y = 0; y < linkElements.length; y++){
+
+                if(json.hasOwnProperty(linkElements[y].className)){
+                    linkElements[y].innerHTML = json[linkElements[y].className];
+                }
+            }
+
+        }
+    }
+
+    function updateDeliveryInfo(){
+        let delivery = new Delivery();
+
+        delivery.getOffers();
+
+        delivery.getPoints();
     }
 }

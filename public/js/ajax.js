@@ -17,9 +17,9 @@ function Ajax(method, queryString, headers, requestName){
     this.req        = getXmlHttpRequest();
 
     this.sendRequest = function(){
-
         if(ajaxRequests[this.requestName] !== undefined){
             ajaxRequests[this.requestName].abortRequest();
+
         }
 
         this.req.timeout = this.timeout;

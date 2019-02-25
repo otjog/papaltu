@@ -216,7 +216,9 @@ function sendAjaxRequest(queryString, target) {
         'X-Component'   : 'shop|category'
     };
 
-    let ajaxReq = new Ajax("GET", queryString, headers);
+    let requestName = 'product_filter';
+
+    let ajaxReq = new Ajax("GET", queryString, headers, requestName);
 
     ajaxReq.req.onloadstart = function(){
         //
