@@ -1,35 +1,41 @@
 function DaData(id, type){
-    this.token = "23933ff36c0c7e63248d1782df14d07badb394a0";
-    this.type = type;
-    this.id = id;
-    let self = this;
+    let token = "23933ff36c0c7e63248d1782df14d07badb394a0";
+    let button = document.getElementsByClassName('update-geo');
+    let requestName = 'geo';
+    let qsParams = {
+        module : requestName,
+        response : 'json', //view or json
+        address_json : ''
+    };
+    let queryString = '';
+
     this.suggestions = function(){
-        $("#"+ this.id).suggestions({
-            token: this.token,
-            type: this.type,
+        $("#"+ id).suggestions({
+            token: token,
+            type: type,
             count: 5,
             onSelect: function(suggestion) {
-                $("#" + self.id + "_json").val(JSON.stringify(suggestion.data));
+                $("#" + id + "_json").val(JSON.stringify(suggestion.data));
 
-                if(self.type === 'ADDRESS'){
+                if(type === 'ADDRESS'){
 
-                    let input = document.getElementById(self.id);
+                    let input = document.getElementById(id);
 
-                    let eventUpdateDelivery = input.dataset.eventUpdateDelivery;
+                    let eventToUpdate = input.dataset.eventToUpdate;
 
-                    switch(eventUpdateDelivery){
+                    qsParams.address_json = JSON.stringify(suggestion.data);
+
+                    queryString = setQueryStirng(qsParams);
+
+                    switch(eventToUpdate){
 
                         case 'click' :
 
-                            let button = document.getElementsByClassName('update-delivery');
-
-                            button[0].addEventListener(eventUpdateDelivery, function (e) {
-                                self.updateDelivery(suggestion);
-                            });
+                            button[0].addEventListener('click', sendRequest, false);
 
                             break;
 
-                        default : self.updateDelivery(suggestion);
+                        default : sendRequest();
                     }
 
                 }
@@ -39,28 +45,69 @@ function DaData(id, type){
         });
     };
 
-    this.updateDelivery = function (suggestion) {
+    function sendRequest () {
 
-        let queryString = 'address_json=' + JSON.stringify(suggestion);
+        let ajaxReq = new Ajax("POST", queryString, {}, requestName);
 
-        let headers = {
-            'X-Module'      : 'geo|'
-        };
-
-        let ajaxReq = new Ajax("POST", queryString, headers);
         //todo проверить, если объекта нет, делать submit формы
         ajaxReq.req.onreadystatechange = function() {
 
             if (ajaxReq.req.readyState !== 4) return;
 
-            let delivery = new Delivery();
+            let json = JSON.parse(ajaxReq.req.responseText);
 
-            delivery.calculate();
+            changeHtml(json);
 
-            delivery.points();
+            updateShipmentInfo();
 
         };
 
         ajaxReq.sendRequest();
+    }
+
+    function changeHtml(json){
+        let geoLocationLinks = document.getElementsByClassName('geo-location-link');
+
+        for(let i = 0; i < geoLocationLinks.length; i++){
+
+            let linkElements = geoLocationLinks[i].getElementsByTagName('span');
+
+            for(let y = 0; y < linkElements.length; y++){
+
+                if(json.hasOwnProperty(linkElements[y].className)){
+                    linkElements[y].innerHTML = json[linkElements[y].className];
+                }
+            }
+
+        }
+    }
+
+    function updateShipmentInfo(){
+        let shipment = new Shipment();
+
+        shipment.getOffers();
+
+        shipment.getPoints();
+    }
+
+    function setQueryStirng(parameters, queryString = ''){
+
+        for(let parameter in parameters){
+
+            if(queryString !== ''){
+                queryString += '&';
+            }
+
+            if(parameters[parameter] !== ''){
+                queryString += parameter;
+                queryString += '=';
+                queryString += parameters[parameter];
+            }else{
+                console.log("Нет данных у параметра " + parameter)
+            }
+
+        }
+
+        return queryString;
     }
 }

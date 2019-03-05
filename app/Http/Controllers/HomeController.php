@@ -8,22 +8,26 @@ class HomeController extends Controller{
 
     protected $categories;
 
-    protected $data;
+    protected $data = [];
+
+    protected $settings;
 
     public function __construct(){
 
-        $settings = Settings::getInstance();
-
-        $this->data = $settings->getParameters();
+        $this->settings = Settings::getInstance();
 
         $this->data['template'] = [];
     }
 
     public function index(){
 
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
+
         $this->data['template'] ['banner']  = 'default';
 
-        $this->data['template'] ['custom'][]  = 'shop-icons';
+        //  $this->data['template'] ['modules']['custom']  = 'shop-icons';
+
+        $this->data['template'] ['modules']['offers']  = 'default';
 
         return view( 'templates.default', $this->data);
     }
