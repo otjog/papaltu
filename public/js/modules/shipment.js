@@ -199,7 +199,6 @@ function Shipment(){
                     self.elements.contentBlock    = self.reloadBlock.getElementsByClassName('blur');
 
                     self.elements.loadingBlock[0].style.display = 'block';
-                    self.elements.contentBlock[0].innerHTML = '';
 
                     self.elements.loadingBlock[0].dataset.ariaValuenow = sendRequestCount;
                     self.elements.loadingBlock[0].dataset.ariaValuemin = 0;
