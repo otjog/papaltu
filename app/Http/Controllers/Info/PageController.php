@@ -5,33 +5,30 @@ namespace App\Http\Controllers\Info;
 use App\Models\Site\Page;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-
+use App\Models\Settings;
 class PageController extends Controller{
 
     protected $pages;
 
-    protected $data;
+    protected $settings;
 
-    protected $template_name;
+    protected $data = [];
 
     /**
      * Создание нового экземпляра контроллера.
      *
-     * @param  Product $products
+     * @param  Page $pages
      * @return void
      */
     public function __construct(Page $pages){
 
-        $this->template_name = env('SITE_TEMPLATE');
+        $this->settings = Settings::getInstance();
 
         $this->pages = $pages;
 
-        $this->data = [
-            'template' => [
-                'component' => 'info',
-                'resource'  => 'page'
-            ],
-            'template_name' => $this->template_name
+        $this->data['template'] = [
+            'component' => 'info',
+            'resource'  => 'page'
         ];
     }
 
@@ -41,6 +38,8 @@ class PageController extends Controller{
      * @return \Illuminate\Http\Response
      */
     public function index(){
+
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
 
         $this->data['data']['pages']  = $this->pages->getAllPages();
 
@@ -77,6 +76,8 @@ class PageController extends Controller{
      */
     public function show($id){
 
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
+
         $this->data['template']['view'] = 'show';
         $this->data['data']['page']  = $this->pages->getPageIfActive($id);
 
@@ -92,9 +93,11 @@ class PageController extends Controller{
      */
     public function edit($id){
 
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
+
         $this->data['data']['page']  = $this->pages->getPage($id);
 
-        return view($this->template_name . 'components.info.page.edit', $this->data);
+        return view($this->data['template_name'] . 'components.info.page.edit', $this->data);
     }
 
     /**

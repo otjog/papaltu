@@ -8,18 +8,18 @@ use App\Models\Shop\Order\Basket;
 use Illuminate\Http\Request;
 use App\Models\Shop\Category\Category;
 use App\Models\Shop\Product\Product;
-
+use App\Models\Settings;
 class CategoryController extends Controller{
 
     protected $categories;
 
     protected $baskets;
 
-    protected $data;
+    protected $settings;
+
+    protected $data = [];
 
     protected $metaTagsCreater;
-
-    protected $template_name;
 
     /**
      * Создание нового экземпляра контроллера.
@@ -29,7 +29,7 @@ class CategoryController extends Controller{
      */
     public function __construct(Category $categories, Basket $baskets, MetaTagsCreater $metaTagsCreater){
 
-        $this->template_name = env('SITE_TEMPLATE');
+        $this->settings = Settings::getInstance();
 
         $this->categories       = $categories;
 
@@ -37,15 +37,9 @@ class CategoryController extends Controller{
 
         $this->metaTagsCreater  = $metaTagsCreater;
 
-        $this->data             = [
-            'template'  => [
-                'component'     => 'shop',
-                'resource'      => 'category',
-                ],
-            'data'      => [
-                'product_chunk' => 3
-            ],
-            'template_name' => $this->template_name
+        $this->data['template'] = [
+            'component' => 'shop',
+            'resource'  => 'category',
         ];
 
     }
@@ -56,6 +50,8 @@ class CategoryController extends Controller{
      * @return \Illuminate\Http\Response
      */
     public function index(){
+
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
 
         $this->data['template'] ['view']        = 'list';
         $this->data['data']     ['categories']  =  $this->categories->getCategoriesTree();
@@ -95,6 +91,8 @@ class CategoryController extends Controller{
      */
     public function show(Request $request, Product $products, $id){
 
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
+
         $category = $this->categories->getCategory($id);
 
         $this->data['template'] ['view']                = 'show';
@@ -109,13 +107,14 @@ class CategoryController extends Controller{
 
         if( count( $request->query ) > 0 ){
 
-            $parameters = $request->toArray();
+            $filterData = $request->toArray();
 
-            $parameters['category'] = $id;
+            $routeData = ['category' => $id];
 
-            $this->data['data'] ['products'] = $products->getFilteredProducts($parameters);
+            $this->data['data'] ['products'] = $products->getFilteredProducts($routeData, $filterData);
 
             $this->data['data'] ['parameters'] = $request->toArray();
+
 
         }else{
 

@@ -4,11 +4,9 @@
         <div class="col-lg-3 footer_col">
             <div class="footer_column footer_contact">
                 <div class="footer_title">Остались вопросы? Звоните нам!</div>
-                <div class="footer_phone">+7 4722 41-40-44</div>
-                <div class="footer_contact_text">
-                    <p><small>г.Белгород ТРК МЕГА Гринн</small></p>
-                    <p><small>пр.Б.Хмельницкого 137Т</small></p>
-                    <p>этаж 2А, офис 116</p>
+                <div class="footer_phone">{{$global_data['project_data']['info']['phone']}}</div>
+                <div class="footer_contact_text pr-5">
+                    <small class="text-muted">{{$global_data['project_data']['info']['address']}}</small>
                 </div>
                 <!--div class="footer_social">
                     <ul>
@@ -26,7 +24,7 @@
             <div class="footer_column">
                 <div class="footer_title">Найди, то что нужно</div>
 
-                @include( $template_name .'.modules.menu.shop', ['menu_type' => 'list'])
+                @include( $global_data['project_data']['template_name'] .'.modules.menu.shop', ['menu_type' => 'list'])
 
             </div>
         </div>
@@ -35,9 +33,9 @@
             <div class="footer_column">
                 <div class="footer_title">Информация</div>
 
-                @include( $template_name .'.modules.menu.page', ['menu_type' => 'list', 'menu_name' => 'info'])
+                @include( $global_data['project_data']['template_name'] .'.modules.menu.page', ['menu_type' => 'list', 'menu_name' => 'info'])
 
-                {{-- @include( $template_name .'modules.menu.page', ['menu_type' => 'list', 'menu_name' => 'about_us']) --}}
+                {{-- @include( $global_data['project_data']['template_name'] .'modules.menu.page', ['menu_type' => 'list', 'menu_name' => 'about_us']) --}}
 
             </div>
         </div>

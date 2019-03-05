@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Shop\Product\Product;
 use App\Models\Shop\Order\Basket;
+use App\Models\Settings;
 
 class BrandController extends Controller{
 
@@ -15,35 +16,31 @@ class BrandController extends Controller{
 
     protected $baskets;
 
-    protected $data;
+    protected $settings;
+
+    protected $data = [];
 
     protected $metaTagsCreater;
 
-    protected $template_name;
     /**
      * Создание нового экземпляра контроллера.
      *
      * @return void
      */
-    public function __construct(Brand $brands, Basket $baskets, MetaTagsCreater $metaTagsCreater){
+    public function __construct(Brand $brands, Basket $baskets, MetaTagsCreater $metaTagsCreater)
+    {
 
-        $this->template_name = env('SITE_TEMPLATE');
+        $this->settings = Settings::getInstance();
 
-        $this->brands   = $brands;
+        $this->brands = $brands;
 
-        $this->baskets  = $baskets;
+        $this->baskets = $baskets;
 
         $this->metaTagsCreater = $metaTagsCreater;
 
-        $this->data     = [
-            'template'  => [
-                'component'     => 'shop',
-                'resource'      => 'brand',
-            ],
-            'data'      => [
-                'product_chunk' => 4
-            ],
-            'template_name' => $this->template_name
+        $this->data['template'] = [
+            'component'     => 'shop',
+            'resource'      => 'brand',
         ];
 
     }
@@ -54,8 +51,12 @@ class BrandController extends Controller{
      * @return \Illuminate\Http\Response
      */
     public function index(){
+
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
+
         $this->data['template'] ['view']    = 'list';
         $this->data['data']     ['brands']  = $this->brands->getActiveBrands();
+        $this->data['data']     ['header_page'] =  'Бренды';
 
         return view( 'templates.default', $this->data);
     }
@@ -84,24 +85,37 @@ class BrandController extends Controller{
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  string  $name
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request, Product $products, $id){
+    public function show(Request $request, Product $products, $name){
+
+        $brand = $this->brands->getBrand($name);
+
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
 
         $this->data['template'] ['view']        = 'show';
+        $this->data['template'] ['sidebar']     = 'product_filter';
+        $this->data['template'] ['filter-tags'] = 'filter-tags';
+        $this->data['data']     ['brand']       = $brand;
+        $this->data['data']     ['header_page'] = 'Товары бренда ' . $brand[0]->name;
+        $this->data['data']     ['parameters']  = [];
 
-        $this->data['data']     ['brand']       = $this->brands->getActiveBrand($id);
+        $this->data['template']['custom'][] = 'shop-icons';
 
-        if(count($request->query) > 0){
-            $this->data['data']['products'] = $products->getFilteredProducts($request->toArray());
+        if (count($request->query) > 0) {
 
-        }else{
-            $this->data['data']['products'] = $products->getActiveProductsOfBrand($id);
+            $routeData = ['brand' => $name];
+
+            $filterData = $request->toArray();
+
+            $this->data['data']['products'] = $products->getFilteredProducts($routeData, $filterData);
+        } else {
+            $this->data['data']['products'] = $products->getActiveProductsOfBrand($name);
         }
 
         $this->data['meta'] = $this->metaTagsCreater->getMetaTags($this->data);
-
+//dd($this->data);
         return view( 'templates.default', $this->data);
     }
 

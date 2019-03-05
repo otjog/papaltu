@@ -10,34 +10,28 @@ use App\Http\Controllers\Controller;
 use App\Models\Shop\Order\Basket;
 use App\Models\Shop\Order\Order;
 use App\Models\Shop\Product\Product;
-
+use App\Models\Settings;
 class OrderController extends Controller{
 
     protected $orders;
 
     protected $baskets;
 
-    protected $data;
+    protected $settings;
 
-    protected $template_name;
+    protected $data = [];
 
     public function __construct(Order $orders, Basket $baskets){
 
-        $this->template_name = env('SITE_TEMPLATE');
+        $this->settings = Settings::getInstance();
 
         $this->orders   = $orders;
 
         $this->baskets  = $baskets;
 
-        $this->data = [
-            'template'  =>  [
-                'component' => 'shop',
-                'resource'  => 'order',
-            ],
-            'data'      => [
-                'chunk' => 3
-            ],
-            'template_name' => $this->template_name
+        $this->data['template'] = [
+            'component' => 'shop',
+            'resource'  => 'order',
         ];
     }
 
@@ -64,7 +58,7 @@ class OrderController extends Controller{
 
         if($payment[0]->alias === 'online'){
 
-            $basket = $this->baskets->getActiveBasketWithProducts($products, $token );
+            $basket = $this->baskets->getActiveBasketWithProductsAndRelations($products, $token );
 
             return $paymentService->send($request, $basket);
 
@@ -90,9 +84,11 @@ class OrderController extends Controller{
 
         $token = $request->session()->get('_token');
 
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
+
         $this->data['template']['view'] = 'create';
 
-        $this->data['data']['basket']   = $this->baskets->getActiveBasketWithProducts( $products, $token );
+        $this->data['data']['basket']   = $this->baskets->getActiveBasketWithProductsAndRelations( $products, $token );
 
         $this->data['data']['payments'] = $payments->getActiveMethods();
 
@@ -106,6 +102,8 @@ class OrderController extends Controller{
      * @return \Illuminate\Http\Response
      */
     public function show(Product $products, $id){
+
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
 
         $this->data['template']['view'] = 'show';
 

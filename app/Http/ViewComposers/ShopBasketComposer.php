@@ -15,7 +15,7 @@ class ShopBasketComposer{
 
         $token = $request->session()->get('_token');
 
-        $this->basket = $basket->getActiveBasketWithProducts( $products, $token );
+        $this->basket = $basket->getActiveBasketWithProductsAndRelations( $products, $token );
     }
 
     public function compose(View $view){

@@ -1,8 +1,6 @@
 /node_modules
 /public/hot
 /public/storage
-/public/.htaccess
-/public/favicon.ico
 /storage/*.key
 /vendor
 /.idea
@@ -13,3 +11,9 @@ Homestead.yaml
 npm-debug.log
 yarn-error.log
 .env
+
+#delete_before_clone
+/public/.htaccess
+/public/favicon.ico
+/public/css/_*/
+/resources/views/_*/

@@ -1,6 +1,5 @@
 <div class="container">
 
-
     {{-- ALERT --}}
     @if (session('status'))
         <div class="alert alert-success">
@@ -65,12 +64,6 @@
                 </ul>
 
             </div>
-
-            <form id="delivery-form">
-                @foreach($parcels as $param => $value)
-                    <input type="hidden" name="{{$param}}" value="{{$value}}">
-                @endforeach
-            </form>
 
         @endif
 
@@ -169,25 +162,21 @@
 
                 <hr class="mb-4">
 
+                {{-- PAY & SHIPMENT --}}
                 <div class="row">
 
+                    {{-- PAY --}}
                     @if( isset( $payments ) && count( $payments ) > 0 )
-
-                        @php
-                            if(isset($chunk) === false || is_nan($chunk) || $chunk > 4){
-                                $chunk = 3;
-                            }
-                        @endphp
 
                         <div class="col-lg-12">
 
                             <h4 class="mb-3">Способ оплаты</h4>
 
-                            @foreach( $payments->chunk($chunk) as $payments_row )
+                            @foreach( $payments->chunk(3) as $payments_row )
 
                                 <div class="row">
                                     @foreach( $payments_row as $payment)
-                                        <div class="col-lg-{{12/$chunk}} form-check form-check-inline mb-3 mr-0">
+                                        <div class="col-lg-{{12 / 3}} form-check form-check-inline mb-3 mr-0">
                                             <div class="custom-control custom-radio mx-3">
                                                 <input id="payment_{{ $payment->id }}" name="payment_id" value="{{ $payment->id }}" type="radio" class="custom-control-input" required="">
                                                 <label class="custom-control-label" for="payment_{{ $payment->id }}">{{ $payment->name }}</label>
@@ -200,18 +189,8 @@
                         </div>
                     @endif
 
-
-                    <div class="col-lg-12">
-
-                        <h4 class="mb-3 text-center">Способ доставки</h4>
-
-                        <div id="delivery-offers" class="order-4 my-4" data-component="shop|order">
-
-                            @include( $template_name .'.modules.delivery.reload.offers')
-
-                        </div>
-
-                    </div>
+                    {{-- SHIPMENT --}}
+                    @include( $global_data['project_data']['template_name'] .'.modules.shipment.default', ['deliveryTemplates' => ['offers-checkbox']])
 
                 </div>
 
@@ -234,4 +213,5 @@
         </div>
 
     </div>
+
 </div>

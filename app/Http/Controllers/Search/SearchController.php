@@ -7,18 +7,19 @@ use App\Http\Controllers\Controller;
 use App\Models\Shop\Product\Product;
 use App\Models\Shop\Order\Basket;
 use sngrl\SphinxSearch\SphinxSearch;
+use App\Models\Settings;
 
 class SearchController extends Controller{
 
-    protected $data;
+    protected $data = [];
+
+    protected $settings;
 
     protected $products;
 
-    protected $query;
+    protected $queryString;
 
     protected $baskets;
-
-    protected $template_name;
 
     /**
      * Создание нового экземпляра контроллера.
@@ -27,24 +28,20 @@ class SearchController extends Controller{
      */
     public function __construct(Request $request, Product $products, Basket $baskets){
 
-        $this->template_name = env('SITE_TEMPLATE');
+        $this->settings = Settings::getInstance();
 
         $this->products = $products;
 
         $this->baskets  = $baskets;
 
-        $this->query    = $request->search;
+        $this->queryString    = $request->search;
 
-        $this->data     = [
-            'template'  => [
-                'component'     => 'shop',
-                'resource'      => 'search',
-            ],
-            'data'      => [
-                'product_chunk' => 4
-            ],
-            'template_name' => $this->template_name
+        $this->data['template']     = [
+            'component'     => 'shop',
+            'resource'      => 'search',
         ];
+        $this->data['data']['parameters']  = $request->toArray();
+
 
     }
 
@@ -52,18 +49,19 @@ class SearchController extends Controller{
 
         $sphinx  = new SphinxSearch();
 
-        $searchIdResult = $sphinx->search($this->query, env( 'SPHINXSEARCH_INDEX' ))->query();
+        $searchIdResult = $sphinx->search($this->queryString, env( 'SPHINXSEARCH_INDEX' ))->query();
+
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
 
         $this->data['template'] ['view']        = 'show';
 
         $this->data['data']     ['products']    = [];
-        $this->data['data']     ['query']       = $this->query;
+        $this->data['data']     ['query']       = $this->queryString;
+        $this->data['data']     ['header_page'] = 'Результаты поиска по запросу: ' . $this->queryString;
 
         if( isset( $searchIdResult[ 'matches' ] ) && count( $searchIdResult[ 'matches' ] ) > 0 ){
             $this->data['data'] ['products'] = $this->products->getProductsById( array_keys( $searchIdResult[ 'matches' ] ) );
         }
-
-
 
         return view( 'templates.default', $this->data);
     }

@@ -56,7 +56,7 @@ class Paymaster implements OnlinePayment{
 
         $token = $request['_token'];
 
-        $basket = $baskets->getActiveBasketWithProducts( $products, $token );
+        $basket = $baskets->getActiveBasketWithProductsAndRelations( $products, $token );
 
         if($request_shop_id === $this->shop_id){
 

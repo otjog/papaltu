@@ -7,113 +7,136 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Shop\Services\Delivery;
 use App\Models\Geo\GeoData;
+use App\Models\Settings;
 
 class AjaxController extends Controller{
 
+    /**Инициализируем массив пришедших параметров*/
+    protected $request = [];
+
+    /**Инициализируем массив для хранения данных ответа*/
+    protected $data = [];
+
+    /**Инициализируем массив для хранения заголовков ответа*/
+    protected $headers = [];
+
+    /**Инициализируем переменную Ответ Сервера*/
+    protected $response;
+
     public function index(Request $request){
 
-        $template_name = env('SITE_TEMPLATE');
+        $this->request = $request->all();
 
-        //Return
-        $data = ['template_name' => $template_name];
+        if(isset($this->request['module']) && $this->request['module'] !== null){
 
-        //Component-Header
-        $component_template = $request->header('X-Component');
+            //todo вернуть $next если нет Module
 
-        if( isset( $component_template ) && $component_template !== null){
+            switch($this->request['module']){
 
-            list($section, $component)  = explode('|', $component_template );
-
-            $data['template']['com'] = [
-                'section' => $section,
-                'component' => $component,
-            ];
-        }
-
-        //Module-Header
-        $module_template =  $request->header('X-Module');
-
-        if( isset( $module_template ) && $module_template !== null ){
-
-            //todo вернуть $next если нет заголовка X-Module
-            list($module, $viewReload)     = explode('|', $module_template );
-
-            $data['template']['mod'] = [
-                'module' => $module,
-                'viewReload' => $viewReload,
-            ];
-
-            switch($module){
-
-                case 'delivery' :
+                case 'shipment' :
 
                     $ds = new Delivery();
 
-                    if( count($request->all()) > 0 ){
-                        $parcels = [];
+                    $this->data['service'] = $ds->getPrices($this->request['parcel'], $this->request['alias'], $this->request['type']);
 
-                        foreach($request->all() as $name => $params) {
+                    break;
 
-                            $arr = explode('|', $params);
+                case 'points' :
 
-                            foreach ($arr as $key => $param) {
+                    $ds = new Delivery();
 
-                                $parcels[$key][$name] = $param;
+                    $this->data = $ds->getPoints($this->request['alias']);
 
-                            }
-
-                        }
-                    }
-
-                    switch($viewReload){
-                        case 'best-offer'   : $data[ $module ] =  $ds->getBestPrice( $parcels ); break;
-                        case 'offers'       : $data[ $module ] =  $ds->getPrices( $parcels ); break;
-                        case 'offers-points':
-                            $prices = $ds->getPrices( $parcels );
-                            $points = $ds->getPoints();
-                            $data[ $module ] = array_merge($prices, $points);
-                            break;
-                        case 'map'          : return response( $data[ $module ] = $ds->getPoints() );
-                    }
-
-                    return response()->view($template_name . '.modules.' . $module . '.reload.' . $viewReload, $data);
+                    break;
 
                 case 'product_filter' :
 
                     $products = new Product();
 
-                    $result = $products->getFilteredProducts($request->toArray());
+                    $result = $products->getFilteredProducts([], $request->toArray());
 
-                    $path = stristr($request->session()->previousUrl(), '?', true);
+                    $url = stristr($request->session()->previousUrl(), '?', true);
 
-                    if($path === false){
-                        $path = $request->session()->previousUrl();
+                    if($url === false){
+                        $url = $request->session()->previousUrl();
                     }
 
-                    $result->setPath($path);
+                    //Настройка URI для вывода ссылок. Для работы постраничного вывода отфильтрованных товаров
+                    $result->setPath($url);
 
-                    return response()
-                        ->view( $template_name . '.modules.' . $module . '.reload.' . $viewReload,
-                            [
-                                'filtered_products' => $result,
-                                'template_name' => $template_name,
-                                'data' => ['parameters' => $request->toArray()]
-                                ]
-                        )
-                        ->header('Cache-Control', 'no-store');
+                    $this->data['filtered_products'] = $result;
 
-                case 'geo'  :
+                    $this->data['data'] = ['parameters' => $request->toArray()];
 
-                    $geoData = new GeoData();
+                    //Получаем обновленные данные из Глобального массива для передачи во фронт
+                    $settings = Settings::getInstance();
+                    $this->data['global_data']['project_data'] = $settings->getParameters();
 
-                    $geoData->setGeoInput($request->address_json);
+                    //Добавляем заголовки в массив
+                    $this->headers['Cache-Control'] = 'no-store';
 
                     break;
 
+                case 'geo'  :
+
+                    /** Записываем введенную пользователем Геолокацию в Сессию */
+                    $geoDataObj = GeoData::getInstance();
+                    $geoDataObj->setGeoInput($this->request['address_json']);
+
+                    /**
+                     * Получаем гео-данные
+                     *
+                     * После мы их отправим в виде json
+                     *
+                     * @var array data
+                     */
+                    $this->data = $geoDataObj->getGeoData();
+
+                    /** Записываем обновленные данные в Глобальный массив */
+                    $settings = Settings::getInstance();
+                    $settings->addParameter('geo', $this->data);
+
+                    break;
+
+                case 'map'  :
+
+                    $geoDataObj = GeoData::getInstance();
+                    $this->data = $geoDataObj->getGeoData();
+
+                    break;
             }
+
+            return $this->sendResponse();
 
         }
 
+    }
+
+    private function sendResponse(){
+
+        //Присваиваем переменной экземпляр Ответа Сервера
+        $this->response = response();
+
+        if($this->request['response'] === 'json') {
+            $this->response = $this->response->json($this->data);
+        }
+
+        if($this->request['response'] === 'view'){
+
+            //Получаем обновленные данные из Глобального массива для передачи во фронт
+            $settings = Settings::getInstance();
+            $this->data['global_data']['project_data'] = $settings->getParameters();
+
+            $view = $this->data['global_data']['project_data']['template_name'] . '.modules.' . $this->request['module'] . '.reload.' . $this->request['view'];
+            //Добавляем к ответу Представление и обновленную переменную с данными
+            $this->response = $this->response->view( $view, $this->data);
+        }
+
+        if( count($this->headers) > 0){
+            $this->response = $this->response->withHeaders($this->headers);
+        }
+
+        return $this->response;
     }
 
 }

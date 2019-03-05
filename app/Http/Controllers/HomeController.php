@@ -2,29 +2,32 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Settings;
+
 class HomeController extends Controller{
 
     protected $categories;
 
-    protected $data;
+    protected $data = [];
 
-    protected $template_name;
+    protected $settings;
 
     public function __construct(){
 
-        $this->template_name = env('SITE_TEMPLATE');
+        $this->settings = Settings::getInstance();
 
-        $this->data = [
-            'template' => [],
-            'template_name' => $this->template_name
-        ];
+        $this->data['template'] = [];
     }
 
     public function index(){
 
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
+
         $this->data['template'] ['banner']  = 'default';
 
-        $this->data['template'] ['custom'][]  = 'shop-icons';
+        //  $this->data['template'] ['modules']['custom']  = 'shop-icons';
+
+        $this->data['template'] ['modules']['offers']  = 'default';
 
         return view( 'templates.default', $this->data);
     }
