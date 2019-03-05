@@ -10,7 +10,9 @@ class PageController extends Controller{
 
     protected $pages;
 
-    protected $data;
+    protected $settings;
+
+    protected $data = [];
 
     /**
      * Создание нового экземпляра контроллера.
@@ -20,9 +22,7 @@ class PageController extends Controller{
      */
     public function __construct(Page $pages){
 
-        $settings = Settings::getInstance();
-
-        $this->data = $settings->getParameters();
+        $this->settings = Settings::getInstance();
 
         $this->pages = $pages;
 
@@ -38,6 +38,8 @@ class PageController extends Controller{
      * @return \Illuminate\Http\Response
      */
     public function index(){
+
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
 
         $this->data['data']['pages']  = $this->pages->getAllPages();
 
@@ -74,6 +76,8 @@ class PageController extends Controller{
      */
     public function show($id){
 
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
+
         $this->data['template']['view'] = 'show';
         $this->data['data']['page']  = $this->pages->getPageIfActive($id);
 
@@ -88,6 +92,8 @@ class PageController extends Controller{
      * @return \Illuminate\Http\Response
      */
     public function edit($id){
+
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
 
         $this->data['data']['page']  = $this->pages->getPage($id);
 

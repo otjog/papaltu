@@ -1,7 +1,7 @@
 <!-- Images -->
 <div class="col-lg-7">
     <div class="row">
-        @include( $template_name. '.components.shop.product.elements.images.gallery')
+        @include( $global_data['project_data']['template_name']. '.components.shop.product.elements.images.gallery')
     </div>
 </div>
 
@@ -32,7 +32,7 @@
 
                 <div class="product_price text-muted mr-3 clearfix">
                     <s>
-                        <small>{{$product->price['value'] + $product->price['sale']}}</small><small>{{$components['shop']['currency']['symbol']}}</small>
+                        <small>{{$product->price['value'] + $product->price['sale']}}</small><small>{{$global_data['project_data']['components']['shop']['currency']['symbol']}}</small>
                     </s>
                 </div>
 
@@ -40,7 +40,7 @@
 
             <div class="product_price clearfix">
                 {{ $product->price['value'] }}
-                <small>{{$components['shop']['currency']['symbol']}}</small>
+                <small>{{$global_data['project_data']['components']['shop']['currency']['symbol']}}</small>
             </div>
 
             <div class="my-2 d-flex flex-row">
@@ -105,23 +105,9 @@
             </div>
         @endif
 
-        <div class="my-4 py-3 border-top">
 
-            <form id="delivery-form">
-                <input type="hidden" name="weight"      value="{{$product->weight}}">
-                <input type="hidden" name="length"      value="{{$product->length}}">
-                <input type="hidden" name="width"       value="{{$product->width}}">
-                <input type="hidden" name="height"      value="{{$product->height}}">
-                <input type="hidden" name="quantity"    value="1">
-            </form>
-
-            <div id="delivery-best-offer">
-                @include( $template_name .'.modules.delivery.reload.best-offer')
-            </div>
-
-            @include( $template_name .'.modules.modals.forms.change-city')
-
-        </div>
+        {{-- Best Shipment Offer --}}
+        @include($global_data['project_data']['template_name']. '.modules.shipment.templates.best-offer')
 
     </div>
 </div>
@@ -134,7 +120,7 @@
             <a class="nav-link active" data-tabIndex="description">Описание</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-tabIndex="delivery">Доставка</a>
+            <a class="nav-link" data-tabIndex="shipment">Доставка</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" data-tabIndex="reviews">Отзывы</a>
@@ -154,7 +140,7 @@
                     @foreach($product->parameters as $key => $parameter)
 
                         <li>
-                            @if($key === 0 || $product->parameters[$key -1 ]->name !== $parameter->name)
+                            @if($key === 0 || $product->parameters[$key -1]->name !== $parameter->name)
                                 <strong>{{$parameter->name}}: </strong>
                             @endif
 
@@ -167,17 +153,10 @@
             @endif
         </div>
 
-        {{-- Delivery Tab --}}
-        <div class="tab-data data-delivery">
+        {{-- Shipment Tab --}}
+        <div class="tab-data data-shipment">
 
-            <div class="row">
-                <div class="col-12 col-lg-4">
-                    <div id="delivery-offers">
-                        @include( $template_name .'.modules.delivery.reload.offers')
-                    </div>
-                </div>
-                <div id="map" style="height:500px;" class="col-12 col-lg-8"></div>
-            </div>
+            @include($global_data['project_data']['template_name']. '.modules.shipment.default', ['deliveryTemplates' => ['offers', 'points']])
 
         </div>
 

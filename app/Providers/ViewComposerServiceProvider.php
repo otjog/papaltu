@@ -21,6 +21,7 @@ class ViewComposerServiceProvider extends ServiceProvider{
             'App\Http\ViewComposers\BannerComposer'         => $template . '.modules.banner.default',
 
             'App\Http\ViewComposers\Shop\Product\ShopOffersComposer' => $template . '.modules.offers.default',
+            'App\Http\ViewComposers\Shop\Delivery\DeliveryOffersComposer' => $template . '.modules.shipment.default',
         ]);
     }
 

@@ -4,11 +4,11 @@
             <h2>Товарные предложения</h2>
             <div class="row no-gutters">
                 @if(isset($offers['mainOffer']) & $offers['mainOffer'] !== null)
-                    @include( $template_name .'.modules.offers.main-offer', ['offer' => $offers['mainOffer']])
+                    @include( $global_data['project_data']['template_name'] .'.modules.offers.main-offer', ['offer' => $offers['mainOffer']])
                 @endif
 
                 @if(isset($offers['offers']) & $offers['offers'] !== null & count($offers['offers']) > 0)
-                    @include( $template_name .'.modules.offers.secondary-offer', ['offers' => $offers['offers']])
+                    @include( $global_data['project_data']['template_name'] .'.modules.offers.secondary-offer', ['offers' => $offers['offers']])
                 @endif
             </div>
         </div>

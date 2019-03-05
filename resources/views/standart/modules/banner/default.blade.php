@@ -3,7 +3,7 @@
 
         <div class="carousel-inner">
             @foreach($banners as $banner)
-                @include( $template_name .'.modules.banner.' . $banner->type . '.' . $banner->template)
+                @include( $global_data['project_data']['template_name'] .'.modules.banner.' . $banner->type . '.' . $banner->template)
             @endforeach
         </div>
         @if( count($banners) > 1)

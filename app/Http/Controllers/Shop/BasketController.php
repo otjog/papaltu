@@ -12,13 +12,13 @@ class BasketController extends Controller{
 
     protected $baskets;
 
-    protected $data;
+    protected $data = [];
+
+    protected $settings;
 
     public function __construct(Basket $baskets){
 
-        $settings = Settings::getInstance();
-
-        $this->data = $settings->getParameters();
+        $this->settings = Settings::getInstance();
 
         $this->baskets = $baskets;
 
@@ -81,6 +81,8 @@ class BasketController extends Controller{
      * @return \Illuminate\Http\Response
      */
     public function edit(Product $products, $token){
+
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
 
         $basket = $this->baskets->getActiveBasketWithProductsAndRelations( $products, $token );
 

@@ -159,3 +159,7 @@ ul.child {
 .popular-products .product-item-wrap.product-item-light:hover  .product-item .product-action{
     display: block !important;
 }
+
+.border-bottom-dotted {
+    border-bottom: 1px dotted;
+}

@@ -16,7 +16,9 @@ class BrandController extends Controller{
 
     protected $baskets;
 
-    protected $data;
+    protected $settings;
+
+    protected $data = [];
 
     protected $metaTagsCreater;
 
@@ -28,9 +30,7 @@ class BrandController extends Controller{
     public function __construct(Brand $brands, Basket $baskets, MetaTagsCreater $metaTagsCreater)
     {
 
-        $settings = Settings::getInstance();
-
-        $this->data = $settings->getParameters();
+        $this->settings = Settings::getInstance();
 
         $this->brands = $brands;
 
@@ -51,6 +51,9 @@ class BrandController extends Controller{
      * @return \Illuminate\Http\Response
      */
     public function index(){
+
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
+
         $this->data['template'] ['view']    = 'list';
         $this->data['data']     ['brands']  = $this->brands->getActiveBrands();
         $this->data['data']     ['header_page'] =  'Бренды';
@@ -88,6 +91,8 @@ class BrandController extends Controller{
     public function show(Request $request, Product $products, $name){
 
         $brand = $this->brands->getBrand($name);
+
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
 
         $this->data['template'] ['view']        = 'show';
         $this->data['template'] ['sidebar']     = 'product_filter';

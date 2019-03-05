@@ -15,7 +15,9 @@ class CategoryController extends Controller{
 
     protected $baskets;
 
-    protected $data;
+    protected $settings;
+
+    protected $data = [];
 
     protected $metaTagsCreater;
 
@@ -27,9 +29,7 @@ class CategoryController extends Controller{
      */
     public function __construct(Category $categories, Basket $baskets, MetaTagsCreater $metaTagsCreater){
 
-        $settings = Settings::getInstance();
-
-        $this->data = $settings->getParameters();
+        $this->settings = Settings::getInstance();
 
         $this->categories       = $categories;
 
@@ -50,6 +50,8 @@ class CategoryController extends Controller{
      * @return \Illuminate\Http\Response
      */
     public function index(){
+
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
 
         $this->data['template'] ['view']        = 'list';
         $this->data['data']     ['categories']  =  $this->categories->getCategoriesTree();
@@ -88,6 +90,8 @@ class CategoryController extends Controller{
      * @return array
      */
     public function show(Request $request, Product $products, $id){
+
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
 
         $category = $this->categories->getCategory($id);
 

@@ -8,15 +8,18 @@ use Illuminate\Http\Request;
 use App\Models\Shop\Product\Product;
 use App\Models\Seo\MetaTagsCreater;
 use App\Models\Settings;
+
 class ProductController extends Controller{
 
     protected $products;
 
     protected $baskets;
 
-    protected $data;
-
     protected $metaTagsCreater;
+
+    protected $settings;
+
+    protected $data = [];
 
     /**
      * Создание нового экземпляра контроллера.
@@ -26,9 +29,7 @@ class ProductController extends Controller{
      */
     public function __construct(Product $products, Basket $baskets, MetaTagsCreater $metaTagsCreater ){
 
-        $settings = Settings::getInstance();
-
-        $this->data = $settings->getParameters();
+        $this->settings = Settings::getInstance();
 
         $this->products = $products;
 
@@ -78,6 +79,8 @@ class ProductController extends Controller{
      */
     public function show($id){
 
+        $this->data['global_data']['project_data'] = $this->settings->getParameters();
+
         $this->data['template']['view'] = 'show';
 
         $this->data['template']['custom'][] = 'shop-icons';
@@ -87,6 +90,7 @@ class ProductController extends Controller{
         $this->data['meta'] = $this->metaTagsCreater->getMetaTags($this->data);
 
         return view( 'templates.default', $this->data);
+
     }
 
     /**

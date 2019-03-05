@@ -2,7 +2,7 @@
 <h1>{{$header_page}}</h1>
     <div class="card-columns">
 
-        @foreach($categories->chunk($components['shop']['chunk_categories']) as $categories_row)
+        @foreach($categories->chunk($global_data['project_data']['components']['shop']['chunk_categories']) as $categories_row)
 
             @foreach($categories_row as $key => $category)
 
