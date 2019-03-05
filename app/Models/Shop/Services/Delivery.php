@@ -13,11 +13,7 @@ class Delivery extends Model{
 
     private $geoData;
 
-    private $services;
-
     private $shipments;
-
-    private $serviceTypes = [ 'toTerminal', 'toDoor' ];
 
     public function __construct(array $attributes = []){
 
@@ -25,64 +21,55 @@ class Delivery extends Model{
 
         $this->shipments = new Shipment();
 
-        $this->services = $this->shipments->getDeliveryServices();
-
         $settings = Settings::getInstance();
 
         $this->geoData = $settings->getParameter('geo');
 
     }
 
-    public function getPrices($request){
+    public function getPrices($parcel, $shipmentServiceAlias, $destinationType){
 
-        list($parcelParameters, $deliveryServiceAlias) = $this->getDeliveryDataFromRequest($request);
+        $shipmentService = $this->shipments->getShipmentServiceByAlias($shipmentServiceAlias);
 
-        $data = [
-            'costs' => [],
-        ];
+        $parcelParameters = $this->getDeliveryDataFromRequest($parcel);
 
-        switch($deliveryServiceAlias){
+        switch($shipmentServiceAlias){
 
             case 'dpd'      :
                 $serviceObj = new Dpd( $this->geoData );
-                $serviceTypes = $this->serviceTypes;
                 break;
 
             case 'cdek'     :
                 $serviceObj = new Cdek( $this->geoData );
-                $serviceTypes = $this->serviceTypes;
                 break;
 
             case 'pochta'   :
                 $serviceObj = new Pochta( $this->geoData );
-                $serviceTypes = ['toTerminal'];
                 break;
 
             default : break; //todo сделать выход из foreach
 
         }
 
-        $costs = $serviceObj->getDeliveryCost($parcelParameters, $serviceTypes);
+        $data = $serviceObj->getDeliveryCost($parcelParameters, $destinationType);
 
-        if( count($costs) > 0 ){
+        if( count($data) > 0 ){
 
-            $data['costs'] = $costs;
+            $shipmentService[0]->offer = $data;
 
         }
 
-        return $data;
+        return $shipmentService[0];
 
     }
 
-    public function getPoints($request){
-
-        list($parcelParameters, $deliveryServiceAlias) = $this->getDeliveryDataFromRequest($request);
+    public function getPoints($shipmentServiceAlias){
 
         $data = [];
 
         $serviceObj = null;
 
-        switch($deliveryServiceAlias){
+        switch($shipmentServiceAlias){
 
             case 'dpd'  : $serviceObj = new Dpd( $this->geoData ); break;
 
@@ -91,39 +78,32 @@ class Delivery extends Model{
         }
 
         if($serviceObj !== null){
-            $data['points'][$deliveryServiceAlias] = $serviceObj->getPointsInCity();
+            $data['points'][$shipmentServiceAlias] = $serviceObj->getPointsInCity();
         }
 
         return $data;
 
     }
 
-    public function getDeliveryDataFromRequest($request){
+    public function getDeliveryDataFromRequest($data){
 
-        if( count($request) > 0 ){
+        if( count($data) > 0 ){
+
             $parcels = [];
-            $deliveryServiceAlias = null;
 
-            foreach($request as $name => $params) {
+            foreach($data as $name => $params) {
 
-                if($name === 'dsalias'){
-                    $deliveryServiceAlias = $params;
-                }else{
+                $arr = explode('|', $params);
 
-                    $arr = explode('|', $params);
+                foreach ($arr as $key => $param) {
 
-                    foreach ($arr as $key => $param) {
-
-                        $parcels[$key][$name] = $param;
-
-                    }
+                    $parcels[$key][$name] = $param;
 
                 }
-
             }
         }
 
-        return [$parcels, $deliveryServiceAlias];
+        return $parcels;
 
     }
 

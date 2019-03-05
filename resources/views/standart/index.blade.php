@@ -77,7 +77,7 @@
 <script src="{{ asset('js/dadata/forms.js')}}"></script>
 <script src="{{ asset('js/ajax.js')}}"></script>
 <script src="{{ asset('js/modules/googlemap.js')}}"></script>
-<script src="{{ asset('js/modules/delivery.js')}}"></script>
+<script src="{{ asset('js/modules/shipment.js')}}"></script>
 <script src="{{ asset('js/custom.js') }}"></script>
 
 <script src="{{ asset('js/modules/product-filter.js')}}"></script>

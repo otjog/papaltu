@@ -16,7 +16,6 @@
 
     {{-- Error Block --}}
     <div class="error" style="display: none">
-        <p>Не можем рассчитать стоимость доставки.
-            <br>Обратитесь к менеджеру.</p>
+        Ошибка
     </div>
 @endif

@@ -65,12 +65,6 @@
 
             </div>
 
-            <form id="delivery-form">
-                @foreach($parcels as $param => $value)
-                    <input type="hidden" name="{{$param}}" value="{{$value}}">
-                @endforeach
-            </form>
-
         @endif
 
         {{-- FORM --}}
@@ -168,8 +162,10 @@
 
                 <hr class="mb-4">
 
+                {{-- PAY & SHIPMENT --}}
                 <div class="row">
 
+                    {{-- PAY --}}
                     @if( isset( $payments ) && count( $payments ) > 0 )
 
                         <div class="col-lg-12">
@@ -193,18 +189,8 @@
                         </div>
                     @endif
 
-
-                    <div class="col-lg-12">
-
-                        <h4 class="mb-3 text-center">Способ доставки</h4>
-
-                        <div id="delivery-offers" class="order-4 my-4" data-component="shop|order">
-
-                            @include( $global_data['project_data']['template_name'] .'.modules.delivery.reload.offers')
-
-                        </div>
-
-                    </div>
+                    {{-- SHIPMENT --}}
+                    @include( $global_data['project_data']['template_name'] .'.modules.shipment.default', ['deliveryTemplates' => ['offers-checkbox']])
 
                 </div>
 
@@ -227,4 +213,5 @@
         </div>
 
     </div>
+
 </div>

@@ -17,9 +17,10 @@
                         <input
                                 type="text"
                                 class="form-control"
-                                id="address"
-                                name="address"
+                                id="geo-location"
+                                name="geo-location"
                                 data-suggestion="ADDRESS"
+                                data-event-to-update="click"
                                 placeholder="308011 г.Белгород ул.Садовая д.118"
                                 required="">
 

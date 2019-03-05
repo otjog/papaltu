@@ -21,7 +21,7 @@
                         <div class="top_bar_icon">
                             <i class="fas fa-map-marker-alt"></i>
                         </div>
-                        @include($global_data['project_data']['template_name'] .'.modules.geo.header')
+                        @include($global_data['project_data']['template_name'] .'.modules.change-geo.header')
                     </div>
                 </div>
             </div>

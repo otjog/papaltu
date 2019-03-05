@@ -211,14 +211,11 @@ function sendAjaxRequest(queryString, target) {
 
     history.pushState('', '', '?' + queryString);
 
-    let headers = {
-        'X-Module'      : 'product_filter|list',
-        'X-Component'   : 'shop|category'
-    };
+    queryString += '&module=product_filter&response=view&view=list';
 
     let requestName = 'product_filter';
 
-    let ajaxReq = new Ajax("GET", queryString, headers, requestName);
+    let ajaxReq = new Ajax("GET", queryString, '', requestName);
 
     ajaxReq.req.onloadstart = function(){
         //

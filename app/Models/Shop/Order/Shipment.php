@@ -47,4 +47,19 @@ class Shipment extends Model{
             ->whereIn('alias', ['self', 'delivery'])
             ->get();
     }
+
+    public function getShipmentServiceByAlias($alias){
+        return self::select(
+            'id',
+            'alias',
+            'name',
+            'description',
+            'img'
+        )
+            ->where('active', 1)
+            ->where('is_service', 1)
+            ->where('alias', $alias)
+            ->get();
+    }
+
 }

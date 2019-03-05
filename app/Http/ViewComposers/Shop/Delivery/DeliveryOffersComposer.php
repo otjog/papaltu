@@ -7,13 +7,22 @@ use Illuminate\View\View;
 
 class DeliveryOffersComposer{
 
-    protected $shipments;
+    protected $shipmentData = [
+        'shipment' => [
+            'services' => [],
+        ]
+    ];
 
-    public function __construct(Shipment $shipments){
-        $this->shipments = $shipments;
+    protected $shipment;
+
+
+    public function __construct(Shipment $shipment){
+        $this->shipment = $shipment;
+        $this->shipmentData['shipment']['services'] = $this->shipment->getDeliveryServices();
+
     }
 
     public function compose(View $view){
-        $view->with('deliveryServices', $this->shipments->getDeliveryServices());
+        $view->with($this->shipmentData);
     }
 }

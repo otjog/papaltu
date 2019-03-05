@@ -6,10 +6,10 @@
 @php
     $aliasesString = '';
 
-    foreach($deliveryServices as $key => $service){
+    foreach($shipment['services'] as $key => $service){
         $aliasesString .= $service->alias;
 
-        if($key + 1 !== count($deliveryServices)){
+        if($key + 1 !== count($shipment['services'])){
             $aliasesString .= "|";
         }
     }
@@ -18,5 +18,6 @@
 <div id="map"
      class="blur"
      style="height:500px;"
-     data-delivery-service-alias="{{$aliasesString}}">
+     data-alias="{{$aliasesString}}"
+>
 </div>

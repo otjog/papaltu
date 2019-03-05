@@ -1,7 +1,14 @@
 function DaData(id, type){
     let token = "23933ff36c0c7e63248d1782df14d07badb394a0";
     let button = document.getElementsByClassName('update-geo');
-    let geoData = {};
+    let requestName = 'geo';
+    let qsParams = {
+        module : requestName,
+        response : 'json', //view or json
+        address_json : ''
+    };
+    let queryString = '';
+
     this.suggestions = function(){
         $("#"+ id).suggestions({
             token: token,
@@ -11,8 +18,25 @@ function DaData(id, type){
                 $("#" + id + "_json").val(JSON.stringify(suggestion.data));
 
                 if(type === 'ADDRESS'){
-                    geoData = suggestion.data;
-                    button[0].addEventListener('click', sendRequest, false);
+
+                    let input = document.getElementById(id);
+
+                    let eventToUpdate = input.dataset.eventToUpdate;
+
+                    qsParams.address_json = JSON.stringify(suggestion.data);
+
+                    queryString = setQueryStirng(qsParams);
+
+                    switch(eventToUpdate){
+
+                        case 'click' :
+
+                            button[0].addEventListener('click', sendRequest, false);
+
+                            break;
+
+                        default : sendRequest();
+                    }
 
                 }
 
@@ -23,15 +47,8 @@ function DaData(id, type){
 
     function sendRequest () {
 
-        let queryString = 'address_json=' + JSON.stringify(geoData);
+        let ajaxReq = new Ajax("POST", queryString, {}, requestName);
 
-        let headers = {
-            'X-Module'      : 'geo|location '
-        };
-
-        let requestName = 'geo';
-
-        let ajaxReq = new Ajax("POST", queryString, headers, requestName);
         //todo проверить, если объекта нет, делать submit формы
         ajaxReq.req.onreadystatechange = function() {
 
@@ -41,7 +58,7 @@ function DaData(id, type){
 
             changeHtml(json);
 
-            updateDeliveryInfo();
+            updateShipmentInfo();
 
         };
 
@@ -65,11 +82,32 @@ function DaData(id, type){
         }
     }
 
-    function updateDeliveryInfo(){
-        let delivery = new Delivery();
+    function updateShipmentInfo(){
+        let shipment = new Shipment();
 
-        delivery.getOffers();
+        shipment.getOffers();
 
-        delivery.getPoints();
+        shipment.getPoints();
+    }
+
+    function setQueryStirng(parameters, queryString = ''){
+
+        for(let parameter in parameters){
+
+            if(queryString !== ''){
+                queryString += '&';
+            }
+
+            if(parameters[parameter] !== ''){
+                queryString += parameter;
+                queryString += '=';
+                queryString += parameters[parameter];
+            }else{
+                console.log("Нет данных у параметра " + parameter)
+            }
+
+        }
+
+        return queryString;
     }
 }

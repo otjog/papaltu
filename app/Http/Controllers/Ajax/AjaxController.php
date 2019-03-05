@@ -11,67 +11,41 @@ use App\Models\Settings;
 
 class AjaxController extends Controller{
 
-    /**Инициализируем массив для хранения заголовков данных*/
+    /**Инициализируем массив пришедших параметров*/
+    protected $request = [];
+
+    /**Инициализируем массив для хранения данных ответа*/
     protected $data = [];
 
-    //Инициализируем массив для хранения заголовков ответа
+    /**Инициализируем массив для хранения заголовков ответа*/
     protected $headers = [];
 
-    //Инициализируем переменную Ответ Сервера
+    /**Инициализируем переменную Ответ Сервера*/
     protected $response;
-
-    //Тип вответа. Возвращаем либо представление, либо данные.
-    protected $responseType = 'view'; // view or json
-
-    //Заголовок с данными ajax-запроса. Из него мы получаем имя Модуля и имя View для отправки ответа
-    protected $ajaxHeader;
-
-    //Имя модуля в который будет посылаться ajax-запрос
-    protected $module;
-
-    //Имя представления в которое будет посылаться ajax-запрос
-    protected $viewReload;
 
     public function index(Request $request){
 
-        /* Зачем это здесь???
-        //Component-Header
-        $component_template = $request->header('X-Component');
+        $this->request = $request->all();
 
-        if( isset( $component_template ) && $component_template !== null){
+        if(isset($this->request['module']) && $this->request['module'] !== null){
 
-            list($section, $component)  = explode('|', $component_template );
+            //todo вернуть $next если нет Module
 
-            $this->data['inc_template']['com'] = [
-                'section' => $section,
-                'component' => $component,
-            ];
-        }
-        */
+            switch($this->request['module']){
 
-        //Module-Header
-        $this->ajaxHeader =  $request->header('X-Module');
-
-        if($this->ajaxHeader !== null){
-
-            //todo вернуть $next если нет заголовка X-Module
-            list($this->module, $this->viewReload)     = explode('|', $this->ajaxHeader );
-
-            switch($this->module){
-
-                case 'delivery' :
+                case 'shipment' :
 
                     $ds = new Delivery();
 
-                    switch($this->viewReload){
-                        case 'offers'       :
-                            $this->data[$this->module] = $ds->getPrices($request->all());
-                            break;
-                        case 'points'          :
-                            $this->responseType = 'json';
-                            $this->data = $ds->getPoints($request->all());
-                            break;
-                    }
+                    $this->data['service'] = $ds->getPrices($this->request['parcel'], $this->request['alias'], $this->request['type']);
+
+                    break;
+
+                case 'points' :
+
+                    $ds = new Delivery();
+
+                    $this->data = $ds->getPoints($this->request['alias']);
 
                     break;
 
@@ -105,11 +79,9 @@ class AjaxController extends Controller{
 
                 case 'geo'  :
 
-                    $this->responseType = 'json';
-
                     /** Записываем введенную пользователем Геолокацию в Сессию */
                     $geoDataObj = GeoData::getInstance();
-                    $geoDataObj->setGeoInput($request->address_json);
+                    $geoDataObj->setGeoInput($this->request['address_json']);
 
                     /**
                      * Получаем гео-данные
@@ -128,8 +100,6 @@ class AjaxController extends Controller{
 
                 case 'map'  :
 
-                    $this->responseType = 'json';
-
                     $geoDataObj = GeoData::getInstance();
                     $this->data = $geoDataObj->getGeoData();
 
@@ -147,22 +117,17 @@ class AjaxController extends Controller{
         //Присваиваем переменной экземпляр Ответа Сервера
         $this->response = response();
 
-        if($this->responseType === 'json') {
+        if($this->request['response'] === 'json') {
             $this->response = $this->response->json($this->data);
         }
 
-        if($this->responseType === 'view'){
+        if($this->request['response'] === 'view'){
 
             //Получаем обновленные данные из Глобального массива для передачи во фронт
             $settings = Settings::getInstance();
             $this->data['global_data']['project_data'] = $settings->getParameters();
 
-            $this->data['inc_template']['mod'] = [
-                'module' => $this->module,
-                'viewReload' => $this->viewReload,
-            ];
-
-            $view = $this->data['global_data']['project_data']['template_name'] . '.modules.' . $this->module . '.reload.' . $this->viewReload;
+            $view = $this->data['global_data']['project_data']['template_name'] . '.modules.' . $this->request['module'] . '.reload.' . $this->request['view'];
             //Добавляем к ответу Представление и обновленную переменную с данными
             $this->response = $this->response->view( $view, $this->data);
         }

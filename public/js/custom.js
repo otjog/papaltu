@@ -182,7 +182,7 @@ for(let f = 0; f < forms.length; f++){
  * Получаем объект Доставки
  * И сразу выполняем расчет доставки и получение пунктов выдачи
  */
-let delivery = new Delivery();
-delivery.getOffers();
-delivery.getPoints();
+let shipment = new Shipment();
+shipment.getOffers();
+shipment.getPoints();
 /*******/

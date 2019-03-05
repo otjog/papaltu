@@ -106,12 +106,8 @@
         @endif
 
 
-        {{-- Best Delivery Offer --}}
-        <div class="my-4 py-3 border-top" id="delivery-best-offer">
-
-            {{-- Здесь лучшее предложение по доставке --}}
-
-        </div>
+        {{-- Best Shipment Offer --}}
+        @include($global_data['project_data']['template_name']. '.modules.shipment.templates.best-offer')
 
     </div>
 </div>
@@ -124,7 +120,7 @@
             <a class="nav-link active" data-tabIndex="description">Описание</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-tabIndex="delivery">Доставка</a>
+            <a class="nav-link" data-tabIndex="shipment">Доставка</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" data-tabIndex="reviews">Отзывы</a>
@@ -157,10 +153,10 @@
             @endif
         </div>
 
-        {{-- Delivery Tab --}}
-        <div class="tab-data data-delivery">
+        {{-- Shipment Tab --}}
+        <div class="tab-data data-shipment">
 
-            @include($global_data['project_data']['template_name']. '.modules.delivery.templates.offers.default', ['delivery_template' => 'show-and-map'])
+            @include($global_data['project_data']['template_name']. '.modules.shipment.default', ['deliveryTemplates' => ['offers', 'points']])
 
         </div>
 
