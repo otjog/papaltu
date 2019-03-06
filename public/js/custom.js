@@ -108,21 +108,36 @@ if(tabs !== null && tabs !== undefined){
     let content         = document.getElementById('tab-data');
     let contentDatas    = content.getElementsByClassName('tab-data');
 
-    toogelDisplayStyle(content, contentDatas, activeTab[0].dataset.tabindex)
+    if(activeTab[0].nodeName === 'A'){
+
+        let tabIndex = activeTab[0].dataset.tabindex;
+
+        if(tabIndex !== undefined && tabIndex !== null) {
+            toogelDisplayStyle(content, contentDatas, activeTab[0].dataset.tabindex);
+        }
+
+    }
+
+
 
     tabs.addEventListener('click', function (e) {
 
         e = e || event;
 
-        //узнаем наименование вкладки
-        let tabIndex = e.target.dataset.tabindex;
+        if(e.target.nodeName === 'A'){
+            //узнаем наименование вкладки
+            let tabIndex = e.target.dataset.tabindex;
 
-        //включаем у вкладки класс active
-        activeTab[0].classList.toggle('active');
+            if(tabIndex !== undefined && tabIndex !== null){
+                //включаем у вкладки класс active
+                activeTab[0].classList.toggle('active');
 
-        e.target.classList.toggle('active');
+                e.target.classList.toggle('active');
 
-        toogelDisplayStyle(content, contentDatas, e.target.dataset.tabindex)
+                toogelDisplayStyle(content, contentDatas, tabIndex)
+            }
+
+        }
 
     });
 }
