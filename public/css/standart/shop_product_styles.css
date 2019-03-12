@@ -5,51 +5,12 @@
 
 [Table of Contents]
 
-4. Home
 5. Single Product
 6. Recently Viewed
 7. Brands
 
 
 ******************************/
-
-/*********************************
-4. Home
-*********************************/
-
-.home
-{
-	width: 100%;
-	height: 260px;
-	background: transparent;
-}
-.home_background
-{
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background-repeat: no-repeat;
-	background-size: cover;
-	background-position: center center;
-}
-.home_overlay
-{
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background: #cde4f1;
-	background: linear-gradient(#FFFFFF, #cde4f1);
-	opacity: 0.9;
-}
-.home_content
-{
-	width: 100%;
-	height: 100%;
-}
 
 /*********************************
 5. Single Product
@@ -73,9 +34,8 @@
 	height: 130px;
 	border: solid 1px #e8e8e8;
 	box-shadow: 0px 1px 5px rgba(0,0,0,0.1);
-	margin-bottom: 15px;
+	margin-bottom: 30px;
 	cursor: pointer;
-	padding: 15px;
 	-webkit-transition: all 200ms ease;
 	-moz-transition: all 200ms ease;
 	-ms-transition: all 200ms ease;
@@ -106,7 +66,7 @@
 	justify-content: center;
 	align-items: center;
 	width: calc(100% + 15px);
-	height: 420px;
+	height: 450px;
 	-webkit-transform: translateX(-15px);
 	-moz-transform: translateX(-15px);
 	-ms-transform: translateX(-15px);
@@ -115,7 +75,6 @@
 	border: solid 1px #e8e8e8;
 	box-shadow: 0px 1px 5px rgba(0,0,0,0.1);
 	overflow: hidden;
-	padding: 15px;
 }
 .image_selected img
 {
@@ -127,15 +86,10 @@
 }
 .product_category
 {
-	font-size: 12px;
+	font-size: 1rem;
 	color: rgba(0,0,0,0.5);
 }
-.product_name
-{
-	font-size: 30px;
-	font-weight: 500;
-	margin-top: 11px;
-}
+
 .product_rating
 {
 	margin-top: 7px;

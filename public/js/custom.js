@@ -1,5 +1,4 @@
-/* Quantity Button ****/
-
+//Quantity Button
 let quantity = {
     'buttons': {
         'increment' : document.getElementsByClassName('quantity_inc'),
@@ -58,16 +57,50 @@ function changeQuantity(e, buttonIndex){
 }
 //END Quantity Button
 
-/* FancyBox************/
-
+//FancyBox
 $(".fancybox").fancybox({
     openEffect	: 'none',
-    closeEffect	: 'none'
+    closeEffect	: 'none',
+    padding : 0
 });
+//создает галерею по клику на главном изображении
+$(".image_selected a").click(function() {
+
+    let imageLinks = $("div.product ul.image_list a.fancybox");
+
+    if(imageLinks.length === 0){
+        imageLinks = $("div.product div.image_selected a");
+    }
+
+    let arrImgHref = [];
+
+    for(let i = 0; i < imageLinks.length; i++){
+        arrImgHref[i] = { 'href' : $(imageLinks[i]).attr('href') }
+    }
+
+    $.fancybox.open(arrImgHref, {
+        padding : 0
+    });
+
+    return false;
+
+});
+
+//обрежем высоту галереи по высоте основного изображения. !!!Временное решение
+let mainImg     = $("div.product div.image_selected");
+let listThumb   = $("div.product ul.image_list");
+let mainImgOutHeight    = mainImg.outerHeight();
+let listThumbOutHeight  = listThumb.outerHeight();
+
+if(listThumbOutHeight > mainImgOutHeight){
+    let listThumbHeight = listThumb.height();
+    let diff = listThumbOutHeight - mainImgOutHeight;
+    listThumb.height(listThumbHeight - diff).css('overflow', 'hidden');
+}
 //END FancyBox
 
 
-/* Tabs **************/
+//Tabs
 let tabs = document.getElementById('tabs');
 
 if(tabs !== null && tabs !== undefined){
@@ -122,7 +155,7 @@ for(let f = 0; f < forms.length; f++){
 
         for(let i in forms[f].elements[inp].dataset){
 
-            if(i = 'suggestion'){
+            if(i === 'suggestion'){
 
                 let type = forms[f].elements[inp].dataset[i];
 
@@ -145,59 +178,11 @@ for(let f = 0; f < forms.length; f++){
 }
 //END DaData
 
-
-/* Maps Google ******/
-
-function initMap( json ) {
-
-    let geo = json._geo;
-
-    delete json._geo;
-
-    let location = {lat: +geo.latitude, lng: +geo.longitude};
-
-    let map = new google.maps.Map(
-        document.getElementById('map'), {zoom: 12, center: location});
-
-    for(let company in json.points){
-
-        if(json.points.hasOwnProperty(company)){
-
-            for(let terminalType in json.points[company]){
-
-                if(json.points[company].hasOwnProperty(terminalType)){
-
-                    for( let terminal in json.points[company][terminalType] ){
-
-                        if(json.points[company][terminalType].hasOwnProperty(terminal)){
-
-                            let geoShop = json.points[company][terminalType][terminal].geoCoordinates;
-
-                            let locationShop = {lat: +geoShop.latitude, lng: +geoShop.longitude};
-
-                            let image = 'https://myshop.loc/storage/img/elements/delivery/' + company + '/marker-' + terminalType + '.png';
-
-                            let marker = new google.maps.Marker({position: locationShop, map: map, icon: image});
-
-                        }
-
-                    }
-
-
-                }
-
-            }
-
-        }
-
-    }
-
-}
-//END Maps Google
-
-/* Delivery Calc And Point */
-let delivery = new Delivery();
-
-delivery.calculate();
-delivery.points();
-//END Delivery
+/**
+ * Получаем объект Доставки
+ * И сразу выполняем расчет доставки и получение пунктов выдачи
+ */
+let shipment = new Shipment();
+shipment.getOffers();
+shipment.getPoints();
+/*******/

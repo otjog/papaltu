@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Parse;
 
 use App\Models\Shop\Category\Category;
 use App\Http\Controllers\Controller;
-use App\Models\Shop\Product\Image;
+use App\Models\Site\Image;
 use Illuminate\Http\Request;
 use phpQuery;
 use App\Models\Shop\Product\Product;

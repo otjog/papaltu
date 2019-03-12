@@ -4,6 +4,8 @@ namespace App\Exceptions;
 
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use App\Models\Site\Image;
 
 class Handler extends ExceptionHandler
 {
@@ -48,6 +50,31 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        if ($exception instanceof NotFoundHttpException) {
+
+            $requestUri = $request->getRequestUri();
+
+            $pathElements = explode('/', $requestUri);
+            //[0] - ''; [1] - storage; [2] - img; [3] - Component (shop); [4] Resource (product); [5] Size (m); [6] FileName;
+
+            if (count($pathElements) === 7) {
+
+                if ($pathElements[1] === 'storage' && $pathElements[2] === 'img') {
+
+                    $images = new Image();
+
+                    $resultImage = $images->createResizeImage($requestUri);
+
+                    if ($resultImage !== null) {
+                        return $resultImage;
+                    }
+
+                }
+
+            }
+
+        }
+
         return parent::render($request, $exception);
     }
 }
